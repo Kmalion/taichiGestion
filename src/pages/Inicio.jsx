@@ -1,4 +1,8 @@
 import React from 'react'
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { Checkbox } from 'primereact/checkbox';
+
 
 export const Inicio = () => {
   return (
