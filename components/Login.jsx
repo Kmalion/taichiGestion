@@ -17,7 +17,7 @@ const Login = () => {
 
   return (
     <div className="p-d-flex p-jc-center p-ai-center" style={{ height: '100vh' }}>
-      <Card style={{ width: '90%', padding: '20px' }}>
+      <Card style={{ width: '100%', padding: '20px' }}>
         <div className="d-flex flex-center p-ai-center mb-5">
         <div className="p-d-flex p-jc-center mb-2">
             <Image src="/img/Taichi logo blanco SAS.png" alt="Logo" width={300} height={100} />

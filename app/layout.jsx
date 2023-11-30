@@ -1,17 +1,22 @@
-import 'primereact/resources/themes/lara-dark-teal/theme.css';
+'use client'
+import React from 'react';
+import { ThemeProvider } from '../context/ThemeContext';
+import 'primereact/resources/themes/bootstrap4-dark-blue/theme.css'
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
-export const metadata = {
-  title: 'Taichi Gestion',
-  description: 'Gestion Taichi Holdings',
+
+
+
+const Layout = ({ children }) => {
+  return (
+    <ThemeProvider>
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    </ThemeProvider>
+  );
 };
 
-export default function RootLayout({ children }) {
- return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  )
-}
+export default Layout;

@@ -1,24 +1,24 @@
-import { Inter } from 'next/font/google';
-import 'primereact/resources/themes/lara-dark-teal/theme.css';
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
-import 'primeflex/primeflex.css';
-import MenuBar from '../components/MenuBar.jsx';
-
-
-const inter = Inter({ subsets: ['latin'] });
-
-export const metadata = {
-  title: 'Taichi Gestion',
-  description: 'Gestion Taichi Holdings',
-};
+'use client'
+import React from 'react';
+import Head from 'next/head';
+import MenuBar from '../components/MenuBar';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Layout({ children }) {
+  const { theme } = useTheme();
+
+  const containerStyle = {
+    marginLeft: '20px', // Ajusta el valor según tus necesidades
+    marginRight: '20px', // Ajusta el valor según tus necesidades
+  };
 
   return (
-  <div>
-    <MenuBar></MenuBar>
-    {children}
-  </div>
-  )
+    <div style={containerStyle}>
+      <Head>
+        <link rel="stylesheet" href={`primereact/resources/themes/${theme}/theme.css`} type="text/css" key={theme} />
+      </Head>
+      <MenuBar />
+      {children}
+    </div>
+  );
 }

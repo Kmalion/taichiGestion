@@ -4,10 +4,12 @@ import { Menubar } from 'primereact/menubar';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
+import { useTheme } from '../context/ThemeContext'; // Asegúrate de importar useTheme y theme
+import { PrimeIcons } from 'primereact/api';
 
 export default function MenuBar() {
   const router = useRouter();
-
+  const { theme, toggleTheme } = useTheme(); 
   // Función para manejar clics en elementos del menú
   const handleMenuClick = (path) => {
     router.push(path); // Navegar a la ruta especificada
@@ -72,14 +74,25 @@ export default function MenuBar() {
   const start = (
     <div>
       <Link href="/dashboard">
-      <Image src="/img/Logo taichi blanco bola.png" alt="Logo" width={50} height={50} />
+        {/* Ajusta la lógica de la imagen según el tema */}
+        {theme === 'lara-dark-teal' ? (
+          <Image src="/img/Logo taichi blanco bola.png" alt="Logo" width={50} height={50} />
+        ) : (
+          <Image src="/img/Logo bola negra.png" alt="Logo" width={50} height={50} />
+        )}
       </Link>
     </div>
   );
-
+  const end = (
+    <div>
+      <button className="p-button" onClick={toggleTheme}>
+        {theme === 'lara-dark-teal' ? <i className={`pi pi-sun`} /> : <i className={`pi pi-moon`} />}
+      </button>
+    </div>
+  );
   return (
-    <div className="card mb-4">
-      <Menubar model={items} start={start} />
+    <div>
+      <Menubar model={items} start={start} end={end} />
     </div>
   );
 }
