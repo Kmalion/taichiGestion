@@ -3,6 +3,7 @@ import React from 'react';
 import Head from 'next/head';
 import MenuBar from '../components/MenuBar';
 import { useTheme } from '../context/ThemeContext';
+import { SessionProvider } from 'next-auth/react';
 
 export default function Layout({ children }) {
   const { theme } = useTheme();
@@ -13,6 +14,7 @@ export default function Layout({ children }) {
   };
 
   return (
+
     <div style={containerStyle}>
       <Head>
         <link rel="stylesheet" href={`primereact/resources/themes/${theme}/theme.css`} type="text/css" key={theme} />
@@ -20,5 +22,6 @@ export default function Layout({ children }) {
       <MenuBar />
       {children}
     </div>
+
   );
 }
