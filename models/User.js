@@ -14,6 +14,26 @@ if (!mongoose.modelNames().includes('User')) {
         type: String,
         required: true,
       },
+      nombre: {
+        type: String,
+        required: true,
+      },
+      apellido: {
+        type: String,
+        required: true,
+      },
+      cargo: {
+        type: String,
+        required: true,
+      },
+      foto: {
+        type: String,
+      },
+      role: {
+        type: String,
+        enum: ['admin', 'user', 'premium'], // Define roles permitidos
+        required: true,
+      },
     },
     { timestamps: true }
   );

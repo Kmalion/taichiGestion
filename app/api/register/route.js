@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
 export const POST = async (request) => {
-  const { email, password } = await request.json();
+  const { email, password, role, nombre, apellido, cargo, foto } = await request.json();
 
   let client;
 
@@ -21,6 +21,11 @@ export const POST = async (request) => {
     const newUser = new User({
       email,
       password: hashedPassword,
+      nombre,
+      apellido,
+      cargo,
+      foto,
+      role,
     });
 
     // Realiza la operación de registro
