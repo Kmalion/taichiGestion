@@ -60,6 +60,14 @@ const RegisterPage = () => {
       }
       if (res.status === 200) {
         showSuccess("Registro exitoso");
+        const data = await res.json();
+        if (data && data.redirect) {
+          // Redirige a la URL proporcionada en la respuesta
+          window.location.href = data.redirect;
+        } else {
+          // Maneja casos en los que no haya una propiedad 'redirect'
+          console.error("La respuesta no contiene una URL de redirección válida.");
+        }
       }
     } catch (error) {
       showError("Error, vuelva a intentarlo");
@@ -91,7 +99,7 @@ const RegisterPage = () => {
 
   return (
     <div className=" " style={{ height: "100vh" }}>
-      <Card style={{ width: "250%", padding: "20px", height: "115vh" }}>
+      <Card style={{ width: "100%", padding: "20px", height: "115vh" }}>
         <form onSubmit={handleSubmit}>
       <div className="p-grid p-fluid">
         <div className="p-col-12">

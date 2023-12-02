@@ -31,11 +31,11 @@ export const POST = async (request) => {
     // Realiza la operación de registro
     await newUser.save();
 
-    // Agrega el encabezado Location en el caso de éxito para realizar la redirección
-    return new NextResponse(null, {
-      status: 302, // Código de estado de redirección temporal
+    // Incluye la URL de redirección en el cuerpo de la respuesta
+    return new NextResponse(JSON.stringify({ redirect: '/' }), {
+      status: 200,
       headers: {
-        Location: '/', // URL a la que se redirige
+        'Content-Type': 'application/json',
       },
     });
   } catch (err) {
