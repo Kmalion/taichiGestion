@@ -11,6 +11,8 @@ const RegisterPage = () => {
   const [error, setError] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const dialogClass = successMessage ? "success-dialog" : "error-dialog";
 
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -20,7 +22,6 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Accede a los valores de los campos de manera más estructurada usando el 'name'
     const formData = new FormData(e.target);
     const formObject = {};
     formData.forEach((value, key) => {
@@ -28,14 +29,12 @@ const RegisterPage = () => {
     });
     const { email, password, role, nombre, apellido, cargo, foto } = formObject;
 
-    // Aquí puedes manejar la foto según tu implementación, por ejemplo, subirla a un servidor o almacenar la URL
-
     if (!isValidEmail(email)) {
       showError("Correo electrónico no válido");
       return;
     }
     if (!password || password.length < 8) {
-      showError("Contraseña inválida minimo 8 caracteres");
+      showError("Contraseña inválida mínima 8 caracteres");
       return;
     }
 
@@ -53,7 +52,6 @@ const RegisterPage = () => {
           cargo,
           role,
           foto,
-          // Agrega la lógica para manejar la foto aquí
         }),
       });
 
@@ -61,9 +59,7 @@ const RegisterPage = () => {
         showError("Este correo electrónico ya está registrado");
       }
       if (res.status === 200) {
-        setError("");
-        showDialog("Registro exitoso");
-        // Maneja la redirección aquí si es necesario
+        showSuccess("Registro exitoso");
       }
     } catch (error) {
       showError("Error, vuelva a intentarlo");
@@ -74,11 +70,18 @@ const RegisterPage = () => {
   const showDialog = (message) => {
     setDialogMessage(message);
     setDialogVisible(true);
+    // Limpiar mensajes de éxito y error después de un tiempo
+    setTimeout(() => {
+      setDialogMessage("");
+      setSuccessMessage("");
+      setError("");
+      setDialogVisible(false);
+    }, 3000);
   };
 
-  const hideDialog = () => {
-    setDialogMessage("");
-    setDialogVisible(false);
+  const showSuccess = (successMessage) => {
+    setSuccessMessage(successMessage);
+    showDialog(successMessage);
   };
 
   const showError = (errorMessage) => {
@@ -198,16 +201,18 @@ const RegisterPage = () => {
               />
             </div>
           </div>
+          <Dialog
+            header={successMessage ? "Mensaje de Éxito" : "Mensaje de Error"}
+            visible={dialogVisible && (error || successMessage)}
+            className={dialogClass}
+            style={{ width: "400px" }}
+            onHide={() => setDialogVisible(false)}
+          >
+            {successMessage && <p>{successMessage}</p>}
+            {error && <p>{error}</p>}
+          </Dialog>
         </form>
-  {/* Agregar el Dialog para mensajes de error */}
-  <Dialog
-          header="Mensaje de Error"
-          visible={dialogVisible && !!error}
-          style={{ width: "400px" }}
-          onHide={hideDialog}
-        >
-          {error}
-        </Dialog>
+
   </Card>
 </div>
 
