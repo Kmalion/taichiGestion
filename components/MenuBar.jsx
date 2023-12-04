@@ -1,15 +1,28 @@
 "use client"
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Menubar } from 'primereact/menubar';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'
-import { useTheme } from '../context/ThemeContext'; // Asegúrate de importar useTheme y theme
+import { useRouter } from 'next/navigation';
+import { useTheme } from '../context/ThemeContext';
 import { PrimeIcons } from 'primereact/api';
 
 export default function MenuBar() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme(); 
+  const { theme, toggleTheme } = useTheme();
+  const [logoSrc, setLogoSrc] = useState('');
+
+  useEffect(() => {
+    // Ejecuta la lógica del tema solo en el lado del cliente
+    const getLogoSrc = () => {
+      return theme === 'lara-dark-teal'
+        ? '/img/Logo_taichi_blanco_bola.png'
+        : '/img/Logo_bola_negra.png';
+    };
+
+    setLogoSrc(getLogoSrc());
+  }, [theme]);
+
   // Función para manejar clics en elementos del menú
   const handleMenuClick = (path) => {
     router.push(path); // Navegar a la ruta especificada
@@ -74,15 +87,12 @@ export default function MenuBar() {
   const start = (
     <div>
       <Link href="/dashboard">
-        {/* Ajusta la lógica de la imagen según el tema */}
-        {theme === 'lara-dark-teal' ? (
-          <Image src="/img/Logo taichi blanco bola.png" alt="Logo" width={50} height={50} />
-        ) : (
-          <Image src="/img/Logo bola negra.png" alt="Logo" width={50} height={50} />
-        )}
+        {/* Utiliza la ruta directa de la imagen */}
+        <Image src={logoSrc} alt="Logo" width={50} height={50} />
       </Link>
     </div>
   );
+  
   const end = (
     <div>
       <button className="p-button" onClick={toggleTheme}>

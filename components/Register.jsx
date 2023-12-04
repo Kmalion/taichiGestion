@@ -1,18 +1,17 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Dialog } from "primereact/dialog";
+import { Toast } from 'primereact/toast'
+
 
 const RegisterPage = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [error, setError] = useState("");
-  const [dialogVisible, setDialogVisible] = useState(false);
-  const [dialogMessage, setDialogMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const dialogClass = successMessage ? "success-dialog" : "error-dialog";
+  const toast = useRef(null);
 
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -62,10 +61,8 @@ const RegisterPage = () => {
         showSuccess("Registro exitoso");
         const data = await res.json();
         if (data && data.redirect) {
-          // Redirige a la URL proporcionada en la respuesta
           window.location.href = data.redirect;
         } else {
-          // Maneja casos en los que no haya una propiedad 'redirect'
           console.error("La respuesta no contiene una URL de redirección válida.");
         }
       }
@@ -75,33 +72,20 @@ const RegisterPage = () => {
     }
   };
 
-  const showDialog = (message) => {
-    setDialogMessage(message);
-    setDialogVisible(true);
-    // Limpiar mensajes de éxito y error después de un tiempo
-    setTimeout(() => {
-      setDialogMessage("");
-      setSuccessMessage("");
-      setError("");
-      setDialogVisible(false);
-    }, 3000);
-  };
-
   const showSuccess = (successMessage) => {
     setSuccessMessage(successMessage);
-    showDialog(successMessage);
+    toast.current.show({ severity: 'success', summary: 'Éxito', detail: successMessage });
   };
 
   const showError = (errorMessage) => {
     setError(errorMessage);
-    showDialog(errorMessage);
+    toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage });
   };
-
   return (
     <div className=" " style={{ height: "100vh" }}>
-      <Card style={{ width: "100%", padding: "20px", height: "115vh" }}>
+      <Card style={{ width: "100%", padding: "20px", height: "102vh" }}>
         <form onSubmit={handleSubmit}>
-      <div className="p-grid p-fluid">
+      <div className="p-grid p-fluid mt-0">
         <div className="p-col-12">
           <h2 className="text-center mt-0">Registro</h2>
         </div>
@@ -209,18 +193,9 @@ const RegisterPage = () => {
               />
             </div>
           </div>
-          <Dialog
-            header={successMessage ? "Mensaje de Éxito" : "Mensaje de Error"}
-            visible={dialogVisible && (error || successMessage)}
-            className={dialogClass}
-            style={{ width: "400px" }}
-            onHide={() => setDialogVisible(false)}
-          >
-            {successMessage && <p>{successMessage}</p>}
-            {error && <p>{error}</p>}
-          </Dialog>
+      
         </form>
-
+        <Toast ref={toast} />
   </Card>
 </div>
 

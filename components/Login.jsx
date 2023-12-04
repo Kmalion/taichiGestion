@@ -1,17 +1,30 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
-import Image from 'next/image';  // Importa Image de Next.js
+import Image from 'next/image';
+import { useTheme } from '../context/ThemeContext';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { theme } = useTheme();
+  const [logoSrc, setLogoSrc] = useState('');
+
+  useEffect(() => {
+    // Ejecuta la lógica del tema solo en el lado del cliente
+    const getLogoSrc = () => {
+      return theme === 'lara-dark-teal'
+        ? '/img/Taichi_logo_blanco.png'
+        : '/img/Taichi_logo_negro.png';
+    };
+
+    setLogoSrc(getLogoSrc());
+  }, [theme]);
 
   const handleLogin = () => {
-    // Aquí puedes agregar la lógica de autenticación, como enviar una solicitud a tu servidor.
     console.log('Iniciar sesión con:', username, password);
   };
 
@@ -19,8 +32,11 @@ const Login = () => {
     <div className="p-d-flex p-jc-center p-ai-center" style={{ height: '100vh' }}>
       <Card style={{ width: '100%', padding: '20px' }}>
         <div className="d-flex flex-center p-ai-center mb-5">
-        <div className="p-d-flex p-jc-center mb-2">
-            <Image src="/img/Taichi logo blanco SAS.png" alt="Logo" width={300} height={100} />
+          <div className="p-d-flex p-jc-center mb-2">
+            {/* Utiliza la función getLogoSrc desde el contexto para obtener la ruta de la imagen */}
+            <Image src={logoSrc} alt="Logo" width={300} height={100}/>
+
+
           </div>
           <h2 className="text-center">Iniciar Sesión</h2>
         </div>
