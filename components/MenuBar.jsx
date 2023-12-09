@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '../context/ThemeContext';
-import { PrimeIcons } from 'primereact/api';
+import { signOut } from 'next-auth/react';
 
 export default function MenuBar() {
   const router = useRouter();
@@ -13,7 +13,6 @@ export default function MenuBar() {
   const [logoSrc, setLogoSrc] = useState('');
 
   useEffect(() => {
-    // Ejecuta la lógica del tema solo en el lado del cliente
     const getLogoSrc = () => {
       return theme === 'lara-dark-teal'
         ? '/img/Logo_taichi_blanco_bola.png'
@@ -23,9 +22,14 @@ export default function MenuBar() {
     setLogoSrc(getLogoSrc());
   }, [theme]);
 
-  // Función para manejar clics en elementos del menú
   const handleMenuClick = (path) => {
-    router.push(path); // Navegar a la ruta especificada
+    router.push(path);
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Espera 100 milisegundos
+    router.push('/login');
   };
 
   const items = [
@@ -36,7 +40,7 @@ export default function MenuBar() {
         {
           label: 'Stock',
           icon: 'pi pi-fw pi-building',
-          command: () => handleMenuClick('/stock'), // Navegar a la ruta /stock al hacer clic
+          command: () => handleMenuClick('/stock'),
         },
         {
           separator: true,
@@ -44,24 +48,23 @@ export default function MenuBar() {
         {
           label: 'Entradas',
           icon: 'pi pi-fw pi-arrow-right',
-          command: () => handleMenuClick('/entradas'), // Navegar a la ruta /entradas al hacer clic
+          command: () => handleMenuClick('/entradas'),
         },
         {
           label: 'Salidas',
           icon: 'pi pi-fw pi-arrow-left',
-          command: () => handleMenuClick('/salidas'), // Navegar a la ruta /salidas al hacer clic
+          command: () => handleMenuClick('/salidas'),
         },
         {
           label: 'Bodegas',
           icon: 'pi pi-fw pi-server',
-          command: () => handleMenuClick('/bodegas'), // Navegar a la ruta /salidas al hacer clic
+          command: () => handleMenuClick('/bodegas'),
         },
         {
           label: 'Historial',
           icon: 'pi pi-fw pi-chart-line',
-          command: () => handleMenuClick('/historial'), // Navegar a la ruta /salidas al hacer clic
+          command: () => handleMenuClick('/historial'),
         },
-        
       ],
     },
     {
@@ -71,28 +74,25 @@ export default function MenuBar() {
         {
           label: 'Perfil',
           icon: 'pi pi-fw pi-user-plus',
-          command: () => handleMenuClick('/perfil'), // Navegar a la ruta /perfil al hacer clic
+          command: () => handleMenuClick('/perfil'),
         },
       ],
     },
     {
-      label: 'Cerrar sesion',
+      label: 'Cerrar sesión',
       icon: 'pi pi-fw pi-power-off',
-      command: () => {
-        // Agrega aquí la lógica para cerrar sesión si es necesario
-      },
+      command: () => handleLogout('/login'),
     },
   ];
 
   const start = (
     <div>
       <Link href="/dashboard">
-        {/* Utiliza la ruta directa de la imagen */}
         <Image src={logoSrc} alt="Logo" width={50} height={50} />
       </Link>
     </div>
   );
-  
+
   const end = (
     <div>
       <button className="p-button" onClick={toggleTheme}>
@@ -100,6 +100,7 @@ export default function MenuBar() {
       </button>
     </div>
   );
+
   return (
     <div>
       <Menubar model={items} start={start} end={end} />

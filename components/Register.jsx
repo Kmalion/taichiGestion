@@ -74,12 +74,13 @@ const RegisterPage = () => {
 
   const showSuccess = (successMessage) => {
     setSuccessMessage(successMessage);
-    toast.current.show({ severity: 'success', summary: 'Éxito', detail: successMessage });
+    toast.current.show({ severity: 'success', summary: 'Éxito', detail: successMessage, life: 5000 });
+
   };
 
   const showError = (errorMessage) => {
     setError(errorMessage);
-    toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage });
+    toast.current.show({ severity: 'error', summary: 'Error', detail: errorMessage, life: 5000 });
   };
   return (
     <div className=" " style={{ height: "100vh" }}>

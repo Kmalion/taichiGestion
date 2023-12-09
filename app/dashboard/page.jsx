@@ -1,10 +1,19 @@
+'use client'
+
 import React from 'react';
 import SalesChart from '@/components/SalesChart';
 import TotalItems from '@/components/TotalItems';
 import { Card } from 'primereact/card';
 import Layout from '@/components/Layout';
+import { useSession } from 'next-auth/react';
+
+
 
 export default function Home() {
+  const {data: session, status} = useSession()
+
+console.log(session, status)
+
   return (
     <Layout>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>

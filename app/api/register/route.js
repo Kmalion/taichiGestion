@@ -1,5 +1,5 @@
 import User from '../../../models/User';
-import connect from '@/utils/db';
+import connectDB from '../../../utils/db';
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
@@ -10,7 +10,7 @@ export const POST = async (request) => {
 
   try {
     // Conecta a la base de datos
-    client = await connect();
+    client = await connectDB();
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -45,7 +45,7 @@ export const POST = async (request) => {
   } finally {
     // Cierra la conexión después de realizar la operación
     if (client) {
-      await client.close();
+      await client.connection.close();
     }
   }
 };

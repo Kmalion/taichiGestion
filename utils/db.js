@@ -1,19 +1,22 @@
 
 import mongoose from "mongoose";
 
-
-
-const connect = async () =>{
-    if(mongoose.connections[0].readyState) return
-
-    try {
-        await mongoose.connect(process.env.MONGODB_URL,{
-          
-        })
-      console.log("Conectado a DB")
-    } catch (error) {
-        throw new Error("Error conectandose a la base de datos")
-    }
+const { MONGODB_URL} = process.env
+ 
+if (!MONGODB_URL){
+    throw new Error("Se debe definir MOGODB_URL")
 }
 
-export default connect
+const connectDB = async () => {
+    try {
+      const connection = await mongoose.connect(MONGODB_URL);
+      if (connection.connection.readyState === 1) {
+        console.log("Conectado a MongoDB");
+        return connection;  // Devuelve la conexión directamente
+      }
+    } catch (error) {
+      console.log(error);
+      throw error; // Lanza el error para ser manejado por el llamador
+    }
+  };
+export default connectDB
