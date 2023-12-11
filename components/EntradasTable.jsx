@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { classNames } from 'primereact/utils';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { ProductService } from '../service/ProductService.jsx';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { FileUpload } from 'primereact/fileupload';
@@ -16,34 +15,76 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
+import { useSession } from 'next-auth/react';
+import axios from 'axios';
+
+
+
 
 export default function EntradasTable() {
     let emptyProduct = {
-        id: null,
         name: '',
+        reference: '',
         image: null,
         description: '',
         category: null,
         price: 0,
         quantity: 0,
-        rating: 0,
-        inventoryStatus: 'INSTOCK'
+        serials: [],
+        brand: '',  // Agregado el campo 'brand'
+        rating: 1,
+        inventoryStatus: 'activo',
+        owner: '',
+        created: ''
     };
+
 
     const [products, setProducts] = useState(null);
     const [productDialog, setProductDialog] = useState(false);
     const [deleteProductDialog, setDeleteProductDialog] = useState(false);
     const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
-    const [product, setProduct] = useState(emptyProduct);
+    const [product,     setProduct] = useState(emptyProduct);
     const [selectedProducts, setSelectedProducts] = useState(null);
     const [submitted, setSubmitted] = useState(false);
-    const [globalFilter, setGlobalFilter] = useState(null);
+    const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef(null);
     const dt = useRef(null);
+    const { data: session } = useSession();
+    const [filteredProducts, setFilteredProducts] = useState(null); 
 
+   
+    
+
+    const userEmail = session?.user?.email;
+    
+    
+    const fetchProducts = async () => {
+        try {
+            const response = await axios.get('/api/products/getProducts');
+            console.log('Products fetched:', response.data);
+            setProducts(response.data);
+            filterProducts(typeof globalFilter === 'string' ? globalFilter : '');
+        } catch (error) {
+            console.error('Error fetching products:', error.message);
+        }
+    };
+    
     useEffect(() => {
-        ProductService.getProducts().then((data) => setProducts(data));
-    }, []);
+        fetchProducts();
+    }, [session, product]);
+
+      const filterProducts = (value) => {
+        if (!products) {
+            // Manejar el caso donde products es null
+            return;
+        }
+    
+        const filtered = products.filter((product) =>
+            product.name && product.name.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredProducts(filtered || []);
+    };
+    
 
     const formatCurrency = (value) => {
         return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -68,30 +109,69 @@ export default function EntradasTable() {
         setDeleteProductsDialog(false);
     };
 
-    const saveProduct = () => {
+    
+    const saveProduct = async () => {
         setSubmitted(true);
-
+    
         if (product.name.trim()) {
-            let _products = [...products];
-            let _product = { ...product };
+            try {
+                // Obtener la fecha y hora actual en formato dia/mes/ano y hora
+                const currentDate = new Date();
+                const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}:${currentDate.getSeconds()}`;
+    
+                const response = await fetch('/api/products/createProduct', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ...product,
+                        owner: session?.user?.email,
+                        created: formattedDate, // Incluir la fecha y hora actual en la variable created
+                    }),
+                });
+    
+                const responseData = await response.json();
+    
+                if (response.ok) {
+                    setProduct((prevProduct) => ({ ...prevProduct, owner: session?.user?.email }));
+    
+                    console.log('Owner: ', product.owner);
+    
+                    console.log('Producto guardado en el backend:', responseData);
+    
+                    toast.current.show({
+                        severity: 'success',
+                        summary: 'Exitoso',
+                        detail: 'Producto guardado',
+                        life: 3000,
+                    });
 
-            if (product.id) {
-                const index = findIndexById(product.id);
-
-                _products[index] = _product;
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Producto actualizado', life: 3000 });
-            } else {
-                _product.id = createId();
-                _product.image = 'product-placeholder.svg';
-                _products.push(_product);
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Producto creado', life: 3000 });
+                    window.location.href = '/entradas';
+                } else {
+                    console.error('Error al guardar el producto en el backend:', responseData);
+                    toast.current.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Error al guardar el producto',
+                        life: 3000,
+                    });
+                }
+            } catch (error) {
+                console.error('Error al procesar la solicitud:', error);
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Error al procesar la solicitud',
+                    life: 3000,
+                });
             }
-
-            setProducts(_products);
+    
             setProductDialog(false);
             setProduct(emptyProduct);
         }
     };
+    
 
     const editProduct = (product) => {
         setProduct({ ...product });
@@ -125,16 +205,7 @@ export default function EntradasTable() {
         return index;
     };
 
-    const createId = () => {
-        let id = '';
-        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-        for (let i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-
-        return id;
-    };
+ 
 
     const exportCSV = () => {
         dt.current.exportCSV();
@@ -164,7 +235,12 @@ export default function EntradasTable() {
         const val = (e.target && e.target.value) || '';
         let _product = { ...product };
 
-        _product[`${name}`] = val;
+        // Verificar si el campo es 'serials' para manejar el array
+        if (name === 'serials') {
+            _product[name] = val.split(',').map((s) => s.trim());
+        } else {
+            _product[name] = val;
+        }
 
         setProduct(_product);
     };
@@ -218,13 +294,13 @@ export default function EntradasTable() {
 
     const getSeverity = (product) => {
         switch (product.inventoryStatus) {
-            case 'INSTOCK':
+            case 'activo':
                 return 'success';
 
-            case 'LOWSTOCK':
+            case 'bajostock':
                 return 'warning';
 
-            case 'OUTOFSTOCK':
+            case 'agotado':
                 return 'danger';
 
             default:
@@ -237,7 +313,15 @@ export default function EntradasTable() {
             <h4 className="m-0">Historial de entradas</h4>
             <span className="p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
+                <InputText
+    type="search"
+    onInput={(e) => {
+        setGlobalFilter(e.target.value);
+        filterProducts(e.target.value);
+    }}
+    placeholder="Buscar..."
+/>
+
             </span>
         </div>
     );
@@ -259,22 +343,47 @@ export default function EntradasTable() {
             <Button label="Si" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
         </React.Fragment>
     );
-
+    const serialsBodyTemplate = (rowData) => {
+        // Verificar si rowData.serial es definido antes de intentar map
+        if (rowData.serial && Array.isArray(rowData.serial)) {
+            return (
+                <ul>
+                    {rowData.serial.map((serialItem, index) => (
+                        <li key={index}>{serialItem}</li>
+                    ))}
+                </ul>
+            );
+        } else {
+            return null; // O muestra algún mensaje o contenido alternativo si no hay datos serial
+        }
+    };
+    console.log('Datos para el DataTable:', globalFilter ? filteredProducts : products);
     return (
         <div>
             <Toast ref={toast} />
             <div className="card">
                 <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
 
-                <DataTable ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
-                        dataKey="id"  paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}>
+                <DataTable
+                    ref={dt}
+                    value={globalFilter ? filteredProducts : products}
+                    selection={selectedProducts}
+                    onSelectionChange={(e) => setSelectedProducts(e.value)}
+                    dataKey="id"
+                    paginator
+                    rows={10}
+                    rowsPerPageOptions={[5, 10, 25]}
+                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                    globalFilter={globalFilter}
+                    header={header}
+                >
                     <Column selectionMode="multiple" exportable={false}></Column>
-                    <Column field="code" header="Referencia" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="reference" header="Referencia" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="name" header="Nombre" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="description" header="Descripcion" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="serial" header="Serial" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="brand" header="Marca" sortable style={{ minWidth: '12rem' }}></Column> 
+                    <Column field="serial" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
                     <Column field="image" header="Imágen" body={imageBodyTemplate}></Column>
                     <Column field="quantity" header="Cantidad" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="price" header="Precio" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
@@ -284,7 +393,16 @@ export default function EntradasTable() {
                 </DataTable>
             </div>
 
-            <Dialog visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Nuevo producto" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
+            <Dialog
+                visible={productDialog}
+                style={{ width: '32rem' }}
+                breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+                header="Creación de nuevo producto"
+                modal
+                className="p-fluid"
+                footer={productDialogFooter}
+                onHide={hideDialog}
+            >
                 {product.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
                 <div className="field">
                     <label htmlFor="name" className="font-bold">
@@ -294,45 +412,63 @@ export default function EntradasTable() {
                     {submitted && !product.name && <small className="p-error">El nombre es requerido</small>}
                 </div>
                 <div className="field">
-                    <label htmlFor="code" className="font-bold">
+                    <label htmlFor="reference" className="font-bold">
                         Referencia
                     </label>
-                    <InputText id="code" value={product.name} onChange={(e) => onInputChange(e, 'code')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })} />
-                    {submitted && !product.name && <small className="p-error">La referencia es requerida.</small>}
+                    <InputText id="reference" value={product.reference} onChange={(e) => onInputChange(e, 'reference')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.reference })} />
+                    {submitted && !product.reference && <small className="p-error">La referencia es requerida.</small>}
                 </div>
                 <div className="field">
-                    <label htmlFor="code" className="font-bold">
+                    <label htmlFor="brand" className="font-bold">
+                        Marca
+                    </label>
+                    <InputText
+                        id="brand"
+                        value={product.brand}
+                        onChange={(e) => onInputChange(e, 'brand')}
+                        required
+                        autoFocus
+                        className={classNames({
+                            'p-invalid': submitted && !product.brand,
+                        })}
+                    />
+                    {submitted && !product.brand && <small className="p-error">La marca es requerida</small>}
+                </div>
+                <div className="field">
+                    <label htmlFor="serials" className="font-bold">
                         Serial
                     </label>
-                    <InputText id="code" value={product.name} onChange={(e) => onInputChange(e, 'code')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })} />
-                    {submitted && !product.name && <small className="p-error">El serial es requerido</small>}
+                    <InputText id="serials" value={product.serials} onChange={(e) => onInputChange(e, 'serials')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.serials })} />
+                    {submitted && !product.serials && <small className="p-error">El serial es requerido</small>}
                 </div>
                 <div className="field">
                     <label htmlFor="description" className="font-bold">
                         Descripcion
                     </label>
                     <InputTextarea id="description" value={product.description} onChange={(e) => onInputChange(e, 'description')} required rows={3} cols={20} />
+                    {submitted && !product.name && <small className="p-error">La descripcion es requerida</small>}
                 </div>
 
                 <div className="field">
                     <label className="mb-3 font-bold">Categoria</label>
                     <div className="formgrid grid">
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category1" name="category" value="Accessories" onChange={onCategoryChange} checked={product.category === 'Accessories'} />
+                            <RadioButton inputId="category1" name="category" value="accessorios" onChange={onCategoryChange} checked={product.category === 'accessorios'} />
                             <label htmlFor="category1">Accesorios</label>
                         </div>
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category2" name="category" value="Clothing" onChange={onCategoryChange} checked={product.category === 'Clothing'} />
-                            <label htmlFor="category2">Herramienta</label>
+                            <RadioButton inputId="category2" name="category" value="herramientas" onChange={onCategoryChange} checked={product.category === 'herramientas'} />
+                            <label htmlFor="category2">Herramientas</label>
                         </div>
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category3" name="category" value="Electronics" onChange={onCategoryChange} checked={product.category === 'Electronics'} />
+                            <RadioButton inputId="category3" name="category" value="equipos" onChange={onCategoryChange} checked={product.category === 'equipos'} />
                             <label htmlFor="category3">Equipos</label>
                         </div>
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category4" name="category" value="Fitness" onChange={onCategoryChange} checked={product.category === 'Fitness'} />
-                            <label htmlFor="category4">Otros</label>
+                            <RadioButton inputId="category4" name="category" value="repuestos" onChange={onCategoryChange} checked={product.category === 'repuestos'} />
+                            <label htmlFor="category4">Repuestos</label>
                         </div>
+                        
                     </div>
                 </div>
 
@@ -342,14 +478,29 @@ export default function EntradasTable() {
                             Precio
                         </label>
                         <InputNumber id="price" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
+                        {submitted && !product.name && <small className="p-error">El precio es requerido</small>}
                     </div>
                     <div className="field col">
                         <label htmlFor="quantity" className="font-bold">
                             Cantidad
                         </label>
                         <InputNumber id="quantity" value={product.quantity} onValueChange={(e) => onInputNumberChange(e, 'quantity')} />
+                        {submitted && !product.name && <small className="p-error">La cantidad es requerida</small>}
                     </div>
                 </div>
+                <div className="card">
+                        <FileUpload
+                            name="demo[]"
+                            url={'/api/upload'}
+                            multiple
+                            accept="image/*"
+                            maxFileSize={1000000}
+                            emptyTemplate={<p className="m-0">Arrastre la imagen para subirla</p>}
+                            chooseLabel="Escoger"
+                            uploadLabel="Subir"
+                            cancelLabel="Cancelar"
+                        />
+                    </div>
             </Dialog>
 
             <Dialog visible={deleteProductDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirmacion" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
@@ -372,4 +523,3 @@ export default function EntradasTable() {
         </div>
     );
 }
-        
