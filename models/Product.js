@@ -8,6 +8,10 @@ try {
 } catch (e) {
   // Si el modelo no existe, crea uno nuevo
   const productSchema = new mongoose.Schema({
+    idp: {
+      type: String,
+      required: true,
+    },
     category: {
       type: String,
       required: true,

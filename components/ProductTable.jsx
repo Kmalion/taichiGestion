@@ -18,6 +18,7 @@ import { Tag } from 'primereact/tag';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
 import '../app/styles/styles.css'
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -120,23 +121,26 @@ export default function EntradasTable() {
 
     const saveProduct = async () => {
         setSubmitted(true);
-
+    
         if (product.reference.trim() && selectedFile) {
             try {
                 const formData = new FormData();
                 formData.append('file', selectedFile);
                 const currentDate = new Date();
                 const formattedDate = currentDate.toISOString();
-
+    
                 const uploadResponse = await axios.post('/api/upload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 });
-                const imageUrl = uploadResponse.data.url
-
-                console.log('URL imagen', imageUrl)
-
+                const imageUrl = uploadResponse.data.url;
+    
+                
+    
+               
+                const productId = uuidv4();
+    
                 const response = await fetch('/api/products/createProduct', {
                     method: 'POST',
                     headers: {
@@ -144,26 +148,26 @@ export default function EntradasTable() {
                     },
                     body: JSON.stringify({
                         ...product,
+                        idp: productId, // Agrega el nuevo campo idp al producto
                         owner: session?.user?.email,
                         created: formattedDate,
-                        image: imageUrl, 
-                        inventoryStatus: product.quantity === 0 ? 'agotado' : 'activo', // Actualiza el estado según la cantidad
+                        image: imageUrl,
+                        inventoryStatus: product.quantity === 0 ? 'agotado' : 'activo',
                     }),
                 });
-
+    
                 const responseData = await response.json();
-
+    
                 if (response.ok) {
                     setProduct((prevProduct) => ({ ...prevProduct, owner: session?.user?.email }));
-
-                  
+    
                     toast.current.show({
                         severity: 'success',
                         summary: 'Exitoso',
                         detail: 'Producto guardado',
                         life: 3000,
                     });
-
+    
                     window.location.href = '/stock';
                 } else {
                     console.error('Error al guardar el producto en el backend:', responseData);
@@ -183,13 +187,57 @@ export default function EntradasTable() {
                     life: 3000,
                 });
             }
-
+    
             setProductDialog(false);
             setProduct(emptyProduct);
         }
     };
+// ...
 
+const deleteProduct = async () => {
+    try {
+        console.log('Valor de product.idp:', product.idp);
 
+        // Concatena la URL
+        const deleteProductUrl = `/api/products/deleteProduct/${product.idp}`;
+        console.log('URL delete:', deleteProductUrl);
+
+        // Usa fetch con la URL concatenada
+        const response = await fetch(deleteProductUrl, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            // Eliminación exitosa
+            const updatedProducts = products.filter((val) => val.idp !== product.idp);
+            setProducts(updatedProducts);
+            setDeleteProductDialog(false);
+            setProduct(emptyProduct);
+            toast.current.show({ severity: 'success', summary: 'Exitoso !', detail: 'Producto Borrado', life: 3000 });
+        } else {
+            console.error('Error al eliminar el producto:', await response.text());
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Error al eliminar el producto',
+                life: 3000,
+            });
+        }
+    } catch (error) {
+        console.error('Error al procesar la solicitud:', error);
+        toast.current.show({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Error al procesar la solicitud',
+            life: 3000,
+        });
+    }
+};
+
+  
     const editProduct = (product) => {
         setProduct({ ...product });
         setProductDialog(true);
@@ -200,14 +248,7 @@ export default function EntradasTable() {
         setDeleteProductDialog(true);
     };
 
-    const deleteProduct = () => {
-        let _products = products.filter((val) => val.id !== product.id);
 
-        setProducts(_products);
-        setDeleteProductDialog(false);
-        setProduct(emptyProduct);
-        toast.current.show({ severity: 'success', summary: 'Exitoso !', detail: 'Producto Borrado', life: 3000 });
-    };
 
     const findIndexById = (id) => {
         let index = -1;
