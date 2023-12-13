@@ -16,10 +16,6 @@ try {
       type: String,
       required: true,
     },
-    name: {
-      type: String,
-      required: true,
-    },
     description: {
       type: String,
       required: true,
@@ -28,22 +24,21 @@ try {
       type: String,
       required: true,
     },
-    serials: [{
-      type: String,
-      unique: true,
-      required: true,
-    }],
+    serials: {
+      type: [String],
+    },
+    
     image: {
       type: String,
     },
     quantity: {
       type: Number,
-      required: true,
+  
       min: 0,
     },
     price: {
       type: Number,
-      required: true,
+      
     },
     rating: {
       type: Number,

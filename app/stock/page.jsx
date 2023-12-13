@@ -1,9 +1,9 @@
 'use client'
 import React from 'react';
-import ProductTable from '../../components/ProductTable';
 import Layout from '../../components/Layout.jsx';
 import { ThemeProvider } from '../../context/ThemeContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
+import EntradasTable from '@/components/ProductTable.jsx';
 
 function StockPage() {
   const { theme, toggleTheme } = useTheme();
@@ -16,7 +16,7 @@ function StockPage() {
     <div className={`app-container ${theme}`}>
     <div>
       <h2>Consulta de inventario</h2>
-      <ProductTable />
+      <EntradasTable></EntradasTable>
     </div>
     </div>
     </Layout>

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { classNames } from 'primereact/utils';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { ProductService } from '../service/ProductService.jsx';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
 import { FileUpload } from 'primereact/fileupload';
@@ -16,21 +15,29 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
+import { useSession } from 'next-auth/react';
+import axios from 'axios';
+import '../app/styles/styles.css'
 
 
 
-export default function ProductsTable() {
+
+export default function EntradasTable() {
     let emptyProduct = {
-        id: null,
-        name: '',
+        reference: '',
         image: null,
         description: '',
         category: null,
         price: 0,
         quantity: 0,
-        rating: 0,
-        inventoryStatus: 'INSTOCK'
+        serials: [],
+        brand: '',  // Agregado el campo 'brand'
+        rating: 1,
+        inventoryStatus: 'activo',
+        owner: '',
+        created: ''
     };
+
 
     const [products, setProducts] = useState(null);
     const [productDialog, setProductDialog] = useState(false);
@@ -39,13 +46,53 @@ export default function ProductsTable() {
     const [product, setProduct] = useState(emptyProduct);
     const [selectedProducts, setSelectedProducts] = useState(null);
     const [submitted, setSubmitted] = useState(false);
-    const [globalFilter, setGlobalFilter] = useState(null);
+    const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef(null);
     const dt = useRef(null);
+    const { data: session } = useSession();
+    const [filteredProducts, setFilteredProducts] = useState(null);
+    const [serialsDialog, setSerialsDialog] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+
+
+    const onFileChange = (e) => {
+        const file = e.files && e.files.length > 0 ? e.files[0] : null;
+        setSelectedFile(file);
+    };
+    
+    const hideSerialsDialog = () => {
+        setSerialsDialog(false);
+    };
+    const serialsDialogFooter = (
+        <Button label="Cerrar" icon="pi pi-check" onClick={hideSerialsDialog} />
+    );
+    const fetchProducts = async () => {
+        try {
+            const response = await axios.get('/api/products/getProducts');
+            console.log('Products fetched:', response.data);
+            setProducts(response.data);
+            filterProducts(typeof globalFilter === 'string' ? globalFilter : '');
+        } catch (error) {
+            console.error('Error fetching products:', error.message);
+        }
+    };
 
     useEffect(() => {
-        ProductService.getProducts().then((data) => setProducts(data));
+        fetchProducts();
     }, []);
+
+    const filterProducts = (value) => {
+        if (!products) {
+            // Manejar el caso donde products es null
+            return;
+        }
+
+        const filtered = products.filter((product) =>
+            product.reference && product.reference.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredProducts(filtered || []);
+    };
+
 
     const formatCurrency = (value) => {
         return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -70,30 +117,78 @@ export default function ProductsTable() {
         setDeleteProductsDialog(false);
     };
 
-    const saveProduct = () => {
+
+    const saveProduct = async () => {
         setSubmitted(true);
 
-        if (product.name.trim()) {
-            let _products = [...products];
-            let _product = { ...product };
+        if (product.reference.trim() && selectedFile) {
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                const currentDate = new Date();
+                const formattedDate = currentDate.toISOString();
 
-            if (product.id) {
-                const index = findIndexById(product.id);
+                const uploadResponse = await axios.post('/api/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                const imageUrl = uploadResponse.data.url
 
-                _products[index] = _product;
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Producto actualizado', life: 3000 });
-            } else {
-                _product.id = createId();
-                _product.image = 'product-placeholder.svg';
-                _products.push(_product);
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Producto creado', life: 3000 });
+                console.log('URL imagen', imageUrl)
+
+                const response = await fetch('/api/products/createProduct', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ...product,
+                        owner: session?.user?.email,
+                        created: formattedDate,
+                        image: imageUrl, 
+                        inventoryStatus: product.quantity === 0 ? 'agotado' : 'activo', // Actualiza el estado según la cantidad
+                    }),
+                });
+
+                const responseData = await response.json();
+
+                if (response.ok) {
+                    setProduct((prevProduct) => ({ ...prevProduct, owner: session?.user?.email }));
+
+                  
+                    toast.current.show({
+                        severity: 'success',
+                        summary: 'Exitoso',
+                        detail: 'Producto guardado',
+                        life: 3000,
+                    });
+
+                    window.location.href = '/stock';
+                } else {
+                    console.error('Error al guardar el producto en el backend:', responseData);
+                    toast.current.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Error al guardar el producto',
+                        life: 3000,
+                    });
+                }
+            } catch (error) {
+                console.error('Error al procesar la solicitud:', error);
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Error al procesar la solicitud',
+                    life: 3000,
+                });
             }
 
-            setProducts(_products);
             setProductDialog(false);
             setProduct(emptyProduct);
         }
     };
+
 
     const editProduct = (product) => {
         setProduct({ ...product });
@@ -127,21 +222,11 @@ export default function ProductsTable() {
         return index;
     };
 
-    const createId = () => {
-        let id = '';
-        let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-        for (let i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-
-        return id;
-    };
 
     const exportCSV = () => {
         dt.current.exportCSV();
     };
-
 
     const confirmDeleteSelected = () => {
         setDeleteProductsDialog(true);
@@ -163,20 +248,25 @@ export default function ProductsTable() {
         setProduct(_product);
     };
 
-    const onInputChange = (e, name) => {
+    const onInputChange = (e, reference) => {
         const val = (e.target && e.target.value) || '';
         let _product = { ...product };
 
-        _product[`${name}`] = val;
+        // Verificar si el campo es 'serials' para manejar el array
+        if (reference === 'serials') {
+            _product[reference] = val.split(',').map((s) => s.trim());
+        } else {
+            _product[reference] = val;
+        }
 
         setProduct(_product);
     };
 
-    const onInputNumberChange = (e, name) => {
+    const onInputNumberChange = (e, reference) => {
         const val = e.value || 0;
         let _product = { ...product };
 
-        _product[`${name}`] = val;
+        _product[`${reference}`] = val;
 
         setProduct(_product);
     };
@@ -184,24 +274,23 @@ export default function ProductsTable() {
     const leftToolbarTemplate = () => {
         return (
             <div className="flex flex-wrap gap-2">
-
-                <Button label="Crear nuevo producto" icon="pi pi-plus" severity="success" onClick={openNew} />
-                {/* <Button label="Borrar" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />  */}
+                <Button label="Crear producto" icon="pi pi-plus" severity="success" onClick={openNew} />
+                <Button label="Borrar" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
             </div>
         );
     };
 
     const rightToolbarTemplate = () => {
-        return (
-            <React.Fragment>
-                <Button label="Exportar CSV" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />
-            </React.Fragment>
-        );
+        return <Button label="Exportar" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
     };
 
     const imageBodyTemplate = (rowData) => {
-        return <img src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
-    };
+        return (
+          <div className="zoomable-image">
+            <img src={`${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />
+          </div>
+        );
+      };
 
     const priceBodyTemplate = (rowData) => {
         return formatCurrency(rowData.price);
@@ -218,6 +307,7 @@ export default function ProductsTable() {
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
+
                 <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editProduct(rowData)} />
                 <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
             </React.Fragment>
@@ -226,13 +316,13 @@ export default function ProductsTable() {
 
     const getSeverity = (product) => {
         switch (product.inventoryStatus) {
-            case 'INSTOCK':
+            case 'activo':
                 return 'success';
 
-            case 'LOWSTOCK':
+            case 'bajostock':
                 return 'warning';
 
-            case 'OUTOFSTOCK':
+            case 'agotado':
                 return 'danger';
 
             default:
@@ -242,10 +332,18 @@ export default function ProductsTable() {
 
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-            <h4 className="m-0">Gestion de productos</h4>
+            <h4 className="m-0">Productos en stock</h4>
             <span className="p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
+                <InputText
+                    type="search"
+                    onInput={(e) => {
+                        setGlobalFilter(e.target.value);
+                        filterProducts(e.target.value);
+                    }}
+                    placeholder="Buscar..."
+                />
+
             </span>
         </div>
     );
@@ -267,99 +365,181 @@ export default function ProductsTable() {
             <Button label="Si" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
         </React.Fragment>
     );
-    const tableContainer = useRef(null);
-
-
-    const onUpload = () => {
-        toast.current.show({ severity: 'info', summary: 'Success', detail: 'File Uploaded' });
+    const serialsBodyTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                <Button icon="pi pi-search" onClick={() => showSerialsDialog(rowData)} />
+            </React.Fragment>
+        );
     };
+    const showSerialsDialog = (rowData) => {
+        setProduct(rowData);
+        setSerialsDialog(true);
+    };
+
 
     return (
         <div>
             <Toast ref={toast} />
-            <div className="card ">
+            <div className="card">
                 <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
 
-                <DataTable ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
-                    dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                <DataTable
+                    ref={dt}
+                    value={globalFilter ? filteredProducts : products}
+                    selection={selectedProducts}
+                    onSelectionChange={(e) => setSelectedProducts(e.value)}
+                    dataKey="id"
+                    paginator
+                    rows={10}
+                    rowsPerPageOptions={[5, 10, 25]}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}>
-                    <Column selectionMode="multiple" exportable={false}></Column>
-                    <Column field="code" header="Referencia" sortable style={{ minWidth: '12rem' }}></Column>
+                    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+                    globalFilter={globalFilter}
+                    header={header}
+                >
+                    <Column field="reference" header="Referencia" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="description" header="Descripcion" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="quantity" header="Cantidad" sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="serial" header="Serial" sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="name" header="Marca" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="category" header="Categoria" sortable style={{ minWidth: '10rem' }}></Column>
+                    <Column field="brand" header="Marca" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
                     <Column field="image" header="Imágen" body={imageBodyTemplate}></Column>
-                    <Column field="price" header="Precio" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
+                    <Column field="quantity" header="Cantidad" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="price" header="Costo" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
+                    <Column field="category" header="Categoria" sortable style={{ minWidth: '10rem' }}></Column>
                     <Column field="inventoryStatus" header="Estado" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="created" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="created_date" header="Fecha creado" sortable style={{ minWidth: '12rem' }}></Column>
-                    {/* BOTONES EDITAR Y BORRAR CADA UNO <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column> */}
+                    <Column field="owner" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
+                <Dialog
+                    visible={serialsDialog}
+                    style={{ width: '30rem' }}
+                    header={`Seriales de ${product.reference}`}
+                    modal
+                    onHide={hideSerialsDialog}
+                    footer={serialsDialogFooter}
+                >
+                    {product.serials && Array.isArray(product.serials) && product.serials.length > 0 ? (
+                        <ul>
+                            {product.serials.map((serialItem, index) => (
+                                <li key={index}>{serialItem}</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No hay seriales disponibles para este producto.</p>
+                    )}
+                </Dialog>
             </div>
 
-            <Dialog visible={productDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Ingresa el nuevo producto" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
+            <Dialog
+                visible={productDialog}
+                style={{ width: '32rem' }}
+                breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+                header="Creación de nuevo producto"
+                modal
+                className="p-fluid"
+                footer={productDialogFooter}
+                onHide={hideDialog}
+            >
                 {product.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
-                
+
                 <div className="field">
-                    <label htmlFor="code" className="font-bold">
+                    <label htmlFor="reference" className="font-bold">
                         Referencia
                     </label>
-                    <InputText id="code" value={product.code} onChange={(e) => onInputChange(e, 'code')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.code })} />
-                    {submitted && !product.code && <small className="p-error">La referencia es requerida</small>}
+                    <InputText id="reference" value={product.reference} onChange={(e) => onInputChange(e, 'reference')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.reference })} />
+                    {submitted && !product.reference && <small className="p-error">La referencia es requerida.</small>}
                 </div>
-
                 <div className="field">
-                    <label htmlFor="name" className="font-bold">
+                    <label htmlFor="brand" className="font-bold">
                         Marca
                     </label>
-                    <InputText id="name" value={product.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.name })} />
-                    {submitted && !product.name && <small className="p-error">La marca es requerida</small>}
+                    <InputText
+                        id="brand"
+                        value={product.brand}
+                        onChange={(e) => onInputChange(e, 'brand')}
+                        required
+                        autoFocus
+                        className={classNames({
+                            'p-invalid': submitted && !product.brand,
+                        })}
+                    />
+                    {submitted && !product.brand && <small className="p-error">La marca es requerida</small>}
                 </div>
+                {/* 
+                
+                Serial
+                
+                <div className="field">
+                    <label htmlFor="serials" className="font-bold">
+                        Serial
+                    </label>
+                    <InputText id="serials" value={product.serials} onChange={(e) => onInputChange(e, 'serials')} required autoFocus className={classNames({ 'p-invalid': submitted && !product.serials })} />
 
+                </div> */}
                 <div className="field">
                     <label htmlFor="description" className="font-bold">
                         Descripcion
                     </label>
                     <InputTextarea id="description" value={product.description} onChange={(e) => onInputChange(e, 'description')} required rows={3} cols={20} />
+                    {submitted && !product.description && <small className="p-error">La descripcion es requerida</small>}
                 </div>
+
                 <div className="field">
                     <label className="mb-3 font-bold">Categoria</label>
                     <div className="formgrid grid">
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category1" name="category" value="Accessories" onChange={onCategoryChange} checked={product.category === 'Accessories'} />
+                            <RadioButton inputId="category1" name="category" value="Accessorios" onChange={onCategoryChange} checked={product.category === 'Accessorios'} />
                             <label htmlFor="category1">Accesorios</label>
                         </div>
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category2" name="category" value="Clothing" onChange={onCategoryChange} checked={product.category === 'Clothing'} />
+                            <RadioButton inputId="category2" name="category" value="Herramientas" onChange={onCategoryChange} checked={product.category === 'Herramientas'} />
                             <label htmlFor="category2">Herramientas</label>
                         </div>
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category3" name="category" value="Electronics" onChange={onCategoryChange} checked={product.category === 'Electronics'} />
+                            <RadioButton inputId="category3" name="category" value="Equipos" onChange={onCategoryChange} checked={product.category === 'Equipos'} />
                             <label htmlFor="category3">Equipos</label>
                         </div>
                         <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category4" name="category" value="Fitness" onChange={onCategoryChange} checked={product.category === 'Fitness'} />
-                            <label htmlFor="category4">Otros</label>
+                            <RadioButton inputId="category4" name="category" value="Repuestos" onChange={onCategoryChange} checked={product.category === 'Repuestos'} />
+                            <label htmlFor="category4">Repuestos</label>
                         </div>
-                    </div>
-                    <div className="card">
-                        <FileUpload
-                            name="demo[]"
-                            url={'/api/upload'}
-                            multiple
-                            accept="image/*"
-                            maxFileSize={1000000}
-                            emptyTemplate={<p className="m-0">Arrastre la imagen para subirla</p>}
-                            chooseLabel="Escoger"
-                            uploadLabel="Subir"
-                            cancelLabel="Cancelar"
-                        />
+
                     </div>
                 </div>
 
+                {/*  Cantidad y precio
+                
+                <div className="formgrid grid">
+                    <div className="field col">
+                        <label htmlFor="price" className="font-bold">
+                            Precio
+                        </label>
+                        <InputNumber id="price" value={product.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
+                        {submitted && !product.price && <small className="p-error">El precio es requerido</small>}
+                    </div>
+                    <div className="field col">
+                        <label htmlFor="quantity" className="font-bold">
+                            Cantidad
+                        </label>
+                        <InputNumber id="quantity" value={product.quantity} onValueChange={(e) => onInputNumberChange(e, 'quantity')} />
+                        {submitted && !product.quantity && <small className="p-error">La cantidad es requerida</small>}
+                    </div>
+                </div> */}
+                <div className="card">
+                <FileUpload
+    name="file" // Asegúrate de que el nombre coincida con lo que esperas en el backend
+    url={'/api/upload'}
+    multiple
+    accept="image/*"
+    maxFileSize={1000000}
+    emptyTemplate={<p className="m-0">Arrastre la imagen para subirla</p>}
+    chooseLabel="Escoger"
+    uploadLabel="Subir"
+    cancelLabel="Cancelar"
+    onSelect={onFileChange}
+/>
+
+                </div>
             </Dialog>
 
             <Dialog visible={deleteProductDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirmacion" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
@@ -367,7 +547,7 @@ export default function ProductsTable() {
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                     {product && (
                         <span>
-                            esta seguro de que quiere borrar <b>{product.name}</b>?
+                            esta seguro de que quiere borrar <b>{product.reference}</b>?
                         </span>
                     )}
                 </div>

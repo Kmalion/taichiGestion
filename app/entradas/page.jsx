@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import EntradasTable from '../../components/EntradasTable';
+import EntradasTable from '../../components/ProductTable';
 import Layout from '../../components/Layout.jsx';
 import { ThemeProvider } from '../../context/ThemeContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';

@@ -1,0 +1,12 @@
+.zoomable-image {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .zoomable-image img {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .zoomable-image:hover img {
+    transform: scale(1.5);
+  }
