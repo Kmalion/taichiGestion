@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { FilterMatchMode, FilterOperator } from 'primereact/api';
 
 
 
@@ -53,9 +54,16 @@ export default function EntradasTable() {
     const toast = useRef(null);
     const dt = useRef(null);
     const { data: session } = useSession();
-    const [filteredProducts, setFilteredProducts] = useState(null);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [serialsDialog, setSerialsDialog] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [filters, setFilters] = useState({
+        global: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        reference: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        // Agrega más filtros si es necesario para otras columnas
+      });
+    
+      const referenceColumn = useRef(null);
 
     const exportPDF = () => {
         const unit = 'pt';
@@ -134,29 +142,27 @@ export default function EntradasTable() {
             console.error('Error fetching products:', error.message);
         }
     };
+    const filterProducts = (value) => {
+        if (!Array.isArray(products)) {
+            return;
+        }
+
+        const filtered = products.filter((product) =>
+            product.reference && product.reference.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredProducts(filtered);
+    };
 
     useEffect(() => {
         fetchProducts();
     }, []);
 
     useEffect(() => {
-        if (products) {
+        if (typeof globalFilter === 'string') {
             filterProducts(globalFilter);
         }
     }, [globalFilter, products]);
 
-
-    const filterProducts = (value) => {
-        if (!products) {
-            console.log("Error filtrando productos")
-            return;
-        }
-
-        const filtered = products.filter((product) =>
-        product.reference && product.reference.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredProducts(filtered || []);
-};
 
 
     const formatCurrency = (value) => {
@@ -465,18 +471,20 @@ export default function EntradasTable() {
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
             <h4 className="m-0">Productos en stock</h4>
-            <span className="p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText
-                    type="search"
-                    onInput={(e) => {
-                        setGlobalFilter(e.target.value);
-                    }}
-                    placeholder="Buscar..."
-                />
-            </span>
+        <span className="p-input-icon-left">
+        <i className="pi pi-search" />
+        <InputText
+          type="search"
+          onInput={(e) => {
+            const inputValue = e.target.value || '';
+            setGlobalFilter(inputValue);
+          }}
+          placeholder="Buscar..."
+        />
+      </span>
         </div>
     );
+    
     const productDialogFooter = (
         <React.Fragment>
             <Button label="Cancelar" icon="pi pi-times" outlined onClick={hideDialog} />
@@ -528,7 +536,7 @@ export default function EntradasTable() {
                     globalFilter={globalFilter}
                     header={header}
                 >
-                    <Column field="reference" header="Referencia" sortable style={{ minWidth: '12rem' }}></Column>
+                     <Column field="reference" header="Referencia" sortable style={{ minWidth: '12rem' }} ref={referenceColumn} onFilter={(e) => onReferenceFilterChange(e.target.value)}></Column>
                     <Column field="description" header="Descripcion" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="brand" header="Marca" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
