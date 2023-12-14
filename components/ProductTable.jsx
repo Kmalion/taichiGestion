@@ -19,7 +19,9 @@ import { useSession } from 'next-auth/react';
 import axios from 'axios';
 import '../app/styles/styles.css'
 import { v4 as uuidv4 } from 'uuid';
-
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 
 
@@ -40,7 +42,7 @@ export default function EntradasTable() {
     };
 
 
-    const [products, setProducts] = useState(null);
+    const [products, setProducts] = useState([]);
     const [productDialog, setProductDialog] = useState(false);
     const [deleteProductDialog, setDeleteProductDialog] = useState(false);
     const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
@@ -55,12 +57,67 @@ export default function EntradasTable() {
     const [serialsDialog, setSerialsDialog] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
 
+    const exportPDF = () => {
+        const unit = 'pt';
+        const size = 'A4'; // Use A1, A2, A3, A4, etc.
+        const orientation = 'landscape'; // portrait or landscape
+        const doc = new jsPDF(orientation, unit, size);
+
+        doc.setFontSize(15);
+        doc.text('Productos en stock', 40, 40);
+
+        const headers = [['Referencia', 'Descripción', 'Marca', 'Serial', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Creado por']];
+
+        const data = products.map(product => [
+            product.reference,
+            product.description,
+            product.brand,
+            product.serials.join(', '),
+            product.quantity,
+            formatCurrency(product.price),
+            product.category,
+            product.inventoryStatus,
+            product.owner
+        ]);
+
+        autoTable(doc, {
+            head: headers,
+            body: data,
+            startY: 50,
+            theme: 'grid',
+            styles: { fontSize: 10, cellPadding: 5, textColor: [50, 50, 50] },
+            columnStyles: { 0: { cellWidth: 40 } },
+        });
+
+        doc.save('Taichi productos.pdf');
+    };
+
+    const exportExcel = () => {
+        const headers = [['Referencia', 'Descripción', 'Marca', 'Serial', 'Imagen', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Creado por']];
+        const data = products.map(product => [
+            product.reference,
+            product.description,
+            product.brand,
+            product.serials.join(', '),
+            product.image,
+            product.quantity,
+            formatCurrency(product.price),
+            product.category,
+            product.inventoryStatus,
+            product.owner
+        ]);
+
+        const ws = XLSX.utils.aoa_to_sheet([].concat(headers, data));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Productos');
+        XLSX.writeFile(wb, 'productos.xlsx');
+    };
 
     const onFileChange = (e) => {
         const file = e.files && e.files.length > 0 ? e.files[0] : null;
         setSelectedFile(file);
     };
-    
+
     const hideSerialsDialog = () => {
         setSerialsDialog(false);
     };
@@ -82,17 +139,24 @@ export default function EntradasTable() {
         fetchProducts();
     }, []);
 
+    useEffect(() => {
+        if (products) {
+            filterProducts(globalFilter);
+        }
+    }, [globalFilter, products]);
+
+
     const filterProducts = (value) => {
         if (!products) {
-            // Manejar el caso donde products es null
+            console.log("Error filtrando productos")
             return;
         }
 
         const filtered = products.filter((product) =>
-            product.reference && product.reference.toLowerCase().includes(value.toLowerCase())
-        );
-        setFilteredProducts(filtered || []);
-    };
+        product.reference && product.reference.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredProducts(filtered || []);
+};
 
 
     const formatCurrency = (value) => {
@@ -118,49 +182,52 @@ export default function EntradasTable() {
         setDeleteProductsDialog(false);
     };
 
-
     const saveProduct = async () => {
         setSubmitted(true);
     
-        if (product.reference.trim() && selectedFile) {
+        if (product.reference.trim()) {
             try {
-                const formData = new FormData();
-                formData.append('file', selectedFile);
+                let imageUrl = product.image; // Usa la URL de la imagen existente si está disponible
                 const currentDate = new Date();
                 const formattedDate = currentDate.toISOString();
+                if (selectedFile) {
+                    // Si se selecciona un nuevo archivo, súbelo
+                    const formData = new FormData();
+                    formData.append('file', selectedFile);
     
-                const uploadResponse = await axios.post('/api/upload', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                const imageUrl = uploadResponse.data.url;
+                    const uploadResponse = await axios.post('/api/upload', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
     
-                
+                    imageUrl = uploadResponse.data.url;
+                }
     
-               
-                const productId = uuidv4();
+                const updatedProduct = {
+                    ...product,
+                    owner: session?.user?.email,
+                    created: formattedDate,
+                    image: imageUrl,
+                    inventoryStatus: product.quantity === 0 ? 'agotado' : 'activo',
+                };
     
-                const response = await fetch('/api/products/createProduct', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        ...product,
-                        idp: productId, // Agrega el nuevo campo idp al producto
-                        owner: session?.user?.email,
-                        created: formattedDate,
-                        image: imageUrl,
-                        inventoryStatus: product.quantity === 0 ? 'agotado' : 'activo',
-                    }),
-                });
+                let response;
+                if (product.idp) {
+                    // Actualizar producto existente
+                    response = await axios.put(`/api/products/updateProduct/${product.idp}`, updatedProduct);
+                } else {
+                    // Crear nuevo producto
+                    const productId = uuidv4();
+                    response = await axios.post('/api/products/createProduct', {
+                        ...updatedProduct,
+                        idp: productId,
+                    });
+                }
     
-                const responseData = await response.json();
+                const responseData = response.data;
     
-                if (response.ok) {
-                    setProduct((prevProduct) => ({ ...prevProduct, owner: session?.user?.email }));
-    
+                if (response.status === 200) {
                     toast.current.show({
                         severity: 'success',
                         summary: 'Exitoso',
@@ -168,7 +235,8 @@ export default function EntradasTable() {
                         life: 3000,
                     });
     
-                    window.location.href = '/stock';
+                    // Recargar productos después de actualizar o crear
+                    fetchProducts();
                 } else {
                     console.error('Error al guardar el producto en el backend:', responseData);
                     toast.current.show({
@@ -192,52 +260,53 @@ export default function EntradasTable() {
             setProduct(emptyProduct);
         }
     };
-// ...
+    
+    
 
-const deleteProduct = async () => {
-    try {
-        console.log('Valor de product.idp:', product.idp);
+    const deleteProduct = async () => {
+        try {
+            console.log('Valor de product.idp:', product.idp);
 
-        // Concatena la URL
-        const deleteProductUrl = `/api/products/deleteProduct/${product.idp}`;
-        console.log('URL delete:', deleteProductUrl);
+            // Concatena la URL
+            const deleteProductUrl = `/api/products/deleteProduct/${product.idp}`;
+            console.log('URL delete:', deleteProductUrl);
 
-        // Usa fetch con la URL concatenada
-        const response = await fetch(deleteProductUrl, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+            // Usa fetch con la URL concatenada
+            const response = await fetch(deleteProductUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
 
-        if (response.ok) {
-            // Eliminación exitosa
-            const updatedProducts = products.filter((val) => val.idp !== product.idp);
-            setProducts(updatedProducts);
-            setDeleteProductDialog(false);
-            setProduct(emptyProduct);
-            toast.current.show({ severity: 'success', summary: 'Exitoso !', detail: 'Producto Borrado', life: 3000 });
-        } else {
-            console.error('Error al eliminar el producto:', await response.text());
+            if (response.ok) {
+                // Eliminación exitosa
+                const updatedProducts = products.filter((val) => val.idp !== product.idp);
+                setProducts(updatedProducts);
+                setDeleteProductDialog(false);
+                setProduct(emptyProduct);
+                toast.current.show({ severity: 'success', summary: 'Exitoso !', detail: 'Producto Borrado', life: 3000 });
+            } else {
+                console.error('Error al eliminar el producto:', await response.text());
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Error al eliminar el producto',
+                    life: 3000,
+                });
+            }
+        } catch (error) {
+            console.error('Error al procesar la solicitud:', error);
             toast.current.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Error al eliminar el producto',
+                detail: 'Error al procesar la solicitud',
                 life: 3000,
             });
         }
-    } catch (error) {
-        console.error('Error al procesar la solicitud:', error);
-        toast.current.show({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Error al procesar la solicitud',
-            life: 3000,
-        });
-    }
-};
+    };
 
-  
+
     const editProduct = (product) => {
         setProduct({ ...product });
         setProductDialog(true);
@@ -322,16 +391,38 @@ const deleteProduct = async () => {
     };
 
     const rightToolbarTemplate = () => {
-        return <Button label="Exportar" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+        return (
+            <div className="flex flex-wrap gap-2">
+                <Button
+                    label="Exportar"
+                    icon="pi pi-upload"
+                    className="p-button-help p-mr-3 p-p-1"
+                    onClick={exportCSV}
+                />
+                <Button
+                    label="Exportar PDF"
+                    icon="pi pi-file-pdf"
+                    className="p-button-warning p-mr-2 p-p-1"
+                    onClick={exportPDF}
+                />
+                <Button
+                    label="Exportar Excel"
+                    icon="pi pi-file-excel"
+                    className="p-button-success p-p-1"
+                    onClick={exportExcel}
+                />
+            </div>
+        );
     };
+    
 
     const imageBodyTemplate = (rowData) => {
         return (
-          <div className="zoomable-image">
-            <img src={`${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />
-          </div>
+            <div className="zoomable-image">
+                <img src={`${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />
+            </div>
         );
-      };
+    };
 
     const priceBodyTemplate = (rowData) => {
         return formatCurrency(rowData.price);
@@ -380,11 +471,9 @@ const deleteProduct = async () => {
                     type="search"
                     onInput={(e) => {
                         setGlobalFilter(e.target.value);
-                        filterProducts(e.target.value);
                     }}
                     placeholder="Buscar..."
                 />
-
             </span>
         </div>
     );
@@ -475,13 +564,13 @@ const deleteProduct = async () => {
                 visible={productDialog}
                 style={{ width: '32rem' }}
                 breakpoints={{ '960px': '75vw', '641px': '90vw' }}
-                header="Creación de nuevo producto"
+                header="Registrar producto"
                 modal
                 className="p-fluid"
                 footer={productDialogFooter}
                 onHide={hideDialog}
             >
-                {product.image && <img src={`https://primefaces.org/cdn/primereact/images/product/${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
+                {product.image && <img src={`${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
 
                 <div className="field">
                     <label htmlFor="reference" className="font-bold">
@@ -567,18 +656,18 @@ const deleteProduct = async () => {
                     </div>
                 </div> */}
                 <div className="card">
-                <FileUpload
-    name="file" // Asegúrate de que el nombre coincida con lo que esperas en el backend
-    url={'/api/upload'}
-    multiple
-    accept="image/*"
-    maxFileSize={1000000}
-    emptyTemplate={<p className="m-0">Arrastre la imagen para subirla</p>}
-    chooseLabel="Escoger"
-    uploadLabel="Subir"
-    cancelLabel="Cancelar"
-    onSelect={onFileChange}
-/>
+                    <FileUpload
+                        name="file" // Asegúrate de que el nombre coincida con lo que esperas en el backend
+                        url={'/api/upload'}
+                        multiple
+                        accept="image/*"
+                        maxFileSize={1000000}
+                        emptyTemplate={<p className="m-0">Arrastre la imagen para subirla</p>}
+                        chooseLabel="Escoger"
+                        uploadLabel="Subir"
+                        cancelLabel="Cancelar"
+                        onSelect={onFileChange}
+                    />
 
                 </div>
             </Dialog>

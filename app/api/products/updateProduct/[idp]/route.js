@@ -1,19 +1,18 @@
+
 import Product from '@/models/Product';
 import connectDB from '@/utils/db';
 import { NextResponse } from 'next/server';
 
-export const DELETE = async (request, { params }) => {
-    const { query } = request;
+// Handler para la ruta de actualización del producto
+export const PUT = async (request, { params }) => {
+    const { body } = request;
     const idp = params.idp;
 
-    console.log('Params:', params);
-
-    if (!idp) {
-        // Manejar el caso donde idp es undefined
+    // Maneja el caso donde idp es undefined
+   if (!idp) {
         return new NextResponse('IDP no proporcionado', { status: 400 });
     }
 
-    console.log('Valor de idp backend:', params.idp);
     let client;
 
     try {
@@ -28,16 +27,29 @@ export const DELETE = async (request, { params }) => {
             return new NextResponse('Producto no encontrado', { status: 404 });
         }
 
-        // Asegúrate de que existingProduct es un documento de Mongoose
-        if (existingProduct instanceof Product) {
-            // Elimina el producto
-            await existingProduct.deleteOne();
-        } else {
-            console.error('existingProduct no es un documento de Mongoose:', existingProduct);
+        // Lee el cuerpo de la solicitud y conviértelo a JSON manualmente
+        const chunks = [];
+        for await (const chunk of body) {
+            chunks.push(chunk);
+        }
+        const bodyText = Buffer.concat(chunks).toString('utf-8');
+
+        // Intenta parsear el cuerpo de la solicitud como JSON
+        let updatedProductData;
+        try {
+ 
+            updatedProductData = JSON.parse(bodyText);
+        } catch (parseError) {
+            console.error('Error al parsear JSON:', parseError);
+            return new NextResponse('Cuerpo de solicitud no es un JSON válido', { status: 400 });
         }
 
+        // Actualiza el producto con los datos del cuerpo de la solicitud
+        existingProduct.set(updatedProductData);
+        await existingProduct.save();
+
         // Responde con éxito
-        return new NextResponse('Producto eliminado con éxito', {
+        return new NextResponse('Producto actualizado con éxito', {
             status: 200,
             headers: {
                 'Content-Type': 'text/plain',
@@ -55,3 +67,4 @@ export const DELETE = async (request, { params }) => {
         }
     }
 };
+
