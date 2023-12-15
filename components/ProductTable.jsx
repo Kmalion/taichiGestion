@@ -61,9 +61,9 @@ export default function EntradasTable() {
         global: { value: '', matchMode: FilterMatchMode.CONTAINS },
         reference: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
         // Agrega más filtros si es necesario para otras columnas
-      });
-    
-      const referenceColumn = useRef(null);
+    });
+
+    const referenceColumn = useRef(null);
 
     const exportPDF = () => {
         const unit = 'pt';
@@ -190,7 +190,7 @@ export default function EntradasTable() {
 
     const saveProduct = async () => {
         setSubmitted(true);
-    
+
         if (product.reference.trim()) {
             try {
                 let imageUrl = product.image; // Usa la URL de la imagen existente si está disponible
@@ -200,16 +200,16 @@ export default function EntradasTable() {
                     // Si se selecciona un nuevo archivo, súbelo
                     const formData = new FormData();
                     formData.append('file', selectedFile);
-    
+
                     const uploadResponse = await axios.post('/api/upload', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
                     });
-    
+
                     imageUrl = uploadResponse.data.url;
                 }
-    
+
                 const updatedProduct = {
                     ...product,
                     owner: session?.user?.email,
@@ -217,7 +217,7 @@ export default function EntradasTable() {
                     image: imageUrl,
                     inventoryStatus: product.quantity === 0 ? 'agotado' : 'activo',
                 };
-    
+
                 let response;
                 if (product.idp) {
                     // Actualizar producto existente
@@ -230,9 +230,9 @@ export default function EntradasTable() {
                         idp: productId,
                     });
                 }
-    
+
                 const responseData = response.data;
-    
+
                 if (response.status === 200) {
                     toast.current.show({
                         severity: 'success',
@@ -240,7 +240,7 @@ export default function EntradasTable() {
                         detail: 'Producto guardado',
                         life: 3000,
                     });
-    
+
                     // Recargar productos después de actualizar o crear
                     fetchProducts();
                 } else {
@@ -261,13 +261,13 @@ export default function EntradasTable() {
                     life: 3000,
                 });
             }
-    
+
             setProductDialog(false);
             setProduct(emptyProduct);
         }
     };
-    
-    
+
+
 
     const deleteProduct = async () => {
         try {
@@ -388,12 +388,20 @@ export default function EntradasTable() {
     };
 
     const leftToolbarTemplate = () => {
+        const isAdminOrPremium = session?.user?.role && (session.user.role.includes('admin') || session.user.role.includes('premium'));
+
         return (
             <div className="flex flex-wrap gap-2">
-                <Button label="Crear producto" icon="pi pi-plus" severity="success" onClick={openNew} />
-                <Button label="Borrar" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
+                <Button
+                    label="Crear producto"
+                    icon="pi pi-plus"
+                    severity="success"
+                    onClick={openNew}
+                    disabled={!isAdminOrPremium} // Deshabilitar el botón si no es admin o premium
+                />
+                {/* Otros botones o elementos */}
             </div>
-        );
+        )
     };
 
     const rightToolbarTemplate = () => {
@@ -420,7 +428,7 @@ export default function EntradasTable() {
             </div>
         );
     };
-    
+
 
     const imageBodyTemplate = (rowData) => {
         return (
@@ -443,11 +451,16 @@ export default function EntradasTable() {
     };
 
     const actionBodyTemplate = (rowData) => {
+
+        const isAdminOrPremium = session?.user?.role && (session.user.role.includes('admin') || session.user.role.includes('premium'));
         return (
             <React.Fragment>
-
-                <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editProduct(rowData)} />
-                <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
+                {isAdminOrPremium && (
+                    <>
+                        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editProduct(rowData)} />
+                        <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
+                    </>
+                )}
             </React.Fragment>
         );
     };
@@ -471,20 +484,20 @@ export default function EntradasTable() {
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
             <h4 className="m-0">Productos en stock</h4>
-        <span className="p-input-icon-left">
-        <i className="pi pi-search" />
-        <InputText
-          type="search"
-          onInput={(e) => {
-            const inputValue = e.target.value || '';
-            setGlobalFilter(inputValue);
-          }}
-          placeholder="Buscar..."
-        />
-      </span>
+            <span className="p-input-icon-left">
+                <i className="pi pi-search" />
+                <InputText
+                    type="search"
+                    onInput={(e) => {
+                        const inputValue = e.target.value || '';
+                        setGlobalFilter(inputValue);
+                    }}
+                    placeholder="Buscar..."
+                />
+            </span>
         </div>
     );
-    
+
     const productDialogFooter = (
         <React.Fragment>
             <Button label="Cancelar" icon="pi pi-times" outlined onClick={hideDialog} />
@@ -515,7 +528,11 @@ export default function EntradasTable() {
         setSerialsDialog(true);
     };
 
-
+    const onFilterChange = (e) => {
+        const newFilters = { ...filters };
+        newFilters[e.field] = { value: e.value, matchMode: e.matchMode };
+        setFilters(newFilters);
+    };
     return (
         <div>
             <Toast ref={toast} />
@@ -535,8 +552,10 @@ export default function EntradasTable() {
                     currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
                     globalFilter={globalFilter}
                     header={header}
+                    filters={filters}
+                    onFilter={(e) => onFilterChange(e)}
                 >
-                     <Column field="reference" header="Referencia" sortable style={{ minWidth: '12rem' }} ref={referenceColumn} onFilter={(e) => onReferenceFilterChange(e.target.value)}></Column>
+                    <Column field="reference" header="Referencia" sortable style={{ minWidth: '12rem' }} ref={referenceColumn} onFilter={(e) => onReferenceFilterChange(e.target.value)}></Column>
                     <Column field="description" header="Descripcion" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="brand" header="Marca" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
