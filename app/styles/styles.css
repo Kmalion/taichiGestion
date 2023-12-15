@@ -33,4 +33,12 @@
     object-fit: cover; /* Escala y recorta la imagen para llenar el contenedor */
     border-radius: 50%;
   }
+
+  /* styles.css */
+.pagetitle {
+  font-weight: bold;
+  color: #3ec8e0; /* Puedes cambiar este color según tus preferencias */
+  /* Agrega cualquier otra propiedad de estilo que desees */
+}
+
   

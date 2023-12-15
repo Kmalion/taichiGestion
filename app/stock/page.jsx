@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '../../components/Layout.jsx';
 import { ThemeProvider } from '../../context/ThemeContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
-import EntradasTable from '@/components/ProductTable.jsx';
+import ProductTable from '@/components/ProductTable.jsx';
 
 function StockPage() {
   const { theme, toggleTheme } = useTheme();
@@ -15,8 +15,8 @@ function StockPage() {
     <Layout>
     <div className={`app-container ${theme}`}>
     <div>
-      <h2>Consulta de inventario</h2>
-      <EntradasTable></EntradasTable>
+      <h3 className='pagetitle text-center'>Consulta de inventario</h3>
+      <ProductTable></ProductTable>
     </div>
     </div>
     </Layout>

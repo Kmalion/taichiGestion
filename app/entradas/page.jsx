@@ -1,9 +1,10 @@
 'use client'
 import React from 'react';
-import EntradasTable from '../../components/ProductTable';
+import EntryTable from '../../components/EntryTable';
 import Layout from '../../components/Layout.jsx';
 import { ThemeProvider } from '../../context/ThemeContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
+import '../styles/styles.css'
 
 function EntradasPage() {
 
@@ -16,8 +17,10 @@ function EntradasPage() {
     <ThemeProvider>
     <Layout>
     <div>
-      <h1>Entradas</h1>
-      <EntradasTable/>
+      <h3 className='pagetitle text-center' >Historial de entradas</h3>
+    </div>
+    <div>
+      <EntryTable></EntryTable>
     </div>
     </Layout>
     </ThemeProvider>

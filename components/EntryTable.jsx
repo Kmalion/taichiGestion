@@ -26,7 +26,7 @@ import { FilterMatchMode, FilterOperator } from 'primereact/api';
 
 
 
-export default function ProductTable() {
+export default function EntryTable() {
     let emptyProduct = {
         reference: '',
         image: null,
