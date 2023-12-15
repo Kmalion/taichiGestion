@@ -15,7 +15,7 @@ const Profile = () => {
   const { email, nombre, apellido, role, cargo, foto } = session.user;
 
   return (
-    <Card style={{ width: "150%", padding: "20px", height: "85vh" }}>
+    <Card style={{ width: "150%", padding: "5px", height: "85vh" }}>
       <div className="p-grid p-fluid mt-0">
         <div className="p-col-12">
           <h2 className="text-center mt-0 highlight-label ">Perfil de usuario</h2>

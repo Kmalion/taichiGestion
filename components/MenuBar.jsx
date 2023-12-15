@@ -5,12 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '../context/ThemeContext';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession  } from 'next-auth/react';
+import { Avatar } from 'primereact/avatar';
 
 export default function MenuBar() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [logoSrc, setLogoSrc] = useState('');
+  const { data: session } = useSession();
 
   useEffect(() => {
     const getLogoSrc = () => {
@@ -94,10 +96,18 @@ export default function MenuBar() {
   );
 
   const end = (
-    <div>
-      <button className="p-button" onClick={toggleTheme}>
-        {theme === 'lara-dark-teal' ? <i className={`pi pi-sun`} /> : <i className={`pi pi-moon`} />}
-      </button>
+    <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
+      <button className="p-button p-button-text p-button-sm" onClick={toggleTheme}>
+  {theme === 'lara-dark-teal' ? <i className={`pi pi-sun`} /> : <i className={`pi pi-moon`} />}
+</button>
+
+      {session && (
+        <Link href="/perfil">
+            <Avatar image={session.user.foto} shape="circle" size="large" />
+        </Link>
+      )}
+    </div>
     </div>
   );
 
