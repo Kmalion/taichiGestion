@@ -23,6 +23,9 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
+import { useRouter } from 'next/navigation';
+
+
 
 
 
@@ -62,6 +65,8 @@ export default function EntryTable() {
         reference: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
         // Agrega más filtros si es necesario para otras columnas
     });
+    const router = useRouter();
+
 
     const referenceColumn = useRef(null);
 
@@ -393,10 +398,10 @@ export default function EntryTable() {
         return (
             <div className="flex flex-wrap gap-2">
                 <Button
-                    label="Crear producto"
+                    label="Registrar entrada"
                     icon="pi pi-plus"
                     severity="success"
-                    onClick={openNew}
+                    onClick={() => router.push('/entradas/registro')}
                     disabled={!isAdminOrPremium} // Deshabilitar el botón si no es admin o premium
                 />
                 {/* Otros botones o elementos */}

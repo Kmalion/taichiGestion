@@ -39,7 +39,9 @@ export default function ProductTable() {
         rating: 1,
         inventoryStatus: 'activo',
         owner: '',
-        created: ''
+        created: '',
+        ubicacion: '',
+        cost: 0
     };
 
 
@@ -85,7 +87,9 @@ export default function ProductTable() {
             formatCurrency(product.price),
             product.category,
             product.inventoryStatus,
-            product.owner
+            product.owner,
+            product.cost,
+            product.ubicacion,
         ]);
 
         autoTable(doc, {
@@ -101,7 +105,7 @@ export default function ProductTable() {
     };
 
     const exportExcel = () => {
-        const headers = [['Referencia', 'Descripción', 'Marca', 'Serial', 'Imagen', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Creado por']];
+        const headers = [['Referencia', 'Descripción', 'Marca', 'Serial', 'Imagen', 'Cantidad', 'Precio', 'Categoría', 'Estado', 'Creado por', 'Ubicacion', 'Costo']];
         const data = products.map(product => [
             product.reference,
             product.description,
@@ -112,7 +116,9 @@ export default function ProductTable() {
             formatCurrency(product.price),
             product.category,
             product.inventoryStatus,
-            product.owner
+            product.owner,
+            product.ubicacion,
+            product.cost,
         ]);
 
         const ws = XLSX.utils.aoa_to_sheet([].concat(headers, data));
@@ -193,7 +199,7 @@ export default function ProductTable() {
 
         if (product.reference.trim()) {
             try {
-                let imageUrl = product.image; // Usa la URL de la imagen existente si está disponible
+                let imageUrl = product.image || '/img/sin_imagen.jpg';// Usa la URL de la imagen existente si está disponible
                 const currentDate = new Date();
                 const formattedDate = currentDate.toISOString();
                 if (selectedFile) {
@@ -216,6 +222,7 @@ export default function ProductTable() {
                     created: formattedDate,
                     image: imageUrl,
                     inventoryStatus: product.quantity === 0 ? 'agotado' : 'activo',
+                    ubicacion: product.ubicacion,
                 };
 
                 let response;
@@ -442,6 +449,7 @@ export default function ProductTable() {
         return formatCurrency(rowData.price);
     };
 
+
     const ratingBodyTemplate = (rowData) => {
         return <Rating value={rowData.rating} readOnly cancel={false} />;
     };
@@ -561,10 +569,14 @@ export default function ProductTable() {
                     <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
                     <Column field="image" header="Imágen" body={imageBodyTemplate}></Column>
                     <Column field="quantity" header="Cantidad" sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="price" header="Costo" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
+                    
                     <Column field="category" header="Categoria" sortable style={{ minWidth: '10rem' }}></Column>
+                    <Column field="cost" header="Costo" body={priceBodyTemplate}sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="ubicacion" header="Ubicacion" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="inventoryStatus" header="Estado" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="price" header="Precio" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
                     <Column field="owner" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
+                    
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
                 <Dialog

@@ -42,7 +42,12 @@ try {
     },
     price: {
       type: Number,
+      default: 0
       
+    },
+    cost: {
+      type: Number,
+      default: 0
     },
     rating: {
       type: Number,
@@ -58,6 +63,10 @@ try {
     owner: {
       type: String,
       required: true,
+    },
+    ubicacion: {
+      type: String,
+      default: ''
     },
     created: {
       type: Date,
