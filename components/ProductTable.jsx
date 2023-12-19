@@ -78,10 +78,10 @@ export default function ProductTable() {
         const orientation = 'landscape'; // portrait or landscape
         const doc = new jsPDF(orientation, unit, size);
 
-        doc.setFontSize(15);
+        doc.setFontSize(12);
         doc.text('Productos en stock', 40, 40);
 
-        const headers = [['Referencia', 'Descripción', 'Marca', 'Serial', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiracion', 'Creado por']];
+        const headers = [['Ref', 'Descripción', 'Marca', 'Serial', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiracion', 'Creado por']];
 
         const data = products.map(product => [
             product.reference,
@@ -625,7 +625,7 @@ export default function ProductTable() {
                 <Dialog
                 visible={showImageDialog}
                 style={{ width: 'auto' }}
-                header={'Imágen' }
+                header={`${product.reference}` }
                 modal
                 onHide={closeImageDialog}
                 footer={<Button label="Cerrar" icon="pi pi-times" onClick={closeImageDialog} />}

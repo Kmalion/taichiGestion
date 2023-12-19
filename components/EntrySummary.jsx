@@ -84,9 +84,9 @@ const EntrySummary = () => {
 
 
   const handleAddProduct = (product) => {
-    const costo = parseFloat(product.cost) || 0;
+    const cost = parseFloat(product.cost) || 0;
     setProducts((prevProducts) => {
-      const newProducts = [...prevProducts, { ...product, costo }];
+      const newProducts = [...prevProducts, { ...product, cost }];
       console.log('Products después de agregar:', newProducts);
       return newProducts;
     });
@@ -135,7 +135,7 @@ const EntrySummary = () => {
   const footerGroup = (
     <ColumnGroup>
       <Row>
-        <Column footer="Total:" colSpan={3} footerStyle={{ textAlign: 'right' }} />
+        <Column footer="Total:" colSpan={4} footerStyle={{ textAlign: 'right' }} />
         <Column
           footer={() => (
             <span>
@@ -153,6 +153,12 @@ const EntrySummary = () => {
     </ColumnGroup>
   );
 
+  const [userList, setUserList] = useState([
+    { id: 1, name: 'Usuario 1' },
+    { id: 2, name: 'Usuario 2' },
+    // Agrega más usuarios según sea necesario
+  ]);
+
   return (
     <div>
       <Card className='flex flex-wrap mt-1'>
@@ -161,16 +167,16 @@ const EntrySummary = () => {
           e.preventDefault();
           handleSaveEntry(entryData);
         }}>
-          <div className="flex flex-column lg:flex-row">
-            <div className="p-2">
+          <div className="flex flex-wrap ">
+            <div className="p-1">
               <label htmlFor="entradaNo">Entrada No.:</label>
               <InputText id="entradaNo" name="entradaNo" value={entryData.entradaNo} readOnly />
             </div>
-            <div className="p-2">
+            <div className="p-1">
               <label htmlFor="fechaEntrada">Fecha de Entrada:</label>
               <InputText id="fechaEntrada" name="fechaEntrada" value={entryData.fechaEntrada} readOnly />
             </div>
-            <div className="p-2">
+            <div className="p-1">
               <label htmlFor="clienteProveedor">Cliente/Proveedor:</label>
               <InputText
                 id="clienteProveedor"
@@ -179,7 +185,19 @@ const EntrySummary = () => {
                 onChange={(e) => setEntryData({ ...entryData, clienteProveedor: e.target.value })}
               />
             </div>
-            <div className="p-2">
+            <div className="p-1">
+              <label htmlFor="asigned_to">Asignado a:</label>
+              <Dropdown
+                id="asigned_to"
+                name="asigned_to"
+                optionLabel="name" // Asegúrate de que esta propiedad coincida con la propiedad de nombre de tus usuarios
+                value={entryData.asigned_to}
+                options={userList}
+                onChange={(e) => setEntryData({ ...entryData, asigned_to: e.value })}
+                placeholder="Seleccionar usuario"
+              />
+            </div>
+            <div className="p-1">
               <label htmlFor="tipo">Tipo:</label>
               <Dropdown
                 id="tipo"
@@ -190,7 +208,7 @@ const EntrySummary = () => {
                 placeholder="Seleccionar tipo"
               />
             </div>
-            <div className="flex justify-content-end mt-4 p-2">
+            <div className=" p-1">
               <FileUpload
                 mode="basic"
                 name="demo[]"
@@ -201,9 +219,9 @@ const EntrySummary = () => {
                 chooseLabel="Subir Soporte"
               />
             </div>
-            <div className='flex justify-content-end mt-4 p-2'>
+            <div className='p-1'>
               <Button
-                className='p-button-success' size="small"
+                className='p-button-success' size="normal "
                 label='Registrar Entrada'
                 icon='pi pi-check'
                 onClick={() => handleSaveEntry(entryData)}
@@ -227,14 +245,12 @@ const EntrySummary = () => {
         </Button>
         {products.length > 0 && (
           <div className='p-1'>
-
             <h4>Productos Agregados:</h4>
             <DataTable value={products} footerColumnGroup={footerGroup}>
               <Column field="reference" header="Referencia" />
-
-
               <Column field="serials" header="Serial" />
               <Column field="ubicacion" header="Ubicación" />
+              <Column field="lote" header="Lote" />
               <Column
                 field="cost"
                 header="Costo"
@@ -266,3 +282,5 @@ const EntrySummary = () => {
 };
 
 export default EntrySummary;
+
+

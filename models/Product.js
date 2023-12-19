@@ -40,7 +40,6 @@ try {
     },
     quantity: {
       type: Number,
-  
       min: 0,
     },
     price: {

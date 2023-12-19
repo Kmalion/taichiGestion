@@ -7,20 +7,52 @@ export const GET = async (request, { params }) => {
 
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('query'); // Obtén el valor del parámetro 'query'
-    console.log('url búsqueda', searchParams);
+    const query = searchParams.get('query');
 
     // Conecta a la base de datos
     client = await connectDB();
 
-    // Realiza la operación para buscar productos por referencia
-    const products = await Product.find({
-      reference: { $regex: new RegExp(query, 'i') },
-    });
-    console.log(JSON.stringify(products));
 
-    // Extrae solo el campo "referencia" de cada producto
-    const references = products.map((product) => product.reference);
+    const agg =[{
+      $search:{
+        autocomplete:{
+          query: query,
+          path: 'reference',
+          fuzzy: {
+            masEdits: 2
+          }
+        }
+      }
+    }, {
+      $limit: 5
+    },{
+      $project:{
+        _id: 0,
+        reference: 1,
+        image: 1,
+        category:0,
+        description:0,
+        brand: 0,
+        serials: 0,
+        lote: 0,
+        quantity: 0,
+        price: 0,
+        cost: 0,
+        rating: 0,
+        inventoryStatus:0,
+        owner: 0,
+        ubicacion:0,
+        exp_date: 0,
+        created: 0,
+      }
+    }
+  ]
+
+  const result = await Product.aggregate(agg);
+  console.log('Respuesta de la base de datos:', result);
+
+    // Extrae solo el campo "reference" de cada producto
+    const references = result.map((product) => product.reference);
 
     // Responde con las referencias en formato JSON
     return new NextResponse(JSON.stringify(references), {
@@ -29,6 +61,7 @@ export const GET = async (request, { params }) => {
         'Content-Type': 'application/json',
       },
     });
+    
   } catch (error) {
     // Maneja errores y responde con un código de estado 500
     return new NextResponse(error, {

@@ -40,5 +40,9 @@
   color: #3ec8e0; /* Puedes cambiar este color según tus preferencias */
   /* Agrega cualquier otra propiedad de estilo que desees */
 }
-
-  
+.p-autocomplete-item {
+  color: black !important;
+}
+.p-autocomplete-panel {
+  z-index: 1000;
+}

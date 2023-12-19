@@ -46,10 +46,10 @@ try {
     },
     type: {
       type: String,
-      enum: ['compra', 'devolucion'],
+      enum: ['compras', 'devoluciones', 'ajuste'],
       required: true,
     },
-    requested_by: {
+    asigned_to: {
       type: String,
     },
     
