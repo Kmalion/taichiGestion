@@ -33,14 +33,18 @@ const EntryProductForm = ({ visible, onHide, onSave, onAddProduct }) => {
     try {
       // Muestra un indicador de carga
       setLoading(true);
-
+  
       // Llama a la API en el servidor para buscar referencias
       const response = await fetch(`/api/products/searchReferences?query=${value}`);
       const data = await response.json();
-      
-
-      // Actualiza la lista de referencias filtradas
-      setFilteredReferences(data);
+  
+      // Verifica si la respuesta es un array JSON válido
+      if (Array.isArray(data)) {
+        // Actualiza la lista de referencias filtradas
+        setFilteredReferences(data);
+      } else {
+        console.error('La respuesta no es un array JSON válido:', data);
+      }
     } catch (error) {
       console.error('Error al buscar referencias:', error);
     } finally {
@@ -48,7 +52,8 @@ const EntryProductForm = ({ visible, onHide, onSave, onAddProduct }) => {
       setLoading(false);
     }
   };
-
+  
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(form);

@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 export const POST = async (request) => {
 
-    const { idp, reference, image, description, category, price, quantity, serials, brand, rating, inventoryStatus, owner, created } = await request.json();
+    const { idp, reference, image, description, category, price, quantity, serials, brand, rating, inventoryStatus, owner, created, exp_date, lote } = await request.json();
 
     let client
   try {
@@ -32,7 +32,9 @@ export const POST = async (request) => {
       rating,
       inventoryStatus,
       owner,
-      created
+      created,
+      exp_date,
+      lote
     });
     // Realiza la operación de creación de producto
     await newProduct.save();

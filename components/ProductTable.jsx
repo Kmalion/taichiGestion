@@ -41,7 +41,9 @@ export default function ProductTable() {
         owner: '',
         created: '',
         ubicacion: '',
-        cost: 0
+        cost: 0,
+        exp_date: '',
+        lote: [],
     };
 
 
@@ -58,12 +60,15 @@ export default function ProductTable() {
     const { data: session } = useSession();
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [serialsDialog, setSerialsDialog] = useState(false);
+    const [loteDialog, setLoteDialog] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [filters, setFilters] = useState({
         global: { value: '', matchMode: FilterMatchMode.CONTAINS },
         reference: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
         // Agrega más filtros si es necesario para otras columnas
     });
+    const [showImageDialog, setShowImageDialog] = useState(false);
+    const [selectedImage, setSelectedImage] = useState('');
 
     const referenceColumn = useRef(null);
 
@@ -76,7 +81,7 @@ export default function ProductTable() {
         doc.setFontSize(15);
         doc.text('Productos en stock', 40, 40);
 
-        const headers = [['Referencia', 'Descripción', 'Marca', 'Serial', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Creado por']];
+        const headers = [['Referencia', 'Descripción', 'Marca', 'Serial', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiracion', 'Creado por']];
 
         const data = products.map(product => [
             product.reference,
@@ -90,6 +95,8 @@ export default function ProductTable() {
             product.owner,
             product.cost,
             product.ubicacion,
+            product.exp_date,
+            product.lote.join(', '),
         ]);
 
         autoTable(doc, {
@@ -119,6 +126,7 @@ export default function ProductTable() {
             product.owner,
             product.ubicacion,
             product.cost,
+            product.exp_date
         ]);
 
         const ws = XLSX.utils.aoa_to_sheet([].concat(headers, data));
@@ -138,6 +146,16 @@ export default function ProductTable() {
     const serialsDialogFooter = (
         <Button label="Cerrar" icon="pi pi-check" onClick={hideSerialsDialog} />
     );
+       
+    
+    const hideLoteDialog = () => {
+        setLoteDialog(false);
+    };
+    const loteDialogFooter = (
+        <Button label="Cerrar" icon="pi pi-check" onClick={hideLoteDialog} />
+    );
+      
+
     const fetchProducts = async () => {
         try {
             const response = await axios.get('/api/products/getProducts');
@@ -435,16 +453,25 @@ export default function ProductTable() {
             </div>
         );
     };
-
+    
 
     const imageBodyTemplate = (rowData) => {
         return (
-            <div className="zoomable-image">
+            <div className="zoomable-image" onClick={() => openImageDialog(rowData.image)}>
                 <img src={`${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />
             </div>
         );
     };
 
+    const openImageDialog = (imageUrl) => {
+        setSelectedImage(imageUrl);
+        setShowImageDialog(true);
+    };
+
+    const closeImageDialog = () => {
+        setShowImageDialog(false);
+        setSelectedImage('');
+    };
     const priceBodyTemplate = (rowData) => {
         return formatCurrency(rowData.price);
     };
@@ -531,10 +558,24 @@ export default function ProductTable() {
             </React.Fragment>
         );
     };
+
     const showSerialsDialog = (rowData) => {
         setProduct(rowData);
         setSerialsDialog(true);
     };
+    const loteBodyTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                <Button icon="pi pi-search" onClick={() => showLoteDialog(rowData)} />
+            </React.Fragment>
+        );
+    };
+
+    const showLoteDialog = (rowData) => {
+        setProduct(rowData);
+        setLoteDialog(true);
+    };
+ 
 
     const onFilterChange = (e) => {
         const newFilters = { ...filters };
@@ -566,19 +607,31 @@ export default function ProductTable() {
                     <Column field="reference" header="Referencia" sortable style={{ minWidth: '12rem' }} ref={referenceColumn} onFilter={(e) => onReferenceFilterChange(e.target.value)}></Column>
                     <Column field="description" header="Descripcion" sortable style={{ minWidth: '16rem' }}></Column>
                     <Column field="brand" header="Marca" sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
-                    <Column field="image" header="Imágen" body={imageBodyTemplate}></Column>
                     <Column field="quantity" header="Cantidad" sortable style={{ minWidth: '12rem' }}></Column>
-                    
+                    <Column field="image" header="Imágen" body={imageBodyTemplate}></Column>
+                    <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
                     <Column field="category" header="Categoria" sortable style={{ minWidth: '10rem' }}></Column>
                     <Column field="cost" header="Costo" body={priceBodyTemplate}sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="ubicacion" header="Ubicacion" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="inventoryStatus" header="Estado" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="price" header="Precio" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
+                    <Column field="lote" header="Lote" sortable style={{ minWidth: '12rem' }} body={loteBodyTemplate}></Column>
+                    <Column field="exp_date" header="Vencimiento" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="owner" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
                     
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
+
+                <Dialog
+                visible={showImageDialog}
+                style={{ width: 'auto' }}
+                header={'Imágen' }
+                modal
+                onHide={closeImageDialog}
+                footer={<Button label="Cerrar" icon="pi pi-times" onClick={closeImageDialog} />}
+            >
+                {selectedImage && <img src={selectedImage} alt="Imagen más grande" style={{ width: '100%' }} />}
+            </Dialog>
                 <Dialog
                     visible={serialsDialog}
                     style={{ width: '30rem' }}
@@ -595,6 +648,24 @@ export default function ProductTable() {
                         </ul>
                     ) : (
                         <p>No hay seriales disponibles para este producto.</p>
+                    )}
+                </Dialog>
+                <Dialog
+                    visible={loteDialog}
+                    style={{ width: '30rem' }}
+                    header={`Lotes de ${product.reference}`}
+                    modal
+                    onHide={hideLoteDialog}
+                    footer={loteDialogFooter}
+                >
+                    {product.lote && Array.isArray(product.lote) && product.lote.length > 0 ? (
+                        <ul>
+                            {product.lote.map((loteItem, index) => (
+                                <li key={index}>{loteItem}</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No hay lotes disponibles para este producto.</p>
                     )}
                 </Dialog>
             </div>

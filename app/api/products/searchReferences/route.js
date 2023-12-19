@@ -1,13 +1,14 @@
-// pages/api/searchReferences/index.js
 import connectDB from '../../../../utils/db';
 import Product from '../../../../models/Product';
 import { NextResponse } from 'next/server';
 
-export const GET = async (request) => {
+export const GET = async (request, { params }) => {
   let client;
 
   try {
-    const { query } = request.query;
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get('query'); // Obtén el valor del parámetro 'query'
+    console.log('url búsqueda', searchParams);
 
     // Conecta a la base de datos
     client = await connectDB();
@@ -16,15 +17,18 @@ export const GET = async (request) => {
     const products = await Product.find({
       reference: { $regex: new RegExp(query, 'i') },
     });
+    console.log(JSON.stringify(products));
 
-    // Responde con los productos en formato JSON
-    return new NextResponse(JSON.stringify(products), {
+    // Extrae solo el campo "referencia" de cada producto
+    const references = products.map((product) => product.reference);
+
+    // Responde con las referencias en formato JSON
+    return new NextResponse(JSON.stringify(references), {
       status: 200,
       headers: {
-          'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
       },
-  });
-  
+    });
   } catch (error) {
     // Maneja errores y responde con un código de estado 500
     return new NextResponse(error, {

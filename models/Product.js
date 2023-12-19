@@ -31,6 +31,9 @@ try {
     serials: {
       type: [String],
     },
+    lote: {
+      type: [String],
+    },
     
     image: {
       type: String,
@@ -67,6 +70,9 @@ try {
     ubicacion: {
       type: String,
       default: ''
+    },
+    exp_date: {
+      type: Date,
     },
     created: {
       type: Date,

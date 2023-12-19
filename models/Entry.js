@@ -49,8 +49,10 @@ try {
       enum: ['compra', 'devolucion'],
       required: true,
     },
-    // Otros campos que puedas necesitar para tu entrada de inventario
-    // Ejemplo: usuario que registró la entrada, número de factura, etc.
+    requested_by: {
+      type: String,
+    },
+    
   });
 
   // Crea el modelo 'Entry'
