@@ -78,6 +78,11 @@ export default function MenuBar() {
           icon: 'pi pi-fw pi-user-plus',
           command: () => handleMenuClick('/perfil'),
         },
+        {
+          label: 'Listado de usuarios',
+          icon: 'pi pi-fw pi-user',
+          command: () => handleMenuClick('/usuarios'),
+        },
       ],
     },
     {
@@ -90,10 +95,11 @@ export default function MenuBar() {
   const start = (
     <div>
       <Link href="/dashboard">
-        <Image src={logoSrc} alt="Logo" width={50} height={50} />
+        <Image src={logoSrc || '/img/sin-imagen.jpg'} alt="Logo" width={50} height={50} />
       </Link>
     </div>
   );
+  
 
   const end = (
     <div className="flex flex-wrap gap-2">
@@ -101,15 +107,20 @@ export default function MenuBar() {
         <button className="p-button p-button-text p-button-sm" onClick={toggleTheme}>
           {theme === 'lara-dark-teal' ? <i className={`pi pi-sun`} /> : <i className={`pi pi-moon`} />}
         </button>
-
+  
         {session && (
           <Link href="/perfil">
-            <Avatar image={session.user.foto} shape="circle" size="large" />
+            <Avatar
+              image={session.user.foto || '/img/generic-avatar.png'} // Ruta predeterminada si la foto está vacía
+              shape="circle"
+              size="large"
+            />
           </Link>
         )}
       </div>
     </div>
   );
+  
 
   return (
     <div>

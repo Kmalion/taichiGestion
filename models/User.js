@@ -5,6 +5,7 @@ if (!mongoose.modelNames().includes('User')) {
   // Si no está definido, define el modelo 'User'
   const userSchema = new mongoose.Schema(
     {
+    
       email: {
         type: String,
         unique: true,

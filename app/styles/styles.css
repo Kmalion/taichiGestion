@@ -7,14 +7,16 @@
     transition: transform 0.3s ease-in-out;
   }
   
-  .zoomable-image:hover img {
-    transform: scale(1.5);
-  }
-
+  
   .highlight-label {
     font-weight: bold;
     color: #67caf1; /* Puedes cambiar el color a tu preferencia */
   }
+
+  .zoomable-image:hover img {
+    transform: scale(1.5);
+  }
+
   .circular-image-container {
     width: 150px; /* Tamaño deseado del contenedor circular */
     height: 150px; /* Tamaño deseado del contenedor circular */
@@ -37,7 +39,7 @@
   /* styles.css */
 .pagetitle {
   font-weight: bold;
-  color: #3ec8e0; /* Puedes cambiar este color según tus preferencias */
+  color: #9462e4; /* Puedes cambiar este color según tus preferencias */
   /* Agrega cualquier otra propiedad de estilo que desees */
 }
 .p-autocomplete-item {
@@ -45,4 +47,52 @@
 }
 .p-autocomplete-panel {
   z-index: 1000;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* Ajusta según sea necesario para centrar verticalmente */
+}
+
+.custom-card {
+  margin: 0 10px; /* Ajusta el margen izquierdo y derecho según tus necesidades */
+  width: 250px; /* Ajusta el ancho máximo de la tarjeta según tus necesidades */
+}
+
+@media (min-width: 768px) {
+  .container {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+/* styles.css */
+.user-info {
+  margin-bottom: 8px;
+}
+
+.info-label {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.user-actions {
+  margin-top: 16px;
+}
+
+.delete-button,
+.edit-button {
+  background-color: #d9534f; /* Establece el color de fondo según tus preferencias */
+  color: #fff; /* Establece el color del texto según tus preferencias */
+  padding: 8px 16px;
+  margin-right: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-button {
+  background-color: #5bc0de; /* Establece el color de fondo para el botón de editar */
 }
