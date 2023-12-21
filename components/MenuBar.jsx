@@ -95,11 +95,10 @@ export default function MenuBar() {
   const start = (
     <div>
       <Link href="/dashboard">
-        <Image src={logoSrc || '/img/sin-imagen.jpg'} alt="Logo" width={50} height={50} />
+        <Image src={logoSrc} alt="Logo" width={50} height={50} />
       </Link>
     </div>
   );
-  
 
   const end = (
     <div className="flex flex-wrap gap-2">

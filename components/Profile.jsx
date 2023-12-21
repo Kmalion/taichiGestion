@@ -13,7 +13,9 @@ const Profile = () => {
   }
 
   const { email, nombre, apellido, role, cargo, foto } = session.user;
-
+  console.log('Contenido de la sesión:', session);
+  
+ 
   return (
     <Card style={{ width: "150%", padding: "5px", height: "85vh" }}>
       <div className="p-grid p-fluid mt-0">

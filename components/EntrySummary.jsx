@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
@@ -11,23 +11,70 @@ import EntryProductForm from './EntryProductForm';
 import { FileUpload } from 'primereact/fileupload';
 import { ColumnGroup } from 'primereact/columngroup';
 import { Row } from 'primereact/row';
+import { classNames } from 'primereact/utils';
+import { useFormik } from 'formik';
+import axios from 'axios';
+import { Toast } from 'primereact/toast';
+import { useSession } from 'next-auth/react';
+import moment from 'moment';
+import 'moment/locale/es';  // Importa el idioma español
+
 import '../app/styles/styles.css'
 
 
+ // Función para obtener la fecha y hora actuales
+ const getCurrentDate = () => {
+  return moment().format('YYYY-MM-DD HH:mm:ss');
+};
 
 const EntrySummary = () => {
+  const toast = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [entryData, setEntryData] = useState({
     entradaNo: generateEntryNo(),
     fechaEntrada: getCurrentDate(),
-    clienteProveedor: '',
+    proveedor: '',
     tipo: '',
+    asigned_to: null,
   });
+
+
 
   const [products, setProducts] = useState([]);
   const [totalCost, setTotalCost] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
+  const { data: session } = useSession();
+  const [userList, setUserList] = useState([]);
+  const created_by = session ? session.user.email : null;
 
+
+  useEffect(() => {
+    console.log('Información de la sesión:', session);
+    console.log('Creado por:', created_by);
+  }, [session, created_by]);
+
+
+  console.log("creado por fuera de use: ", created_by);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('/api/users/getUsers');
+
+        console.log("Respuesta de opciones users: ", response);
+
+        const updatedOptions = response.data.users.map(user => ({ label: user.nombre, email: user.email }));
+
+        console.log("Updated User: ", updatedOptions);
+
+        setUserList(updatedOptions);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
 
   const handleOpenForm = () => {
@@ -38,20 +85,56 @@ const EntrySummary = () => {
     setShowForm(false);
   };
 
-  const handleSaveEntry = (entryForm) => {
-    setEntryData((prevEntryData) => {
-      const updatedEntryData = {
-        ...prevEntryData,
-        clienteProveedor: entryForm.clienteProveedor,
-        tipo: entryForm.tipo,
-        products: [...products],
-        totalCost: totalCost,
-        totalQuantity: totalQuantity,
-      };
-      console.log('EntryData después de guardar la entrada:', updatedEntryData);
-      return updatedEntryData;
+  const handleSaveEntry = async () => {
+    const subtotalArray = products.map((product) => calculateSubtotal(product));
+    const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
+  
+    const updatedEntryData = {
+      ...entryData,
+      products: products.map(({ subtotal, ...product }) => product), // Elimina la propiedad subtotal de cada producto
+      subtotal: subtotal,
+      totalCost: totalCost,
+      totalQuantity: totalQuantity,
+      created_by: created_by,
+    };
+  
+    console.log('Datos que se enviarán al backend:', {
+      ...updatedEntryData,
+      products: updatedEntryData.products.map((product) => ({
+        ...product,
+
+      })),
     });
+  
+    try {
+      // Envía los datos al backend usando Axios
+      const response = await axios.post('/api/entries/createEntry', updatedEntryData);
+  
+      // Muestra una notificación de éxito
+      toast.current.show({ severity: 'success', summary: 'Entrada guardada con éxito', detail: response.data.message });
+  
+      // Reinicia el estado del formulario
+      setEntryData({
+        entradaNo: generateEntryNo(),
+        fechaEntrada: getCurrentDate(),
+        proveedor: '',
+        tipo: '',
+        asigned_to: null,
+      });
+      setProducts([]);
+      setTotalCost(0);
+      setTotalQuantity(0);
+    } catch (error) {
+      // Maneja errores si la solicitud al backend falla
+      console.error('Error al guardar la entrada:', error);
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error al guardar la entrada',
+        detail: 'Por favor, inténtalo de nuevo.',
+      });
+    }
   };
+  
 
 
   useEffect(() => {
@@ -70,9 +153,17 @@ const EntrySummary = () => {
   const calculateTotal = () => {
     const total = products.reduce((accumulator, product) => {
       const costo = parseFloat(product.cost) || 0;
-      return accumulator + costo;
+      const cantidad = parseInt(product.quantity, 10) || 0;
+      const totalPorProducto = costo * cantidad; // Nueva línea para calcular el total por producto
+      return accumulator + totalPorProducto; // Actualizado para acumular el total por producto
     }, 0);
     setTotalCost(total);
+  };
+
+  const calculateSubtotal = (product) => {
+    const costo = parseFloat(product.cost) || 0;
+    const cantidad = parseInt(product.quantity, 10) || 0;
+    return costo * cantidad;
   };
   const calculateTotalQuantity = () => {
     const quantityTotal = products.reduce((accumulator, product) => {
@@ -85,8 +176,9 @@ const EntrySummary = () => {
 
   const handleAddProduct = (product) => {
     const cost = parseFloat(product.cost) || 0;
+    const subtotal = calculateSubtotal(product);
     setProducts((prevProducts) => {
-      const newProducts = [...prevProducts, { ...product, cost }];
+      const newProducts = [...prevProducts, { ...product, cost, subtotal }];
       console.log('Products después de agregar:', newProducts);
       return newProducts;
     });
@@ -102,18 +194,8 @@ const EntrySummary = () => {
     return `${currentYear}-${entryNumber}`;
   }
 
-  // Función para obtener la fecha y hora actuales
-  function getCurrentDate() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
+ 
 
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  }
   const tipoOptions = [
     { label: 'Compras', value: 'compras' },
     { label: 'Devoluciones', value: 'devoluciones' },
@@ -135,101 +217,139 @@ const EntrySummary = () => {
   const footerGroup = (
     <ColumnGroup>
       <Row>
-        <Column footer="Total:" colSpan={4} footerStyle={{ textAlign: 'right' }} />
-        <Column
-          footer={() => (
-            <span>
-              <strong>
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
-                }).format(totalCost)}
-              </strong>
-            </span>
-          )}
-        />
-        <Column footer={totalQuantity} />
+        <Column footer={`Total items: ${totalQuantity}`} colSpan={5} footerStyle={{ textAlign: 'right' }} />
+        <Column />
+        <Column colSpan={3} footer={
+          <span> Total :
+            <strong>
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+              }).format(totalCost)}
+            </strong>
+          </span>
+        } />
       </Row>
     </ColumnGroup>
   );
+  const formik = useFormik({
+    initialValues: {
+      value: ''
+    },
+    validate: (data) => {
+      // ...
+    },
+    onSubmit: (data) => {
+      // Cambia esta línea para utilizar los valores del formulario en el handleSaveEntry
+      handleSaveEntry(data);
+      formik.resetForm();
+    }
+  });
 
-  const [userList, setUserList] = useState([
-    { id: 1, name: 'Usuario 1' },
-    { id: 2, name: 'Usuario 2' },
-    // Agrega más usuarios según sea necesario
-  ]);
+  const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
+
+  const getFormErrorMessage = (name) => {
+    return isFormFieldInvalid(name) ? <small className="p-error">{formik.errors[name]}</small> : <small className="p-error">&nbsp;</small>;
+  };
+
+  const show = (data) => {
+    toast.current.show({ severity: 'success', summary: 'Form Submitted', detail: data.value });
+  };
 
   return (
-    <div>
+    <div>   <h3 className='text-center mt-3'>Datos de entrada</h3>
       <Card className='flex flex-wrap mt-1'>
-        <h3 className='text-center'>Datos de entrada</h3>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleSaveEntry(entryData);
-        }}>
-          <div className="flex flex-wrap ">
-            <div className="p-1">
-              <label htmlFor="entradaNo">Entrada No.:</label>
-              <InputText id="entradaNo" name="entradaNo" value={entryData.entradaNo} readOnly />
-            </div>
-            <div className="p-1">
-              <label htmlFor="fechaEntrada">Fecha de Entrada:</label>
-              <InputText id="fechaEntrada" name="fechaEntrada" value={entryData.fechaEntrada} readOnly />
-            </div>
-            <div className="p-1">
-              <label htmlFor="clienteProveedor">Cliente/Proveedor:</label>
+        <form onSubmit={formik.handleSubmit} className="flex flex-wrap gap-2 mt-2">
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <Toast ref={toast} />
               <InputText
-                id="clienteProveedor"
-                name="clienteProveedor"
-                value={entryData.clienteProveedor || ''}
-                onChange={(e) => setEntryData({ ...entryData, clienteProveedor: e.target.value })}
+                id="entradaNo"
+                name="entradaNo"
+                value={entryData.entradaNo}
+                onChange={(e) => setEntryData({ ...entryData, entradaNo: e.target.value })}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('entradaNo') })}
               />
-            </div>
-            <div className="p-1">
-              <label htmlFor="asigned_to">Asignado a:</label>
+              <label htmlFor="entradaNo">Entrada No.</label>
+            </span>
+            {getFormErrorMessage('entradaNo')}
+          </div>
+
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <InputText
+                id="fechaEntrada"
+                name="fechaEntrada"
+                value={entryData.fechaEntrada}
+                onChange={(e) => setEntryData({ ...entryData, fechaEntrada: e.target.value })}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('fechaEntrada') })}
+              />
+              <label htmlFor="fechaEntrada">Fecha de Entrada</label>
+            </span>
+            {getFormErrorMessage('fechaEntrada')}
+          </div>
+
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <InputText
+                id="proveedor"
+                name="proveedor"
+                value={entryData.proveedor || ''}
+                onChange={(e) => {
+                  console.log('Proveedor cambiado:', e.target.value);
+                  setEntryData({ ...entryData, proveedor: e.target.value });
+                }}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('proveedor') })}
+              />
+
+              <label htmlFor="proveedor">Proveedor</label>
+            </span>
+            {getFormErrorMessage('proveedor')}
+          </div>
+
+          <div className="p-col-12">
+            <span className="p-float-label">
               <Dropdown
                 id="asigned_to"
                 name="asigned_to"
-                optionLabel="name" // Asegúrate de que esta propiedad coincida con la propiedad de nombre de tus usuarios
+                optionLabel="label"
                 value={entryData.asigned_to}
                 options={userList}
                 onChange={(e) => setEntryData({ ...entryData, asigned_to: e.value })}
                 placeholder="Seleccionar usuario"
+                className={classNames({ 'p-invalid': isFormFieldInvalid('asigned_to') })}
               />
-            </div>
-            <div className="p-1">
-              <label htmlFor="tipo">Tipo:</label>
+              <label htmlFor="asigned_to">Asignado a</label>
+            </span>
+            {getFormErrorMessage('asigned_to')}
+          </div>
+
+          <div className="p-col-12">
+            <span className="p-float-label">
               <Dropdown
                 id="tipo"
                 name="tipo"
                 options={tipoOptions}
                 value={entryData.tipo}
-                onChange={(e) => setEntryData({ ...entryData, tipo: e.value })}
+                onChange={(e) => {
+                  console.log('Tipo cambiado:', e.value);
+                  setEntryData({ ...entryData, tipo: e.value });
+                }}
                 placeholder="Seleccionar tipo"
+                className={classNames({ 'p-invalid': isFormFieldInvalid('tipo') })}
               />
-            </div>
-            <div className=" p-1">
-              <FileUpload
-                mode="basic"
-                name="demo[]"
-                url="/api/upload"
-                accept="image/*"
-                customUpload
-                uploadHandler={customBase64Uploader}
-                chooseLabel="Subir Soporte"
-              />
-            </div>
-            <div className='p-1'>
-              <Button
-                className='p-button-success' size="normal "
-                label='Registrar Entrada'
-                icon='pi pi-check'
-                onClick={() => handleSaveEntry(entryData)}
-              />
-            </div>
+
+              <label htmlFor="tipo">Tipo</label>
+            </span>
+            {getFormErrorMessage('tipo')}
+          </div>
+
+          <div className="p-col-12">
+            <Button type="button" label="Crear" onClick={handleSaveEntry} />
           </div>
         </form>
       </Card>
+
       <Dialog visible={showForm} onHide={handleCloseForm}>
         <EntryProductForm
           onClose={handleCloseForm}
@@ -264,6 +384,19 @@ const EntrySummary = () => {
                 )}
               />
               <Column field="quantity" header="Cantidad" />
+              <Column
+                field="subtotal" // Nueva columna para mostrar el subtotal
+                header="Subtotal"
+                body={(rowData) => (
+                  <span>
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                    }).format(rowData.subtotal)}
+                  </span>
+                )}
+              />
+
               <Column
                 body={(rowData, column) => (
                   <Button

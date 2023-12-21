@@ -1,11 +1,13 @@
 
 'use client '
+// Importa las dependencias necesarias y define el componente
+
 import React, { useState } from 'react';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-import '../app/styles/styles.css';
+import { Calendar } from 'primereact/calendar';
 
 const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
   const [form, setForm] = useState({
@@ -15,6 +17,7 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
     serials: '',
     lote: '',
     ubicacion: '',
+    exp_date: '', // Agrega el campo de fecha
   });
 
   const [filteredReferences, setFilteredReferences] = useState([]);
@@ -22,17 +25,15 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
+
     console.log(`Input changed - Name: ${name}, Value: ${JSON.stringify(value)}`);
-  
+
     setForm((prevForm) => ({
       ...prevForm,
       [name]: value.label || value,
     }));
   };
-  
-  
-  
+
   const searchReferences = async (searchQuery) => {
     const query = String(searchQuery).toLowerCase();
 
@@ -61,32 +62,38 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
     onHide();
   };
 
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   return (
     <Card style={{ width: '100%', padding: '20px' }} onHide={onHide}>
-      <h2 className="text-center mt-0">Agregar producto </h2>
+      <h2 className="text-center mt-0">Agregar producto</h2>
       <form onSubmit={handleSubmit}>
         <div className="p-fluid p-formgrid p-grid">
-      <div className="p-field p-col-12 p-md-6">
-    <label htmlFor="reference">Referencia:</label>
-    {console.log('Labels de las sugerencias:', filteredReferences.map(suggestion => suggestion.label))}
-    <AutoComplete
-        key={filteredReferences.length.toString()} // Usar la longitud para forzar la actualización
-        id="reference"
-        name="reference"
-        value={form.reference}
-        suggestions={filteredReferences}
-        completeMethod={searchReferences}
-        field="label" // Usar 'label' como campo para las sugerencias
-        onChange={handleInputChange}
-        placeholder="Buscar referencia"
-        minLength={1}
-        loading={loading}
-        className="p-autocomplete-item"
-        dropdownClassName="p-autocomplete-panel"
-        required
-    />
-</div>
+          <div className="p-field p-col-12 p-md-6">
+            <label htmlFor="reference">Referencia:</label>
+            <AutoComplete
+              key={filteredReferences.length.toString()}
+              id="reference"
+              name="reference"
+              value={form.reference}
+              suggestions={filteredReferences}
+              completeMethod={searchReferences}
+              field="label"
+              onChange={handleInputChange}
+              placeholder="Buscar referencia"
+              minLength={1}
+              loading={loading}
+              className="p-autocomplete-item"
+              dropdownClassName="p-autocomplete-panel"
+              required
+            />
+          </div>
 
           <div className="p-field p-col-12 p-md-6 mt-2">
             <label htmlFor="quantity">Cantidad:</label>
@@ -95,8 +102,8 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
               name="quantity"
               value={form.quantity}
               onChange={handleInputChange}
-              required // Campo requerido
-              type="number" // Solo acepta números
+              required
+              type="number"
             />
           </div>
 
@@ -107,8 +114,8 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
               name="cost"
               value={form.cost}
               onChange={handleInputChange}
-              required // Campo requerido
-              type="number" // Solo acepta números
+              required
+              type="number"
             />
           </div>
 
@@ -119,7 +126,7 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
               name="serials"
               value={form.serials}
               onChange={handleInputChange}
-              required // Campo requerido
+              required
             />
           </div>
 
@@ -133,6 +140,17 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
             />
           </div>
 
+          <div className="p-field p-col-12 mt-2">
+            <label htmlFor="exp_date">Fecha de vencimiento:</label>
+            <Calendar
+              id="exp_date"
+              name="exp_date"
+              value={form.exp_date}
+              onChange={(e) => setForm({ ...form, exp_date: e.value })}
+              minDate={new Date(getCurrentDate())}
+            />
+          </div>
+
           <div className="p-field p-col-12 p-md-6 mt-2">
             <label htmlFor="ubicacion">Ubicación:</label>
             <InputText
@@ -140,7 +158,7 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
               name="ubicacion"
               value={form.ubicacion}
               onChange={handleInputChange}
-              required // Campo requerido
+              required
             />
           </div>
         </div>

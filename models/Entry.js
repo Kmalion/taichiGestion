@@ -8,51 +8,43 @@ try {
 } catch (e) {
   // Si el modelo no existe, crea uno nuevo
   const entrySchema = new mongoose.Schema({
-    title: {
+    entradaNo: {
       type: String,
       required: true,
     },
-    date: {
+    fechaEntrada: {
       type: Date,
-      default: Date.now,
+      required: true,
+    },
+    proveedor: {
+      type: String,
+      required: true,
+    },
+    tipo: {
+      type: String,
+      required: true,
+    },
+    asigned_to: {
+      type: String, // Ajusta el tipo según tus necesidades
     },
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-      }
+        ref: 'Product', // Nombre del modelo de la colección de productos
+      },
     ],
+    totalCost: {
+      type: Number,
+      default: 0,
+    },
     totalQuantity: {
       type: Number,
       default: 0,
     },
-    totalPrice: {
-      type: Number,
-      default: 0,
-    },
-    supplier: {
-      type: String,
-      required: true,
-    },
-    document: {
-      type: String,
-      required: true,
-    },
-    comment: {
+    created_by: {
       type: String,
     },
-    client: {
-      type: String,
-    },
-    type: {
-      type: String,
-      enum: ['compras', 'devoluciones', 'ajuste'],
-      required: true,
-    },
-    asigned_to: {
-      type: String,
-    },
-    
+    // Otros campos relacionados con la entrada
   });
 
   // Crea el modelo 'Entry'
