@@ -1,6 +1,6 @@
 'use client'
 
-import EntrySummary from '@/components/EntrySummary';
+import EntrySummary from '@/components/entry/EntrySummary';
 import Layout from '@/components/Layout';
 import { ThemeProvider } from '@/context/ThemeContext';
 

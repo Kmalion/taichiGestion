@@ -8,13 +8,28 @@ export const POST = async (request) => {
     await connectDB();
 
     // Extrae los datos de la solicitud
-    const { entradaNo, fechaEntrada, proveedor, tipo, asigned_to, products, totalCost, totalQuantity, created_by } = await request.json();
+    const { entradaNo, fechaEntrada, proveedor, tipo, asigned_to, products, totalCost, totalQuantity, created_by, subtotal } = await request.json();
 
     // Convierte 'asigned_to' a una cadena si es un objeto
     const asignedToString = typeof asigned_to === 'object' ? asigned_to.email : asigned_to;
 
     // Convierte 'products' a un array de objetos si es una cadena
     const productsArray = typeof products === 'string' ? JSON.parse(products) : products;
+
+    // Log de los datos recibidos
+    console.log('Datos recibidos del frontend:');
+    console.log({
+      entradaNo,
+      fechaEntrada,
+      proveedor,
+      tipo,
+      asigned_to: asignedToString,
+      products: productsArray,
+      totalCost,
+      totalQuantity,
+      created_by,
+      subtotal
+    });
 
     // Crea una nueva entrada
     const newEntry = new Entry({
@@ -27,6 +42,7 @@ export const POST = async (request) => {
       totalCost,
       totalQuantity,
       created_by,
+      subtotal
     });
 
     // Guarda la nueva entrada en la base de datos
