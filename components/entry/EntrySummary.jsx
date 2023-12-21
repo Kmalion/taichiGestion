@@ -114,6 +114,7 @@ const EntrySummary = () => {
         proveedor: '',
         tipo: '',
         asigned_to: null,
+        cliente: ''
       });
       setProducts([]);
       setTotalCost(0);
@@ -142,6 +143,7 @@ const EntrySummary = () => {
     });
     calculateTotal();
   };
+
   const calculateTotal = () => {
     const total = products.reduce((accumulator, product) => {
       const costo = parseFloat(product.cost) || 0;
@@ -274,12 +276,12 @@ const EntrySummary = () => {
       <Dialog visible={showForm} onHide={handleCloseForm}>
         <EntryProductForm
           onClose={handleCloseForm}
-          onSave={handleSaveEntry}
           onAddProduct={handleAddProduct}
           entradaNo={entryData.entradaNo}
           onHide={handleCloseForm}
         />
       </Dialog>
+
       <Column field="lastYearSale" body={footerGroup} />
       <Toast ref={toast} />
     </div>

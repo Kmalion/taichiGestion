@@ -9,7 +9,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 
-const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
+const EntryProductForm = ({ onHide, onAddProduct }) => {
   const [form, setForm] = useState({
     reference: '',
     quantity: '',
@@ -54,8 +54,6 @@ const EntryProductForm = ({ onHide, onSave, onAddProduct }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form before onSave:', form);
-    onSave(form);
     console.log('Form before onAddProduct:', form);
     onAddProduct(form);
     console.log('Form after onAddProduct:', form);

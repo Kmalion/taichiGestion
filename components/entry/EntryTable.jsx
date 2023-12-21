@@ -17,7 +17,7 @@ import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
-import '../app/styles/styles.css'
+import '../../app/styles/styles.css'
 import { v4 as uuidv4 } from 'uuid';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
