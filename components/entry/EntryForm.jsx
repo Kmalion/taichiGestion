@@ -35,8 +35,8 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
         errors.proveedor = 'Proveedor es requerido';
       }
 
-      if (!data.cliente.trim()) {
-        errors.cliente = 'Cliente es requerido';
+      if (data.tipo === 'devoluciones' && !data.cliente.trim()) {
+        errors.cliente = 'Cliente es requerido para devoluciones';
       }
 
       if (!data.asigned_to) {
@@ -71,7 +71,6 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     { label: 'Devoluciones', value: 'devoluciones' },
     { label: 'Ajuste', value: 'ajuste' },
   ];
-
   return (
     <div>
       <h3 className="text-center mt-3">Datos de entrada</h3>
