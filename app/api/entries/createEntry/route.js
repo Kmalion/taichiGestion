@@ -1,5 +1,5 @@
-import Entry from '../../../../models/Entry';
-import connectDB from '../../../../utils/db';
+import EntryServiceManager from '../../services/entry/EntryServiceManager'; // Ajusta la importación según la ubicación de tu servicio
+import connectDB from '../../../../utils/db'; // Ajusta la importación según la ubicación de tu utilidad de conexión a la base de datos
 import { NextResponse } from 'next/server';
 
 export const POST = async (request) => {
@@ -10,43 +10,21 @@ export const POST = async (request) => {
     // Extrae los datos de la solicitud
     const { entradaNo, fechaEntrada, proveedor, tipo, asigned_to, products, totalCost, totalQuantity, created_by, subtotal } = await request.json();
 
-    // Convierte 'asigned_to' a una cadena si es un objeto
-    const asignedToString = typeof asigned_to === 'object' ? asigned_to.email : asigned_to;
+    // Crea una instancia del servicio EntryServiceManager
+    const entryServiceManager = new EntryServiceManager();
 
-    // Convierte 'products' a un array de objetos si es una cadena
-    const productsArray = typeof products === 'string' ? JSON.parse(products) : products;
-
-    // Log de los datos recibidos
-    console.log('Datos recibidos del frontend:');
-    console.log({
+    // Crea una nueva entrada utilizando el servicio
+    await entryServiceManager.addEntry({
       entradaNo,
       fechaEntrada,
       proveedor,
       tipo,
-      asigned_to: asignedToString,
-      products: productsArray,
+      asigned_to,
       totalCost,
       totalQuantity,
       created_by,
       subtotal
-    });
-
-    // Crea una nueva entrada
-    const newEntry = new Entry({
-      entradaNo,
-      fechaEntrada,
-      proveedor,
-      tipo,
-      asigned_to: asignedToString,
-      products: productsArray,
-      totalCost,
-      totalQuantity,
-      created_by,
-      subtotal
-    });
-
-    // Guarda la nueva entrada en la base de datos
-    await newEntry.save();
+    }, products);
 
     // Responde con éxito y la información de la nueva entrada
     return new NextResponse(JSON.stringify({ redirect: '/entradas' }), {

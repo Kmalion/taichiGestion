@@ -8,27 +8,62 @@ import { Toast } from 'primereact/toast';
 import { useFormik } from 'formik';
 import { classNames } from 'primereact/utils';
 
-// Crea el componente del primer formulario
 const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   const toast = useRef(null);
+
   const formik = useFormik({
     initialValues: {
-      value: ''
+      entradaNo: entryData.entradaNo || '',
+      fechaEntrada: entryData.fechaEntrada || '',
+      proveedor: entryData.proveedor || '',
+      cliente: entryData.cliente || '',
+      asigned_to: entryData.asigned_to || null,
+      tipo: entryData.tipo || null,
     },
     validate: (data) => {
-      // ...
+      const errors = {};
+
+      if (!data.entradaNo.trim()) {
+        errors.entradaNo = 'Entrada No. es requerido';
+      }
+
+      if (!data.fechaEntrada.trim()) {
+        errors.fechaEntrada = 'Fecha de Entrada es requerido';
+      }
+
+      if (!data.proveedor.trim()) {
+        errors.proveedor = 'Proveedor es requerido';
+      }
+
+      if (!data.cliente.trim()) {
+        errors.cliente = 'Cliente es requerido';
+      }
+
+      if (!data.asigned_to) {
+        errors.asigned_to = 'Asignado a es requerido';
+      }
+
+      if (!data.tipo) {
+        errors.tipo = 'Tipo es requerido';
+      }
+
+      return errors;
     },
     onSubmit: (data) => {
-      // Cambia esta línea para utilizar los valores del formulario en el handleSaveEntry
       handleSaveEntry(data);
+      toast.current.show({ severity: 'success', summary: 'Form Submitted', detail: data.entradaNo });
       formik.resetForm();
-    }
+    },
   });
 
   const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
 
   const getFormErrorMessage = (name) => {
-    return isFormFieldInvalid(name) ? <small className="p-error">{formik.errors[name]}</small> : <small className="p-error">&nbsp;</small>;
+    return isFormFieldInvalid(name) ? (
+      <small className="p-error">{formik.errors[name]}</small>
+    ) : (
+      <small className="p-error">&nbsp;</small>
+    );
   };
 
   const tipoOptions = [
@@ -38,17 +73,19 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   ];
 
   return (
-    <div>   <h3 className='text-center mt-3'>Datos de entrada</h3>
-      <Card className='flex flex-wrap mt-1'>
-        <form onSubmit={formik.handleSubmit} className="flex flex-wrap gap-2 mt-2">
+    <div>
+      <h3 className="text-center mt-3">Datos de entrada</h3>
+      <Card className="flex flex-wrap mt-1">
+        <form onSubmit={(e) => e.preventDefault()} className="flex flex-wrap gap-2 mt-2">
           <div className="p-col-12">
             <span className="p-float-label">
               <Toast ref={toast} />
               <InputText
                 id="entradaNo"
                 name="entradaNo"
-                value={entryData.entradaNo}
-                onChange={(e) => setEntryData({ ...entryData, entradaNo: e.target.value })}
+                value={formik.values.entradaNo}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
                 className={classNames({ 'p-invalid': isFormFieldInvalid('entradaNo') })}
               />
               <label htmlFor="entradaNo">Entrada No.</label>
@@ -61,8 +98,9 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
               <InputText
                 id="fechaEntrada"
                 name="fechaEntrada"
-                value={entryData.fechaEntrada}
-                onChange={(e) => setEntryData({ ...entryData, fechaEntrada: e.target.value })}
+                value={formik.values.fechaEntrada}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
                 className={classNames({ 'p-invalid': isFormFieldInvalid('fechaEntrada') })}
               />
               <label htmlFor="fechaEntrada">Fecha de Entrada</label>
@@ -75,14 +113,14 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
               <InputText
                 id="proveedor"
                 name="proveedor"
-                value={entryData.proveedor || ''}
+                value={formik.values.proveedor || ''}
                 onChange={(e) => {
-                  console.log('Proveedor cambiado:', e.target.value);
                   setEntryData({ ...entryData, proveedor: e.target.value });
+                  formik.handleChange(e);
                 }}
+                onBlur={formik.handleBlur}
                 className={classNames({ 'p-invalid': isFormFieldInvalid('proveedor') })}
               />
-
               <label htmlFor="proveedor">Proveedor</label>
             </span>
             {getFormErrorMessage('proveedor')}
@@ -91,13 +129,14 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
           <div className="p-col-12">
             <span className="p-float-label">
               <InputText
-                id="cliente" // Nuevo campo para el cliente
+                id="cliente"
                 name="cliente"
-                value={entryData.cliente || ''}
+                value={formik.values.cliente || ''}
                 onChange={(e) => {
-                  console.log('Cliente cambiado:', e.target.value);
                   setEntryData({ ...entryData, cliente: e.target.value });
+                  formik.handleChange(e);
                 }}
+                onBlur={formik.handleBlur}
                 className={classNames({ 'p-invalid': isFormFieldInvalid('cliente') })}
               />
               <label htmlFor="cliente">Cliente</label>
@@ -111,9 +150,13 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                 id="asigned_to"
                 name="asigned_to"
                 optionLabel="label"
-                value={entryData.asigned_to}
+                value={formik.values.asigned_to}
                 options={userList}
-                onChange={(e) => setEntryData({ ...entryData, asigned_to: e.value })}
+                onChange={(e) => {
+                  setEntryData({ ...entryData, asigned_to: e.value });
+                  formik.handleChange(e);
+                }}
+                onBlur={formik.handleBlur}
                 placeholder="Seleccionar usuario"
                 className={classNames({ 'p-invalid': isFormFieldInvalid('asigned_to') })}
               />
@@ -128,33 +171,50 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                 id="tipo"
                 name="tipo"
                 options={tipoOptions}
-                value={entryData.tipo}
+                value={formik.values.tipo}
                 onChange={(e) => {
-                  console.log('Tipo cambiado:', e.value);
                   setEntryData({ ...entryData, tipo: e.value });
+                  formik.handleChange(e);
                 }}
+                onBlur={formik.handleBlur}
                 placeholder="Seleccionar tipo"
                 className={classNames({ 'p-invalid': isFormFieldInvalid('tipo') })}
               />
-
               <label htmlFor="tipo">Tipo</label>
             </span>
             {getFormErrorMessage('tipo')}
           </div>
 
           <div className="p-col-12">
-          <Button
-  className="m-3 p-3"
-  size="small"
-  label="Registar entrada"
-  onClick={(e) => {
-    handleSaveEntry();
-  }}
-/>
+            <Button
+              type="button"
+              className="m-3 p-3"
+              size="small"
+              label="Registrar entrada"
+              onClick={() => {
+                // Marcar todos los campos como tocados
+                formik.setTouched({
+                  entradaNo: true,
+                  fechaEntrada: true,
+                  proveedor: true,
+                  cliente: true,
+                  asigned_to: true,
+                  tipo: true,
+                });
+
+                // Realizar la validación manualmente
+                const errors = formik.validateForm();
+
+                // Verificar si hay errores antes de enviar
+                if (Object.keys(errors).length === 0) {
+                  formik.submitForm();
+                }
+              }}
+            />
           </div>
         </form>
       </Card>
-      </div>  
+    </div>
   );
 };
 

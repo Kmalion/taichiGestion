@@ -25,12 +25,39 @@ try {
       required: true,
     },
     asigned_to: {
-      type: String, // Ajusta el tipo según tus necesidades
+      type: Object,
+      required: true,
     },
     products: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product', // Nombre del modelo de la colección de productos
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Product',
+        },
+        reference: {
+          type: String,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        cost: {
+          type: Number,
+          required: true,
+        },
+        serials: {
+          type: String,
+        },
+        lote: {
+          type: String,
+        },
+        ubicacion: {
+          type: String,
+        },
+        exp_date: {
+          type: Date,
+        },
       },
     ],
     totalCost: {
