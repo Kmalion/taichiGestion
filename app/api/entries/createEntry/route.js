@@ -6,9 +6,8 @@ export const POST = async (request) => {
   try {
     // Conecta a la base de datos
     await connectDB();
-
     // Extrae los datos de la solicitud
-    const { entradaNo, fechaEntrada, proveedor, tipo, asigned_to, products, totalCost, totalQuantity, created_by, subtotal } = await request.json();
+    const { entradaNo, fechaEntrada, proveedor, tipo, asigned_to, products, totalCost, totalQuantity, created_by, subtotal, cliente, document } = await request.json();
 
     // Crea una instancia del servicio EntryServiceManager
     const entryServiceManager = new EntryServiceManager();
@@ -23,7 +22,9 @@ export const POST = async (request) => {
       totalCost,
       totalQuantity,
       created_by,
-      subtotal
+      subtotal,
+      cliente,
+      document
     }, products);
 
     // Responde con éxito y la información de la nueva entrada

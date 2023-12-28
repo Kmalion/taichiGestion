@@ -71,6 +71,12 @@ try {
     created_by: {
       type: String,
     },
+    document: {
+      type: String,
+    },
+    cliente: {
+      type: String,
+    },
     // Otros campos relacionados con la entrada
   });
 

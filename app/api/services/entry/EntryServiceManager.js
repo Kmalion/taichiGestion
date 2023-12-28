@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import EntrySchema from '../../../../models/Entry'; // Ajusta la importación del esquema de Entry
+import EntrySchema from '../../../../models/Entry';
 
 class EntryServiceManager {
   constructor(path) {
@@ -8,6 +8,11 @@ class EntryServiceManager {
 
   async addEntry(newEntry, products) {
     try {
+      // Verifica si la lista de productos está vacía
+      if (!products || products.length === 0) {
+        throw new Error('La lista de productos no puede estar vacía.');
+      }
+
       // Asigna los productos al nuevo Entry
       newEntry.products = products;
 

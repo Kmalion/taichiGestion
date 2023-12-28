@@ -160,12 +160,20 @@ export default function ProductTable() {
         try {
             const response = await axios.get('/api/products/getProducts');
             console.log('Products fetched:', response.data);
-            setProducts(response.data);
+    
+            // Actualiza el estado inventoryStatus antes de establecer los productos
+            const updatedProducts = response.data.map(product => ({
+                ...product,
+                inventoryStatus: (parseInt(product.quantity, 10) || 0) === 0 ? 'agotado' : 'activo',
+            }));
+    
+            setProducts(updatedProducts);
             filterProducts(typeof globalFilter === 'string' ? globalFilter : '');
         } catch (error) {
             console.error('Error fetching products:', error.message);
         }
     };
+    
     const filterProducts = (value) => {
         if (!Array.isArray(products)) {
             return;
@@ -239,9 +247,9 @@ export default function ProductTable() {
                     owner: session?.user?.email,
                     created: formattedDate,
                     image: imageUrl,
-                    inventoryStatus: product.quantity === 0 ? 'agotado' : 'activo',
+                    inventoryStatus: (parseInt(product.quantity, 10) || 0) === 0 ? 'agotado' : 'activo',
                     ubicacion: product.ubicacion,
-                };
+                  }
 
                 let response;
                 if (product.idp) {
@@ -475,6 +483,10 @@ export default function ProductTable() {
     const priceBodyTemplate = (rowData) => {
         return formatCurrency(rowData.price);
     };
+    const costBodyTemplate = (rowData) => {
+        return formatCurrency(rowData.cost);
+    };
+
 
 
     const ratingBodyTemplate = (rowData) => {
@@ -504,13 +516,13 @@ export default function ProductTable() {
         switch (product.inventoryStatus) {
             case 'activo':
                 return 'success';
-
-            case 'bajostock':
+    
+            case 'inactivo':
                 return 'warning';
-
+    
             case 'agotado':
                 return 'danger';
-
+    
             default:
                 return null;
         }
@@ -576,6 +588,17 @@ export default function ProductTable() {
         setLoteDialog(true);
     };
  
+    const expDateBodyTemplate = (rowData) => {
+        // Supongamos que 'exp_date' es una cadena de fecha en formato ISO 8601 ('YYYY-MM-DD')
+        const fecha = new Date(rowData.exp_date);
+        const formattedDate = `${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()}`;
+      
+        return (
+          <React.Fragment>
+            {formattedDate}
+          </React.Fragment>
+        );
+      };
 
     const onFilterChange = (e) => {
         const newFilters = { ...filters };
@@ -611,12 +634,12 @@ export default function ProductTable() {
                     <Column field="image" header="Imágen" body={imageBodyTemplate}></Column>
                     <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
                     <Column field="category" header="Categoria" sortable style={{ minWidth: '10rem' }}></Column>
-                    <Column field="cost" header="Costo" body={priceBodyTemplate}sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="cost" header="Costo" body={costBodyTemplate}sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="ubicacion" header="Ubicacion" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="inventoryStatus" header="Estado" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="price" header="Precio" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
                     <Column field="lote" header="Lote" sortable style={{ minWidth: '12rem' }} body={loteBodyTemplate}></Column>
-                    <Column field="exp_date" header="Vencimiento" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="exp_date" header="Vencimiento" sortable style={{ minWidth: '12rem' }} body={expDateBodyTemplate}></Column>
                     <Column field="owner" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
                     
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
