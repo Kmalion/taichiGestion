@@ -42,7 +42,7 @@ export default function SalesChart({ cardWidth, cardHeight }) {
   }, []);
 
   return (
-    <div className="card" style={{ width: cardWidth, height: cardHeight }}>
+    <div className="card" >
       <Chart type="bar" data={chartData} options={chartOptions} />
     </div>
   );

@@ -1,5 +1,14 @@
-
 import axios from 'axios';
+
+export const getAllProducts = async () => {
+  try {
+    const response = await axios.get('/api/products/getProducts');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener todos los productos:', error);
+    throw error;
+  }
+};
 
 export const getProductByReference = async (reference) => {
   try {
