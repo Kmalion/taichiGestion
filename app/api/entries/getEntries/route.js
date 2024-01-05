@@ -23,7 +23,8 @@ export const GET = async (request) => {
             subtotal: entry.subtotal,
             products: entry.products, 
             document: entry.document,
-            cliente: entry.cliente
+            cliente: entry.cliente,
+            comment: entry.comment
         }));
 
         // Responde con las entradas en formato JSON

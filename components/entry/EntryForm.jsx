@@ -8,6 +8,7 @@ import { Toast } from 'primereact/toast';
 import { useFormik } from 'formik';
 import { FileUpload } from 'primereact/fileupload'
 import { classNames } from 'primereact/utils';
+import { InputTextarea } from 'primereact/inputtextarea';
 import uploadFile from '../../service/fileUploadService'
 
 const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
@@ -21,7 +22,8 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
       cliente: entryData.cliente || '',
       asigned_to: entryData.asigned_to || null,
       tipo: entryData.tipo || null,
-      document: entryData.document || ''
+      document: entryData.document || '',
+      comment: entryData.comment || '',
     },
     validate: (data) => {
       const errors = {};
@@ -54,8 +56,13 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     },
     onSubmit: (data) => {
       console.log('Cliente:', formik.values.cliente);
-console.log('Document:', formik.values.document);
-      handleSaveEntry(data);
+      
+    
+      // Agrega la propiedad 'comment' a data antes de llamar a handleSaveEntry
+      const dataWithComment = { ...data, comment: formik.values.comentario };
+      
+      console.log('Datos:', dataWithComment);
+      handleSaveEntry(dataWithComment);
       formik.resetForm();
     },
   });
@@ -63,28 +70,28 @@ console.log('Document:', formik.values.document);
   const onUpload = async (event) => {
     // Manejar la lógica de la carga de archivos aquí
     // event.files contiene los archivos cargados
-  
+
     const selectedFile = event.files && event.files[0];
-  
+
     if (selectedFile) {
       try {
         const fileUrl = await uploadFile(selectedFile);
         console.log('URL del archivo subido:', fileUrl);
-  
+
         // Muestra el Toast de éxito
         toast.current.show({
           severity: 'success',
           summary: 'Archivo subido exitosamente',
           detail: 'El archivo se ha subido con éxito.',
         });
-  
+
         // Actualiza la URL del archivo en el estado
         setEntryData({ ...entryData, document: fileUrl });
 
       } catch (error) {
         // Manejar errores al subir el archivo
         console.error('Error al subir el archivo:', error);
-  
+
         // Muestra el Toast de error
         toast.current.show({
           severity: 'error',
@@ -94,7 +101,7 @@ console.log('Document:', formik.values.document);
       }
     }
   };
-  
+
   useEffect(() => {
     // Actualiza el valor de entradaNo cuando cambia entryData
     if (entryData.entradaNo instanceof Promise) {
@@ -122,124 +129,124 @@ console.log('Document:', formik.values.document);
     { label: 'Ajuste', value: 'ajuste' },
   ];
   return (
-      <div>
-        <h3 className="text-center mt-3">Datos de entrada</h3>
-        <Card className="flex flex-wrap mt-1">
-          <form onSubmit={(e) => e.preventDefault()} className="flex flex-wrap gap-2 mt-2">
-            <div className="p-col-12">
-              <span className="p-float-label">
-                <Toast ref={toast} />
-                <InputText
-                  id="entradaNo"
-                  name="entradaNo"
-                  value={formik.values.entradaNo}
-                  readOnly
-                  onChange={(e) => formik.handleChange(e)}
-                  onBlur={formik.handleBlur}
-                  className={classNames({ 'p-invalid': isFormFieldInvalid('entradaNo') })}
-                />
-                <label htmlFor="entradaNo">Entrada No.</label>
-              </span>
-              {getFormErrorMessage('entradaNo')}
-            </div>
+    <div>
+      <h3 className="text-center mt-3">Datos de entrada</h3>
+      <Card className="flex flex-wrap mt-1">
+        <form onSubmit={(e) => e.preventDefault()} className="flex flex-wrap gap-2 mt-2">
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <Toast ref={toast} />
+              <InputText
+                id="entradaNo"
+                name="entradaNo"
+                value={formik.values.entradaNo}
+                readOnly
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('entradaNo') })}
+              />
+              <label htmlFor="entradaNo">Entrada No.</label>
+            </span>
+            {getFormErrorMessage('entradaNo')}
+          </div>
 
-            <div className="p-col-12">
-              <span className="p-float-label">
-                <InputText
-                  id="fechaEntrada"
-                  name="fechaEntrada"
-                  value={formik.values.fechaEntrada}
-                  readOnly
-                  onChange={(e) => formik.handleChange(e)}
-                  onBlur={formik.handleBlur}
-                  className={classNames({ 'p-invalid': isFormFieldInvalid('fechaEntrada') })}
-                />
-                <label htmlFor="fechaEntrada">Fecha de Entrada</label>
-              </span>
-              {getFormErrorMessage('fechaEntrada')}
-            </div>
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <InputText
+                id="fechaEntrada"
+                name="fechaEntrada"
+                value={formik.values.fechaEntrada}
+                readOnly
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('fechaEntrada') })}
+              />
+              <label htmlFor="fechaEntrada">Fecha de Entrada</label>
+            </span>
+            {getFormErrorMessage('fechaEntrada')}
+          </div>
 
-            <div className="p-col-12">
-              <span className="p-float-label">
-                <InputText
-                  id="proveedor"
-                  name="proveedor"
-                  value={formik.values.proveedor || ''}
-                  onChange={(e) => {
-                    setEntryData({ ...entryData, proveedor: e.target.value });
-                    formik.handleChange(e);
-                  }}
-                  onBlur={formik.handleBlur}
-                  className={classNames({ 'p-invalid': isFormFieldInvalid('proveedor') })}
-                />
-                <label htmlFor="proveedor">Proveedor</label>
-              </span>
-              {getFormErrorMessage('proveedor')}
-            </div>
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <InputText
+                id="proveedor"
+                name="proveedor"
+                value={formik.values.proveedor || ''}
+                onChange={(e) => {
+                  setEntryData({ ...entryData, proveedor: e.target.value });
+                  formik.handleChange(e);
+                }}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('proveedor') })}
+              />
+              <label htmlFor="proveedor">Proveedor</label>
+            </span>
+            {getFormErrorMessage('proveedor')}
+          </div>
 
-            <div className="p-col-12">
-              <span className="p-float-label">
-                <InputText
-                  id="cliente"
-                  name="cliente"
-                  value={formik.values.cliente || ''}
-                  onChange={(e) => {
-                    setEntryData({ ...entryData, cliente: e.target.value });
-                    formik.handleChange(e);
-                  }}
-                  onBlur={formik.handleBlur}
-                  className={classNames({ 'p-invalid': isFormFieldInvalid('cliente') })}
-                />
-                <label htmlFor="cliente">Cliente</label>
-              </span>
-              {getFormErrorMessage('cliente')}
-            </div>
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <InputText
+                id="cliente"
+                name="cliente"
+                value={formik.values.cliente || ''}
+                onChange={(e) => {
+                  setEntryData({ ...entryData, cliente: e.target.value });
+                  formik.handleChange(e);
+                }}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('cliente') })}
+              />
+              <label htmlFor="cliente">Cliente</label>
+            </span>
+            {getFormErrorMessage('cliente')}
+          </div>
 
-            <div className="p-col-12">
-              <span className="p-float-label">
-                <Dropdown
-                  id="asigned_to"
-                  name="asigned_to"
-                  optionLabel="label"
-                  value={formik.values.asigned_to}
-                  options={userList}
-                  onChange={(e) => {
-                    setEntryData({ ...entryData, asigned_to: e.value });
-                    formik.handleChange(e);
-                  }}
-                  onBlur={formik.handleBlur}
-                  placeholder="Seleccionar usuario"
-                  className={classNames({ 'p-invalid': isFormFieldInvalid('asigned_to') })}
-                />
-                <label htmlFor="asigned_to">Asignado a</label>
-              </span>
-              {getFormErrorMessage('asigned_to')}
-            </div>
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <Dropdown
+                id="asigned_to"
+                name="asigned_to"
+                optionLabel="label"
+                value={formik.values.asigned_to}
+                options={userList}
+                onChange={(e) => {
+                  setEntryData({ ...entryData, asigned_to: e.value });
+                  formik.handleChange(e);
+                }}
+                onBlur={formik.handleBlur}
+                placeholder="Seleccionar usuario"
+                className={classNames({ 'p-invalid': isFormFieldInvalid('asigned_to') })}
+              />
+              <label htmlFor="asigned_to">Asignado a</label>
+            </span>
+            {getFormErrorMessage('asigned_to')}
+          </div>
 
-            <div className="p-col-12">
-              <span className="p-float-label">
-                <Dropdown
-                  id="tipo"
-                  name="tipo"
-                  options={tipoOptions}
-                  value={formik.values.tipo}
-                  onChange={(e) => {
-                    setEntryData({ ...entryData, tipo: e.value });
-                    formik.handleChange(e);
-                  }}
-                  onBlur={formik.handleBlur}
-                  placeholder="Seleccionar tipo"
-                  className={classNames({ 'p-invalid': isFormFieldInvalid('tipo') })}
-                />
-                <label htmlFor="tipo">Tipo</label>
-              </span>
-              {getFormErrorMessage('tipo')}
-            </div>
-            <div className="p-col-12">
+          <div className="p-col-12">
+            <span className="p-float-label">
+              <Dropdown
+                id="tipo"
+                name="tipo"
+                options={tipoOptions}
+                value={formik.values.tipo}
+                onChange={(e) => {
+                  setEntryData({ ...entryData, tipo: e.value });
+                  formik.handleChange(e);
+                }}
+                onBlur={formik.handleBlur}
+                placeholder="Seleccionar tipo"
+                className={classNames({ 'p-invalid': isFormFieldInvalid('tipo') })}
+              />
+              <label htmlFor="tipo">Tipo</label>
+            </span>
+            {getFormErrorMessage('tipo')}
+          </div>
+          <div className="p-col-12">
             <span className="p-float-label">
               <FileUpload
                 mode="basic"
-                accept="image/*,application/pdf" 
+                accept="image/*,application/pdf"
                 maxFileSize={1000000}
                 customUpload
                 uploadHandler={onUpload}
@@ -248,37 +255,61 @@ console.log('Document:', formik.values.document);
               />
             </span>
           </div>
-            <div className="p-col-12">
-              <Button
-                type="button"
-                className="p-button-success m-3 p-3"
-                size="small"
-                label="Registrar entrada"
-                onClick={() => {
-                  // Marcar todos los campos como tocados
-                  formik.setTouched({
-                    entradaNo: true,
-                    fechaEntrada: true,
-                    proveedor: true,
-                    cliente: true,
-                    asigned_to: true,
-                    tipo: true,
-                  });
+          <div className="p-col-12">
+          <span className="p-float-label">
+  <InputTextarea
+    id="comment"
+    name="comment"
+    value={formik.values.comment}
+    onChange={(e) => {
+      formik.handleChange(e);
+      // Actualiza el estado usando setEntryData
+      setEntryData({ ...entryData, comment: e.target.value });
+    }}
+    onBlur={formik.handleBlur}
+    className={classNames({ 'p-invalid': isFormFieldInvalid('comment') })}
+    rows={5}
+    cols={60}
+    autoResize
+  />
+  <label htmlFor="comment">Comentarios</label>
+</span>
 
-                  // Realizar la validación manualmente
-                  const errors = formik.validateForm();
 
-                  // Verificar si hay errores antes de enviar
-                  if (Object.keys(errors).length === 0) {
-                    formik.submitForm();
-                  }
-                }}
-              />
-            </div>
-          </form>
-        </Card>
-      </div>
-    );
-  };
 
-  export default EntryForm;
+            {getFormErrorMessage('comentario')}
+          </div>
+          <div className="p-col-12">
+            <Button
+              type="button"
+              className="p-button-success m-3 p-3"
+              size="small"
+              label="Registrar entrada"
+              onClick={() => {
+                // Marcar todos los campos como tocados
+                formik.setTouched({
+                  entradaNo: true,
+                  fechaEntrada: true,
+                  proveedor: true,
+                  cliente: true,
+                  asigned_to: true,
+                  tipo: true,
+                });
+
+                // Realizar la validación manualmente
+                const errors = formik.validateForm();
+
+                // Verificar si hay errores antes de enviar
+                if (Object.keys(errors).length === 0) {
+                  formik.submitForm();
+                }
+              }}
+            />
+          </div>
+        </form>
+      </Card>
+    </div>
+  );
+};
+
+export default EntryForm;

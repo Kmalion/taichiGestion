@@ -49,7 +49,8 @@ const EntrySummary = () => {
     tipo: '',
     asigned_to: null,
     cliente: '',
-    document: ""
+    document: "",
+    comment: ""
   });
 
   const [products, setProducts] = useState([]);
@@ -142,7 +143,7 @@ const EntrySummary = () => {
       });
       return;
     }
-  
+   
     const subtotalArray = products.map((product) => calculateSubtotal(product));
     const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
     const updatedEntryData = {
@@ -154,9 +155,11 @@ const EntrySummary = () => {
       totalQuantity: totalQuantity,
       created_by: created_by,
       cliente: entryData.cliente, // Mantén el valor de cliente
-      document: entryData.document, // Mantén el valor de document
+      document: entryData.document, // Mantén el valor de document  
+      comment: entryData.comment
     };
-    
+
+   
     for (const product of products) {
       await updateProductInfo(product.reference, {
         cost: product.cost,
@@ -189,7 +192,8 @@ const EntrySummary = () => {
         tipo: '',
         asigned_to: null,
         cliente: entryData.cliente,
-        document: entryData.document, 
+        document: entryData.document,
+        comment: entryData.comment
       });
       setProducts([]);
       setTotalCost(0);
@@ -204,6 +208,7 @@ const EntrySummary = () => {
         cliente: updatedEntryData.cliente,
         totalCost: updatedEntryData.totalCost,
         products: updatedEntryData.products,
+        comment:updatedEntryData.comment
       });
 
     } catch (error) {

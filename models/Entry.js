@@ -77,6 +77,9 @@ try {
     cliente: {
       type: String,
     },
+    comment: {
+      type: String,
+    },
     // Otros campos relacionados con la entrada
   });
 

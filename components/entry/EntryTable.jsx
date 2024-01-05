@@ -7,9 +7,13 @@ import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { Paginator } from 'primereact/paginator';
 import { useRouter } from 'next/navigation';
+import { Dialog } from 'primereact/dialog';
+
 
 
 const EntryTable = () => {
+  const [commentDialogVisible, setCommentDialogVisible] = useState(false);
+  const [selectedEntryComment, setSelectedEntryComment] = useState('');
   const [entries, setEntries] = useState([]);
   const [expandedRows, setExpandedRows] = useState(null);
   const [first, setFirst] = useState(0); // Para el paginador
@@ -58,6 +62,23 @@ const EntryTable = () => {
     setExpandedRows(null);
   };
 
+  const showCommentDialog = (comment) => {
+    setSelectedEntryComment(comment);
+    setCommentDialogVisible(true);
+  };
+
+  const hideCommentDialog = () => {
+    setCommentDialogVisible(false);
+  };
+
+  const commentColumn = (rowData) => (
+    <Button
+      icon="pi pi-eye"
+      onClick={() => showCommentDialog(rowData.comment)}
+      className="p-button-text p-button-rounded"
+      disabled={!rowData.comment}
+    />
+  );
 
   const statusBodyTemplate = (rowData) => {
     return <Tag value={rowData.status} severity={getEntrySeverity(rowData)}></Tag>;
@@ -190,6 +211,7 @@ const EntryTable = () => {
         <Column field="totalQuantity" header="Cantidad Total" sortable />
         <Column field="cliente" header="Cliente" sortable />
         <Column field="document" header="Documento" body={DocumentColumn} sortable />
+        <Column field="comment" header="Comentario" body={commentColumn} sortable />
         <Column
           field="asigned_to"
           header="Responsable"
@@ -198,7 +220,15 @@ const EntryTable = () => {
         />
         <Column field="created_by" header="Creado por" sortable />
       </DataTable>
-
+      <Dialog
+        visible={commentDialogVisible}
+        onHide={hideCommentDialog}
+        header="Comentario"
+        modal
+        style={{ width: '30vw' }}
+      >
+        <div>{selectedEntryComment}</div>
+      </Dialog>
     </div>
   );
 };
