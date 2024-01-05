@@ -28,13 +28,22 @@ try {
       type: String,
       required: true,
     },
-    serials: {
-      type: [String],
-    },
+    serials: [
+      {
+        serial: {
+          type: String,
+        },
+        status: {
+          type: String,
+          enum: ['disponible', 'noDisponible'], // Ajusta según tus necesidades
+          default: 'disponible',
+          required: true,
+        },
+      },
+    ],
     lote: {
       type: [String],
     },
-    
     image: {
       type: String,
     },
@@ -44,12 +53,11 @@ try {
     },
     price: {
       type: Number,
-      default: 0
-      
+      default: 0,
     },
     cost: {
       type: Number,
-      default: 0
+      default: 0,
     },
     rating: {
       type: Number,
@@ -68,7 +76,7 @@ try {
     },
     ubicacion: {
       type: String,
-      default: ''
+      default: '',
     },
     exp_date: {
       type: Date,

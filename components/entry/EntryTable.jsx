@@ -21,6 +21,8 @@ const EntryTable = () => {
   const toast = useRef(null);
   const router = useRouter();
 
+  
+
   const onRowExpand = (event) => {
     const expandedRow = { [`${event.data.entradaNo}`]: true };
     setExpandedRows((prevRows) => ({ ...prevRows, ...expandedRow }));
@@ -185,7 +187,6 @@ const EntryTable = () => {
         dataKey="entradaNo"
         header={header}
         tableStyle={{ minWidth: '60rem' }}
-        paginator // Habilitar paginador
         rows={rows} // Número de filas a mostrar por página
         totalRecords={entries.length} // Total de registros para el paginador
         onPageChange={onPageChange} // Manejador de cambio de página
@@ -220,6 +221,12 @@ const EntryTable = () => {
         />
         <Column field="created_by" header="Creado por" sortable />
       </DataTable>
+      <Paginator
+        first={first}
+        rows={rows}
+        totalRecords={entries.length}
+        onPageChange={onPageChange}
+      />
       <Dialog
         visible={commentDialogVisible}
         onHide={hideCommentDialog}

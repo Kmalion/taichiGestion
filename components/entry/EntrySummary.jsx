@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import 'moment/locale/es';
 import '../../app/styles/styles.css'
 import * as productService from '../../service/productService';
+import { getProductByReference } from '@/service/productService'; // Reemplaza 'ruta/del/servicio' con la ruta real a tu servicio
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -134,6 +135,8 @@ const EntrySummary = () => {
 
 
   const handleSaveEntry = async () => {
+    
+   
     // Verifica si la lista de productos está vacía
     if (products.length === 0) {
       toast.current.show({
@@ -143,7 +146,9 @@ const EntrySummary = () => {
       });
       return;
     }
-   
+
+
+
     const subtotalArray = products.map((product) => calculateSubtotal(product));
     const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
     const updatedEntryData = {
@@ -158,6 +163,62 @@ const EntrySummary = () => {
       document: entryData.document, // Mantén el valor de document  
       comment: entryData.comment
     };
+// Verificar duplicados en serials antes de enviar la entrada
+ for (const product of products) {
+    try {
+      const existingProduct = await getProductByReference(product.reference);
+
+      if (
+        existingProduct &&
+        (Array.isArray(product.serials) || typeof product.serials === 'string') && // Verifica si es un array o una cadena
+        Array.isArray(existingProduct.serials)
+      ) {
+        const productSerials = Array.isArray(product.serials)
+          ? product.serials
+          : [product.serials]; // Convierte a array si no lo es
+
+        console.log('Seriales existentes:', existingProduct.serials);
+        console.log('Seriales a verificar:', productSerials);
+
+        // Verifica si algún serial ya existe en la base de datos
+        const duplicateSerial = productSerials.find((serial) =>
+          existingProduct.serials.includes(serial)
+        );
+
+        console.log('Serial duplicado encontrado:', duplicateSerial);
+
+        if (duplicateSerial) {
+          // Muestra una notificación de error y detiene la creación de la entrada
+          toast.current.show({
+            severity: 'error',
+            summary: 'Error al guardar la entrada',
+            detail: `El serial '${duplicateSerial}' ya está registrado. Verifica la lista de productos.`,
+          });
+          return;
+        }
+
+        // Agrega el atributo status a cada serial en la lista de productos antes de enviar la entrada
+        product.serials = productSerials.map(serial => ({
+          serial,
+          status: 'disponible', // Puedes ajustar según tus necesidades
+        }));
+      } else {
+        console.error('product.serials o existingProduct.serials no es un array:', product.serials, existingProduct.serials);
+        // Puedes decidir cómo manejar esta situación según tus necesidades
+        return;
+      }
+    } catch (error) {
+      // Manejar errores al obtener el producto
+      console.error('Error al obtener el producto por referencia:', error);
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error al obtener el producto',
+        detail: 'Por favor, inténtalo de nuevo.',
+      });
+      return;
+    }
+}
+
 
    
     for (const product of products) {

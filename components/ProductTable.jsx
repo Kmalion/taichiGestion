@@ -16,6 +16,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
 import { useSession } from 'next-auth/react';
+import { Paginator } from 'primereact/paginator';
 import axios from 'axios';
 import '../app/styles/styles.css'
 import { v4 as uuidv4 } from 'uuid';
@@ -58,6 +59,9 @@ export default function ProductTable() {
     const toast = useRef(null);
     const dt = useRef(null);
     const { data: session } = useSession();
+    const [first, setFirst] = useState(0);
+    const [rows, setRows] = useState(10);
+    const [totalRecords, setTotalRecords] = useState(0);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [serialsDialog, setSerialsDialog] = useState(false);
     const [loteDialog, setLoteDialog] = useState(false);
@@ -156,23 +160,7 @@ export default function ProductTable() {
     );
       
 
-    const fetchProducts = async () => {
-        try {
-            const response = await axios.get('/api/products/getProducts');
-            console.log('Products fetched:', response.data);
-    
-            // Actualiza el estado inventoryStatus antes de establecer los productos
-            const updatedProducts = response.data.map(product => ({
-                ...product,
-                inventoryStatus: (parseInt(product.quantity, 10) || 0) === 0 ? 'agotado' : 'activo',
-            }));
-    
-            setProducts(updatedProducts);
-            filterProducts(typeof globalFilter === 'string' ? globalFilter : '');
-        } catch (error) {
-            console.error('Error fetching products:', error.message);
-        }
-    };
+
     
     const filterProducts = (value) => {
         if (!Array.isArray(products)) {
@@ -185,9 +173,47 @@ export default function ProductTable() {
         setFilteredProducts(filtered);
     };
 
+    const fetchProducts = async (first, rows) => {
+        try {
+          const response = await axios.get('/api/products/getProducts');
+          console.log('Products fetched:', response.data);
+      
+          // Actualiza el estado inventoryStatus antes de establecer los productos
+          const updatedProducts = response.data.map(product => ({
+            ...product,
+            inventoryStatus: (parseInt(product.quantity, 10) || 0) === 0 ? 'agotado' : 'activo',
+          }));
+      
+          filterProducts(typeof globalFilter === 'string' ? globalFilter : '');
+      
+          return {
+            products: updatedProducts,
+            totalRecords: response.data.totalRecords,
+          };
+        } catch (error) {
+          console.error('Error fetching products:', error.message);
+          return { products: [], totalRecords: 0 }; // En caso de error, devolver valores predeterminados o vacíos
+        }
+      };
+      
+
     useEffect(() => {
-        fetchProducts();
-    }, []);
+        // Obtener datos del servicio de productos
+        fetchProducts(first, rows)
+          .then((data) => {
+            if (data && data.products) {
+              setProducts(data.products);
+              console.log("Products obtenidos ",data.products)
+              setTotalRecords(data.totalRecords);
+            } else {
+              console.error('La respuesta del servicio de productos no tiene la estructura esperada:', data);
+            }
+          })
+          .catch((error) => {
+            console.error('Error al obtener productos:', error);
+          });
+      }, [first, rows]);
+      
 
     useEffect(() => {
         if (typeof globalFilter === 'string') {
@@ -195,7 +221,7 @@ export default function ProductTable() {
         }
     }, [globalFilter, products]);
 
-
+ 
 
     const formatCurrency = (value) => {
         return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -605,6 +631,10 @@ export default function ProductTable() {
         newFilters[e.field] = { value: e.value, matchMode: e.matchMode };
         setFilters(newFilters);
     };
+    const onPageChange = (event) => {
+        setFirst(event.first);
+        setRows(event.rows);
+      };
     return (
         <div>
             <Toast ref={toast} />
@@ -617,7 +647,7 @@ export default function ProductTable() {
                     selection={selectedProducts}
                     onSelectionChange={(e) => setSelectedProducts(e.value)}
                     dataKey="id"
-                    paginator
+                    
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
@@ -644,6 +674,12 @@ export default function ProductTable() {
                     
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
+                <Paginator
+          first={first}
+          rows={rows}
+          totalRecords={products.length}
+          onPageChange={onPageChange}
+        />
 
                 <Dialog
                 visible={showImageDialog}

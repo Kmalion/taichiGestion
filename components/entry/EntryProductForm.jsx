@@ -25,9 +25,6 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    console.log(`Input changed - Name: ${name}, Value: ${JSON.stringify(value)}`);
-
     setForm((prevForm) => ({
       ...prevForm,
       [name]: value.label || value,
@@ -40,11 +37,9 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
     try {
       const response = await fetch(`/api/products/getProducts?query=${query}`);
       const suggestions = await response.json();
-      console.log('Sugerencias recibidas:', suggestions);
       const data = suggestions.map((product) => product.reference);
-      console.log('data:', data);
       const references = suggestions.map((product) => ({ label: product.reference }));
-      console.log('Referencias filtradas:', references);
+  
 
       setFilteredReferences(references);
     } catch (error) {
@@ -54,9 +49,7 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form before onAddProduct:', form);
     onAddProduct(form);
-    console.log('Form after onAddProduct:', form);
     onHide();
   };
 

@@ -1,4 +1,3 @@
-
 import Product from '../../../../../models/Product';
 import connectDB from '../../../../../utils/db';
 import { NextResponse } from 'next/server';
@@ -44,7 +43,19 @@ export const PATCH = async (request, { params }) => {
             return new NextResponse('Cuerpo de solicitud no es un JSON válido', { status: 400 });
         }
 
-        // Actualizar el producto con los datos del cuerpo de la solicitud
+        // Agregar las nuevas propiedades a actualizar
+        if (updatedProductData.exp_date) {
+            existingProduct.exp_date = updatedProductData.exp_date;
+        }
+
+        if (updatedProductData.cost) {
+            existingProduct.cost = updatedProductData.cost;
+        }
+
+        if (updatedProductData.ubicacion) {
+            existingProduct.ubicacion = updatedProductData.ubicacion;
+        }
+
         // Mantener los datos existentes en serials y lote
         existingProduct.serials = existingProduct.serials.concat(updatedProductData.serials || []);
         existingProduct.lote = existingProduct.lote.concat(updatedProductData.lote || []);
@@ -74,4 +85,3 @@ export const PATCH = async (request, { params }) => {
         }
     }
 };
-

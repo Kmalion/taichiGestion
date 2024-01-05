@@ -1,4 +1,3 @@
-// getProductQuantity.js
 import Product from '@/models/Product';
 import connectDB from '@/utils/db';
 import { NextResponse } from 'next/server';
@@ -25,13 +24,19 @@ export const GET = async (request, { params }) => {
       return new NextResponse('Producto no encontrado', { status: 404 });
     }
 
-    // Responde con la cantidad actual del producto
-    return new NextResponse(JSON.stringify({ quantity: existingProduct.quantity }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    // Responde con la cantidad actual y los seriales del producto
+    return new NextResponse(
+      JSON.stringify({
+        quantity: existingProduct.quantity,
+        serials: existingProduct.serials,
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
   } catch (err) {
     console.error('Error al procesar la solicitud:', err);
     return new NextResponse('Error interno del servidor', { status: 500 });
