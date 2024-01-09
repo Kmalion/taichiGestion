@@ -9,7 +9,11 @@ export const POST = async (request) => {
     // Extrae los datos de la solicitud
     const { entradaNo, fechaEntrada, proveedor, tipo, asigned_to, products, totalCost, totalQuantity, created_by, subtotal, cliente, document, comment } = await request.json();
 
-    // Crea una instancia del servicio EntryServiceManager
+    const modifiedProducts = products.map((product) => ({
+      ...product,
+      serials: Array.isArray(product.serials) ? product.serials : [{ serial: product.serials, status: 'disponible' }],
+    }));
+    
     const entryServiceManager = new EntryServiceManager();
 
     // Crea una nueva entrada utilizando el servicio
@@ -26,7 +30,8 @@ export const POST = async (request) => {
       cliente,
       document,
       comment
-    }, products);
+    }, modifiedProducts);
+    
 
     // Responde con éxito y la información de la nueva entrada
     return new NextResponse(JSON.stringify({ redirect: '/entradas' }), {

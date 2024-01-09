@@ -41,17 +41,18 @@ const getNewEntry = async () => {
 const entradaNo = getNewEntry()
 
 const EntrySummary = () => {
+
   const toast = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [entryData, setEntryData] = useState({
-    entradaNo:  entradaNo,
+    entradaNo: entradaNo,
     fechaEntrada: getCurrentDate(),
     proveedor: '',
     tipo: '',
     asigned_to: null,
     cliente: '',
     document: "",
-    comment: ""
+    comment: "",
   });
 
   const [products, setProducts] = useState([]);
@@ -117,12 +118,11 @@ const EntrySummary = () => {
 
   const updateProductInfo = async (reference, updatedInfo) => {
     try {
-      // Realiza una solicitud PATCH al endpoint de actualización parcial del producto
       const response = await axios.patch(`/api/products/updateProductEntry/${reference}`, updatedInfo);
 
       // Verifica si la solicitud fue exitosa y maneja según sea necesario
       if (response.status === 200) {
-        console.log(`Producto actualizado con éxito (Reference: ${reference}):`, response.data);
+
       } else {
         console.error(`Error al actualizar el producto (Reference: ${reference}):`, response.data);
       }
@@ -135,8 +135,8 @@ const EntrySummary = () => {
 
 
   const handleSaveEntry = async () => {
-    
-   
+
+
     // Verifica si la lista de productos está vacía
     if (products.length === 0) {
       toast.current.show({
@@ -161,66 +161,62 @@ const EntrySummary = () => {
       created_by: created_by,
       cliente: entryData.cliente, // Mantén el valor de cliente
       document: entryData.document, // Mantén el valor de document  
-      comment: entryData.comment
+      comment: entryData.comment,
+      serials: entryData.serials
     };
-// Verificar duplicados en serials antes de enviar la entrada
- for (const product of products) {
-    try {
-      const existingProduct = await getProductByReference(product.reference);
+    // Verificar duplicados en serials antes de enviar la entrada
+    for (const product of products) {
+      try {
+        const existingProduct = await getProductByReference(product.reference);
 
-      if (
-        existingProduct &&
-        (Array.isArray(product.serials) || typeof product.serials === 'string') && // Verifica si es un array o una cadena
-        Array.isArray(existingProduct.serials)
-      ) {
-        const productSerials = Array.isArray(product.serials)
-          ? product.serials
-          : [product.serials]; // Convierte a array si no lo es
+        if (
+          existingProduct &&
+          (Array.isArray(product.serials) || typeof product.serials === 'string') && // Verifica si es un array o una cadena
+          Array.isArray(existingProduct.serials)
+        ) {
+          const productSerials = Array.isArray(product.serials)
+            ? product.serials
+            : [product.serials]; // Convierte a array si no lo es
 
-        console.log('Seriales existentes:', existingProduct.serials);
-        console.log('Seriales a verificar:', productSerials);
+      
 
-        // Verifica si algún serial ya existe en la base de datos
-        const duplicateSerial = productSerials.find((serial) =>
-          existingProduct.serials.includes(serial)
-        );
+          // Verifica si algún serial ya existe en la base de datos
+          const duplicateSerial = productSerials.find((serial) =>
+            existingProduct.serials.includes(serial)
+          );
 
-        console.log('Serial duplicado encontrado:', duplicateSerial);
+         
 
-        if (duplicateSerial) {
-          // Muestra una notificación de error y detiene la creación de la entrada
-          toast.current.show({
-            severity: 'error',
-            summary: 'Error al guardar la entrada',
-            detail: `El serial '${duplicateSerial}' ya está registrado. Verifica la lista de productos.`,
-          });
+          if (duplicateSerial) {
+            // Muestra una notificación de error y detiene la creación de la entrada
+            toast.current.show({
+              severity: 'error',
+              summary: 'Error al guardar la entrada',
+              detail: `El serial '${duplicateSerial}' ya está registrado. Verifica la lista de productos.`,
+            });
+            return;
+          }
+
+      
+        } else {
+          console.error('product.serials o existingProduct.serials no es un array:', product.serials, existingProduct.serials);
+          // Puedes decidir cómo manejar esta situación según tus necesidades
           return;
         }
-
-        // Agrega el atributo status a cada serial en la lista de productos antes de enviar la entrada
-        product.serials = productSerials.map(serial => ({
-          serial,
-          status: 'disponible', // Puedes ajustar según tus necesidades
-        }));
-      } else {
-        console.error('product.serials o existingProduct.serials no es un array:', product.serials, existingProduct.serials);
-        // Puedes decidir cómo manejar esta situación según tus necesidades
+      } catch (error) {
+        // Manejar errores al obtener el producto
+        console.error('Error al obtener el producto por referencia:', error);
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error al obtener el producto',
+          detail: 'Por favor, inténtalo de nuevo.',
+        });
         return;
       }
-    } catch (error) {
-      // Manejar errores al obtener el producto
-      console.error('Error al obtener el producto por referencia:', error);
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error al obtener el producto',
-        detail: 'Por favor, inténtalo de nuevo.',
-      });
-      return;
     }
-}
 
 
-   
+
     for (const product of products) {
       await updateProductInfo(product.reference, {
         cost: product.cost,
@@ -230,11 +226,11 @@ const EntrySummary = () => {
         lote: product.lote,
       });
     }
-  
+
     for (const product of products) {
       await handleUpdateProductQuantity(product.reference, product.quantity);
     }
-  
+
     try {
       const entradaNo = await generateEntryNo();
       // Envía los datos al backend usando Axios
@@ -259,7 +255,7 @@ const EntrySummary = () => {
       setProducts([]);
       setTotalCost(0);
       setTotalQuantity(0);
-  
+
       generatePDF({
         entradaNo: entradaNo,
         fechaEntrada: updatedEntryData.fechaEntrada,
@@ -269,7 +265,7 @@ const EntrySummary = () => {
         cliente: updatedEntryData.cliente,
         totalCost: updatedEntryData.totalCost,
         products: updatedEntryData.products,
-        comment:updatedEntryData.comment
+        comment: updatedEntryData.comment
       });
 
     } catch (error) {
@@ -282,7 +278,7 @@ const EntrySummary = () => {
       });
     }
   };
-  
+
 
   // Función para generar el PDF
   const generatePDF = (entryData) => {
@@ -435,7 +431,18 @@ const EntrySummary = () => {
             <h4>Productos Agregados:</h4>
             <DataTable value={products} footerColumnGroup={footerGroup}>
               <Column field="reference" header="Referencia" />
-              <Column field="serials" header="Serial" />
+              <Column
+                header="Serial"
+                body={(rowData) => (
+                  <span>
+                    {rowData.serials.map((serial) => (
+                      <div key={serial.serial}>
+                        {`Serial: ${serial.serial}, Status: ${serial.status}`}
+                      </div>
+                    ))}
+                  </span>
+                )}
+              />
               <Column field="ubicacion" header="Ubicación" />
               <Column field="lote" header="Lote" />
               <Column

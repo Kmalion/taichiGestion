@@ -63,6 +63,8 @@ export default function ProductTable() {
     const [rows, setRows] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [serialsDialogVisible, setSerialsDialogVisible] = useState(false);
+    const [selectedSerials, setSelectedSerials] = useState([]);
     const [serialsDialog, setSerialsDialog] = useState(false);
     const [loteDialog, setLoteDialog] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -85,7 +87,7 @@ export default function ProductTable() {
         doc.setFontSize(12);
         doc.text('Productos en stock', 40, 40);
 
-        const headers = [['Ref', 'Descripción', 'Marca', 'Serial', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiracion', 'Creado por']];
+        const headers = [['Ref', 'Descripción', 'Marca', 'Seriales', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiracion', 'Creado por']];
 
         const data = products.map(product => [
             product.reference,
@@ -116,7 +118,7 @@ export default function ProductTable() {
     };
 
     const exportExcel = () => {
-        const headers = [['Referencia', 'Descripción', 'Marca', 'Serial', 'Imagen', 'Cantidad', 'Precio', 'Categoría', 'Estado', 'Creado por', 'Ubicacion', 'Costo']];
+        const headers = [['Referencia', 'Descripción', 'Marca', 'Seriales', 'Imagen', 'Cantidad', 'Precio', 'Categoría', 'Estado', 'Creado por', 'Ubicacion', 'Costo']];
         const data = products.map(product => [
             product.reference,
             product.description,
@@ -150,18 +152,18 @@ export default function ProductTable() {
     const serialsDialogFooter = (
         <Button label="Cerrar" icon="pi pi-check" onClick={hideSerialsDialog} />
     );
-       
-    
+
+
     const hideLoteDialog = () => {
         setLoteDialog(false);
     };
     const loteDialogFooter = (
         <Button label="Cerrar" icon="pi pi-check" onClick={hideLoteDialog} />
     );
-      
 
 
-    
+
+
     const filterProducts = (value) => {
         if (!Array.isArray(products)) {
             return;
@@ -175,45 +177,44 @@ export default function ProductTable() {
 
     const fetchProducts = async (first, rows) => {
         try {
-          const response = await axios.get('/api/products/getProducts');
-          console.log('Products fetched:', response.data);
-      
-          // Actualiza el estado inventoryStatus antes de establecer los productos
-          const updatedProducts = response.data.map(product => ({
-            ...product,
-            inventoryStatus: (parseInt(product.quantity, 10) || 0) === 0 ? 'agotado' : 'activo',
-          }));
-      
-          filterProducts(typeof globalFilter === 'string' ? globalFilter : '');
-      
-          return {
-            products: updatedProducts,
-            totalRecords: response.data.totalRecords,
-          };
+            const response = await axios.get('/api/products/getProducts');
+
+
+            // Actualiza el estado inventoryStatus antes de establecer los productos
+            const updatedProducts = response.data.map(product => ({
+                ...product,
+                inventoryStatus: (parseInt(product.quantity, 10) || 0) === 0 ? 'agotado' : 'activo',
+            }));
+
+            filterProducts(typeof globalFilter === 'string' ? globalFilter : '');
+
+            return {
+                products: updatedProducts,
+                totalRecords: response.data.totalRecords,
+            };
         } catch (error) {
-          console.error('Error fetching products:', error.message);
-          return { products: [], totalRecords: 0 }; // En caso de error, devolver valores predeterminados o vacíos
+            console.error('Error fetching products:', error.message);
+            return { products: [], totalRecords: 0 }; // En caso de error, devolver valores predeterminados o vacíos
         }
-      };
-      
+    };
+
 
     useEffect(() => {
         // Obtener datos del servicio de productos
         fetchProducts(first, rows)
-          .then((data) => {
-            if (data && data.products) {
-              setProducts(data.products);
-              console.log("Products obtenidos ",data.products)
-              setTotalRecords(data.totalRecords);
-            } else {
-              console.error('La respuesta del servicio de productos no tiene la estructura esperada:', data);
-            }
-          })
-          .catch((error) => {
-            console.error('Error al obtener productos:', error);
-          });
-      }, [first, rows]);
-      
+            .then((data) => {
+                if (data && data.products) {
+                    setProducts(data.products);
+                    setTotalRecords(data.totalRecords);
+                } else {
+                    console.error('La respuesta del servicio de productos no tiene la estructura esperada:', data);
+                }
+            })
+            .catch((error) => {
+                console.error('Error al obtener productos:', error);
+            });
+    }, [first, rows]);
+
 
     useEffect(() => {
         if (typeof globalFilter === 'string') {
@@ -221,7 +222,7 @@ export default function ProductTable() {
         }
     }, [globalFilter, products]);
 
- 
+
 
     const formatCurrency = (value) => {
         return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -275,7 +276,7 @@ export default function ProductTable() {
                     image: imageUrl,
                     inventoryStatus: (parseInt(product.quantity, 10) || 0) === 0 ? 'agotado' : 'activo',
                     ubicacion: product.ubicacion,
-                  }
+                }
 
                 let response;
                 if (product.idp) {
@@ -330,11 +331,10 @@ export default function ProductTable() {
 
     const deleteProduct = async () => {
         try {
-            console.log('Valor de product.idp:', product.idp);
 
             // Concatena la URL
             const deleteProductUrl = `/api/products/deleteProduct/${product.idp}`;
-            console.log('URL delete:', deleteProductUrl);
+
 
             // Usa fetch con la URL concatenada
             const response = await fetch(deleteProductUrl, {
@@ -487,7 +487,7 @@ export default function ProductTable() {
             </div>
         );
     };
-    
+
 
     const imageBodyTemplate = (rowData) => {
         return (
@@ -542,13 +542,13 @@ export default function ProductTable() {
         switch (product.inventoryStatus) {
             case 'activo':
                 return 'success';
-    
+
             case 'inactivo':
                 return 'warning';
-    
+
             case 'agotado':
                 return 'danger';
-    
+
             default:
                 return null;
         }
@@ -589,7 +589,9 @@ export default function ProductTable() {
             <Button label="Si" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
         </React.Fragment>
     );
+
     const serialsBodyTemplate = (rowData) => {
+  
         return (
             <React.Fragment>
                 <Button icon="pi pi-search" onClick={() => showSerialsDialog(rowData)} />
@@ -597,10 +599,13 @@ export default function ProductTable() {
         );
     };
 
+
     const showSerialsDialog = (rowData) => {
         setProduct(rowData);
         setSerialsDialog(true);
     };
+
+
     const loteBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -613,18 +618,18 @@ export default function ProductTable() {
         setProduct(rowData);
         setLoteDialog(true);
     };
- 
+
     const expDateBodyTemplate = (rowData) => {
         // Supongamos que 'exp_date' es una cadena de fecha en formato ISO 8601 ('YYYY-MM-DD')
         const fecha = new Date(rowData.exp_date);
         const formattedDate = `${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()}`;
-      
+
         return (
-          <React.Fragment>
-            {formattedDate}
-          </React.Fragment>
+            <React.Fragment>
+                {formattedDate}
+            </React.Fragment>
         );
-      };
+    };
 
     const onFilterChange = (e) => {
         const newFilters = { ...filters };
@@ -634,7 +639,9 @@ export default function ProductTable() {
     const onPageChange = (event) => {
         setFirst(event.first);
         setRows(event.rows);
-      };
+    };
+
+
     return (
         <div>
             <Toast ref={toast} />
@@ -647,7 +654,7 @@ export default function ProductTable() {
                     selection={selectedProducts}
                     onSelectionChange={(e) => setSelectedProducts(e.value)}
                     dataKey="id"
-                    
+
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
@@ -664,51 +671,61 @@ export default function ProductTable() {
                     <Column field="image" header="Imágen" body={imageBodyTemplate}></Column>
                     <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
                     <Column field="category" header="Categoria" sortable style={{ minWidth: '10rem' }}></Column>
-                    <Column field="cost" header="Costo" body={costBodyTemplate}sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="cost" header="Costo" body={costBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="ubicacion" header="Ubicacion" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="inventoryStatus" header="Estado" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="price" header="Precio" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
                     <Column field="lote" header="Lote" sortable style={{ minWidth: '12rem' }} body={loteBodyTemplate}></Column>
                     <Column field="exp_date" header="Vencimiento" sortable style={{ minWidth: '12rem' }} body={expDateBodyTemplate}></Column>
                     <Column field="owner" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
-                    
+
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
                 <Paginator
-          first={first}
-          rows={rows}
-          totalRecords={products.length}
-          onPageChange={onPageChange}
-        />
+                    first={first}
+                    rows={rows}
+                    totalRecords={products.length}
+                    onPageChange={onPageChange}
+                />
 
                 <Dialog
-                visible={showImageDialog}
-                style={{ width: 'auto' }}
-                header={`${product.reference}` }
-                modal
-                onHide={closeImageDialog}
-                footer={<Button label="Cerrar" icon="pi pi-times" onClick={closeImageDialog} />}
-            >
-                {selectedImage && <img src={selectedImage} alt="Imagen más grande" style={{ width: '100%' }} />}
-            </Dialog>
-                <Dialog
-                    visible={serialsDialog}
-                    style={{ width: '30rem' }}
-                    header={`Seriales de ${product.reference}`}
+                    visible={showImageDialog}
+                    style={{ width: 'auto' }}
+                    header={`${product.reference}`}
                     modal
-                    onHide={hideSerialsDialog}
-                    footer={serialsDialogFooter}
+                    onHide={closeImageDialog}
+                    footer={<Button label="Cerrar" icon="pi pi-times" onClick={closeImageDialog} />}
                 >
-                    {product.serials && Array.isArray(product.serials) && product.serials.length > 0 ? (
-                        <ul>
-                            {product.serials.map((serialItem, index) => (
-                                <li key={index}>{serialItem}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>No hay seriales disponibles para este producto.</p>
-                    )}
+                    {selectedImage && <img src={selectedImage} alt="Imagen más grande" style={{ width: '100%' }} />}
                 </Dialog>
+                <Dialog
+    visible={serialsDialog}
+    style={{ width: '30rem' }}
+    header={`Seriales de ${product.reference}`}
+    modal
+    onHide={hideSerialsDialog}
+    footer={serialsDialogFooter}
+>
+    {product.serials && Array.isArray(product.serials) && product.serials.length > 0 ? (
+        <ul>
+            {product.serials.map((serialItem, index) => (
+                <li key={index}>
+                    <div>
+                        <strong></strong> {serialItem.serial} <span className={`p-tag ${serialItem.status === 'disponible' ? 'p-tag-success' : 'p-tag-danger'}`}>
+                            {serialItem.status}
+                        </span>
+                    </div>
+                   
+                </li>
+            ))}
+        </ul>
+    ) : (
+        <p>No hay seriales disponibles para este producto.</p>
+    )}
+</Dialog>
+
+
+
                 <Dialog
                     visible={loteDialog}
                     style={{ width: '30rem' }}

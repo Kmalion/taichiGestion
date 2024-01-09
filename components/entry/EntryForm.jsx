@@ -55,13 +55,12 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
       return errors;
     },
     onSubmit: (data) => {
-      console.log('Cliente:', formik.values.cliente);
+
       
     
       // Agrega la propiedad 'comment' a data antes de llamar a handleSaveEntry
       const dataWithComment = { ...data, comment: formik.values.comentario };
       
-      console.log('Datos:', dataWithComment);
       handleSaveEntry(dataWithComment);
       formik.resetForm();
     },
@@ -76,7 +75,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     if (selectedFile) {
       try {
         const fileUrl = await uploadFile(selectedFile);
-        console.log('URL del archivo subido:', fileUrl);
+
 
         // Muestra el Toast de éxito
         toast.current.show({

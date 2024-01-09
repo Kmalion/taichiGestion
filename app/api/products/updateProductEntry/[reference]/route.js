@@ -37,7 +37,6 @@ export const PATCH = async (request, { params }) => {
         let updatedProductData;
         try {
             updatedProductData = JSON.parse(bodyText);
-            console.log('Datos a actualizar:', updatedProductData);
         } catch (parseError) {
             console.error('Error al parsear JSON:', parseError);
             return new NextResponse('Cuerpo de solicitud no es un JSON válido', { status: 400 });

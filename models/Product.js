@@ -35,7 +35,7 @@ try {
         },
         status: {
           type: String,
-          enum: ['disponible', 'noDisponible'], // Ajusta según tus necesidades
+          enum: ['disponible', 'noDisponible'],
           default: 'disponible',
           required: true,
         },

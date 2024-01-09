@@ -31,6 +31,22 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
     }));
   };
 
+  const handleSerialsChange = (e) => {
+    const value = e.target.value;
+
+    // Añade lógica para establecer el estado en "disponible" automáticamente para serials
+    setForm((prevForm) => ({
+      ...prevForm,
+      serials: [
+        {
+          serial: value,
+          status: 'disponible',
+        },
+      ],
+    }));
+  };
+
+
   const searchReferences = async (searchQuery) => {
     const query = String(searchQuery).toLowerCase();
 
@@ -39,7 +55,7 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
       const suggestions = await response.json();
       const data = suggestions.map((product) => product.reference);
       const references = suggestions.map((product) => ({ label: product.reference }));
-  
+
 
       setFilteredReferences(references);
     } catch (error) {
@@ -115,8 +131,8 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
             <InputText
               id="serials"
               name="serials"
-              value={form.serials}
-              onChange={handleInputChange}
+              value={form.serials.length > 0 ? form.serials[0].serial : ''}
+              onChange={handleSerialsChange}
               required
             />
           </div>

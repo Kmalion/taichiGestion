@@ -12,7 +12,7 @@ export  const GET = async (request) =>{
 
         // Realiza la operación para obtener todos los productos
         const products = await Product.find();
-        // Responde con los productos en formato JSON
+
         return new NextResponse(JSON.stringify(products), {
             status: 200,
             headers: {

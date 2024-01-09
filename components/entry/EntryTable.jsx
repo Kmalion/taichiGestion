@@ -21,7 +21,7 @@ const EntryTable = () => {
   const toast = useRef(null);
   const router = useRouter();
 
-  
+
 
   const onRowExpand = (event) => {
     const expandedRow = { [`${event.data.entradaNo}`]: true };
@@ -31,7 +31,7 @@ const EntryTable = () => {
   useEffect(() => {
     try {
       EntryService.getEntries().then((data) => {
-        console.log('Datos obtenidos:', data);  // Agrega este console.log
+
         setEntries(data);
       });
     } catch (error) {
@@ -111,7 +111,19 @@ const EntryTable = () => {
             <Column field="reference" header="Referencia" sortable />
             <Column field="quantity" header="Cantidad" sortable />
             <Column field="cost" header="Costo" sortable />
-            <Column field="serials" header="Serials" sortable />
+            <Column
+              field="serials"
+              header="Serials"
+              body={(rowData) => (
+                <ul>
+                  {rowData.serials.map((serialData, index) => (
+                    <li key={index}>
+                      <strong>Serial:</strong> {serialData.serial}, <strong>Status:</strong> {serialData.status}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            />
             <Column field="lote" header="Lote" sortable />
             <Column field="ubicacion" header="Ubicación" sortable />
             <Column
@@ -150,7 +162,7 @@ const EntryTable = () => {
     </div>
   );
 
-  const DocumentColumn = ( data ) => {
+  const DocumentColumn = (data) => {
     const handleDownload = () => {
       // Verifica si la propiedad 'document' está definida en data y no es vacía
       if (data && data.document && data.document.trim() !== '') {
@@ -161,7 +173,7 @@ const EntryTable = () => {
         // Puedes mostrar una notificación al usuario indicando que no se puede descargar el documento
       }
     };
-  
+
     return (
       <Button
         icon="pi pi-download"
@@ -171,9 +183,9 @@ const EntryTable = () => {
       />
     );
   };
-  
-  
-  
+
+
+
   return (
     <div className="card">
       <Toast ref={toast} />

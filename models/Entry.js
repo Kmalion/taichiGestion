@@ -46,9 +46,19 @@ try {
           type: Number,
           required: true,
         },
-        serials: {
-          type: String,
-        },
+        serials: [
+          {
+            serial: {
+              type: String,
+            },
+            status: {
+              type: String,
+              enum: ['disponible', 'noDisponible'],
+              default: 'disponible',
+              required: true,
+            },
+          },
+        ],
         lote: {
           type: String,
         },
