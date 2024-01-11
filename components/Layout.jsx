@@ -1,11 +1,13 @@
 'use client'
 import React from 'react';
 import Head from 'next/head';
-import MenuBar from '../components/MenuBar';
+import MenuBar from './menu/MenuBar';
 import { useTheme } from '../context/ThemeContext';
-import { SessionProvider } from 'next-auth/react';
+import Footer from '@/components/menu/Footer';
+
 
 export default function Layout({ children }) {
+
   const { theme } = useTheme();
 
   const containerStyle = {
@@ -20,7 +22,10 @@ export default function Layout({ children }) {
         <link rel="stylesheet" href={`primereact/resources/themes/${theme}/theme.css`} type="text/css" key={theme} />
       </Head>
       <MenuBar />
+      
       {children}
+
+      <Footer></Footer>
     </div>
 
   );

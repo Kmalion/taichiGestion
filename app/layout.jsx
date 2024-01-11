@@ -6,9 +6,15 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 import Providers from '@/utils/Providers';
+import { locale, addLocale } from 'primereact/api';
+import filterTranslations from '@/utils/filterTranslations.json';
+
 
 
 const Layout = ({ children }) => {
+  locale('es');
+    addLocale('es', { filter: filterTranslations });
+  
   return (
     <ThemeProvider>
 

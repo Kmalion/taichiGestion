@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from 'primereact/card';
 import { useSession } from 'next-auth/react';
-import '../app/styles/styles.css'
+import '@/app/styles/styles.css'
 import { Image } from 'primereact/image';
 
 const Profile = () => {

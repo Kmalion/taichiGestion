@@ -1,0 +1,21 @@
+{
+  "startsWith": "Empieza con",
+  "contains": "Contiene",
+  "notContains": "No contiene",
+  "endsWith": "Termina con",
+  "equals": "Igual",
+  "notEquals": "No es igual",
+  "lt": "Menor que",
+  "lte": "Menor o igual que",
+  "gt": "Mayor que",
+  "gte": "Mayor o igual que",
+  "is": "Es",
+  "isNot": "No es",
+  "before": "Antes",
+  "after": "Después",
+  "dateIs": "Es",
+  "dateIsNot": "No es",
+  "dateBefore": "Antes",
+  "dateAfter": "Después",
+  "clear": "Limpiar"
+}

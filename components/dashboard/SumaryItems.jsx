@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { getAllProducts } from "../service/productService"; // Asegúrate de tener la ruta correcta
-import { EntryService } from "../service/entryService"; // Asegúrate de tener la ruta correcta
+import { getAllProducts } from "../../service/productService"; // Asegúrate de tener la ruta correcta
+import { EntryService } from "../../service/entryService"; // Asegúrate de tener la ruta correcta
 
 const SummaryItems = () => {
   const [inventoryCost, setInventoryCost] = useState(0);

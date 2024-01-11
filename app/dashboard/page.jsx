@@ -1,11 +1,11 @@
 'use client'
 import React from 'react';
-import SalesChart from '@/components/SalesChart';
+import SalesChart from '@/components/dashboard/SalesChart';
 import { Card } from 'primereact/card';
 import Layout from '@/components/Layout';
 import { useSession } from 'next-auth/react';
-import SummaryItems from '../../components/SumaryItems';
-import BestProduct from '../../components/BestProduct';
+import SummaryItems from '../../components/dashboard/SumaryItems';
+import BestProduct from '../../components/product/BestProduct';
 
 export default function Home() {
   const { data: session, status } = useSession();

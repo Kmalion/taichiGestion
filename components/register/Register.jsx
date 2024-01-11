@@ -31,7 +31,7 @@ const RegisterPage = () => {
     });
     const { email, password, role, nombre, apellido, cargo, foto } = formObject;
 
-    console.log("Datos enviados al backend:", formObject);
+   
 
     if (!isValidEmail(email)) {
       showError("Correo electrónico no válido");

@@ -4,7 +4,7 @@ import { Menubar } from 'primereact/menubar';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { signOut, useSession } from 'next-auth/react';
 import { Avatar } from 'primereact/avatar';
 
@@ -68,6 +68,16 @@ export default function MenuBar() {
           command: () => handleMenuClick('/historial'),
         },
       ],
+    },
+    {
+      label: 'Clientes',
+      icon: 'pi pi-fw pi-users',
+      command: () => handleMenuClick('/clientes'),
+    },
+    {
+      label: 'Proveedores', // Nueva opción
+      icon: 'pi pi-fw pi-truck',
+      command: () => handleMenuClick('/proveedores'),
     },
     {
       label: 'Usuario',

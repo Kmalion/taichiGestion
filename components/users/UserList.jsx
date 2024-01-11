@@ -10,7 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast'; // Agregado Toast
 import { useSession } from 'next-auth/react';
-import '../app/styles/styles.css';
+import '@/app/styles/styles.css';
 
 const UsersList = () => {
   const [users, setUsers] = useState([]);

@@ -1,5 +1,5 @@
 'use client'
-import Register from '../../components/Register'
+import Register from '@/components/register/Register'
 import Layout from '../../components/Layout';
 
 

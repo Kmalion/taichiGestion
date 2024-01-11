@@ -18,7 +18,7 @@ import { Tag } from 'primereact/tag';
 import { useSession } from 'next-auth/react';
 import { Paginator } from 'primereact/paginator';
 import axios from 'axios';
-import '../app/styles/styles.css'
+import '@/app/styles/styles.css'
 import { v4 as uuidv4 } from 'uuid';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -678,7 +678,6 @@ export default function ProductTable() {
                     <Column field="lote" header="Lote" sortable style={{ minWidth: '12rem' }} body={loteBodyTemplate}></Column>
                     <Column field="exp_date" header="Vencimiento" sortable style={{ minWidth: '12rem' }} body={expDateBodyTemplate}></Column>
                     <Column field="owner" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
-
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
                 <Paginator
