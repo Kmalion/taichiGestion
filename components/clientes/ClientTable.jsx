@@ -10,6 +10,7 @@ import ClientService from '@/service/clientService';
 import EditClientForm from '@/components/clientes/EditClientForm';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import filterTranslations from '@/utils/filterTranslations';
+import { useSession } from 'next-auth/react';
 
 
 const ClientTable = () => {
@@ -20,6 +21,7 @@ const ClientTable = () => {
   const [first, setFirst] = useState(0);
   const [globalFilter, setGlobalFilter] = useState(null);
   const [filterMatchMode, setFilterMatchMode] = useState('contains');
+  const { data: session } = useSession();
 
   const onPageChange = (event) => {
     setFirst(event.first);
@@ -115,6 +117,36 @@ const ClientTable = () => {
     const formattedDate = new Date(dateString).toLocaleDateString('es-ES', options);
     return formattedDate;
   };
+  const isAdminOrPremium = session?.user?.role && (session.user.role.includes('admin') || session.user.role.includes('premium'));
+
+  const actionBodyTemplate = (rowData) => {
+    return (
+      <React.Fragment>
+        {isAdminOrPremium && (
+          <div className=" flex justify-content-center mt-4">
+            <Button
+              icon="pi pi-pencil"
+              rounded
+              outlined
+              className="p-button-sm mr-2" // Agregado p-button-sm para hacerlo más pequeño
+              onClick={() => handleEdit(rowData)}
+              style={{ fontSize: '0.875rem' }} // Establecer el tamaño del texto según tus preferencias
+            />
+            <Button
+              icon="pi pi-trash"
+              rounded
+              outlined
+              severity="danger"
+              className="p-button-sm"
+              onClick={() => handleDelete(rowData)}
+              style={{ fontSize: '0.875rem' }}
+            />
+
+          </div>
+        )}
+      </React.Fragment>
+    );
+  };
 
   return (
     <div>
@@ -183,8 +215,8 @@ const ClientTable = () => {
           filterMatchMode={filterMatchMode}></Column>
         <Column field="ciudad" header="Ciudad" filter
           filterMatchMode={filterMatchMode}></Column>
-        <Column field="created" header="Fecha de Creación" filter
-          filterMatchMode={filterMatchMode} body={(rowData) => formatDate(rowData.created)}></Column>
+        <Column field="created" header="Fecha de Creación" sortable
+          body={(rowData) => formatDate(rowData.created)}></Column>
         <Column body={actionBodyTemplate}></Column>
       </DataTable>
 
@@ -192,14 +224,6 @@ const ClientTable = () => {
     </div>
   );
 
-  function actionBodyTemplate(rowData) {
-    return (
-      <div className="flex gap-3">
-        <Button icon="pi pi-pencil" className="p-button-rounded p-button-success p-button-outlined" onClick={() => handleEdit(rowData)} />
-        <Button icon="pi pi-trash" className="p-button-rounded p-button-danger p-button-outlined" onClick={() => handleDelete(rowData)} />
-      </div>
-    );
-  }
 };
 
 export default ClientTable;

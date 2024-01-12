@@ -3,6 +3,7 @@ import React from 'react';
 import Layout from '../../components/Layout.jsx';
 import { ThemeProvider } from '../../context/ThemeContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
+import ProvidersSummary from '@/components/proveedores/ProvidersSummary.jsx';
 
 
 function StockPage() {
@@ -14,9 +15,8 @@ function StockPage() {
     <ThemeProvider>
     <Layout>
     <div className={`app-container ${theme}`}>
-    <div>
-      <h3 className='pagetitle text-center'>Proveedores</h3>
-    </div>
+    <h3 className='pagetitle text-center'>Proveedores </h3>
+      <ProvidersSummary></ProvidersSummary>
     </div>
     </Layout>
     </ThemeProvider>

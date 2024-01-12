@@ -5,7 +5,7 @@ import { Card } from 'primereact/card';
 import Layout from '@/components/Layout';
 import { useSession } from 'next-auth/react';
 import SummaryItems from '../../components/dashboard/SumaryItems';
-import BestProduct from '../../components/product/BestProduct';
+import BestProduct from '../../components/dashboard/BestProduct';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -31,9 +31,9 @@ export default function Home() {
           <Card className='text-center mt-2' title="Ventas" style={cardStyle}>
             <SalesChart />
           </Card>
-          <Card className='mt-2' >
+          <div className='mt-2' >
             <BestProduct />
-          </Card>
+          </div>
         </div>
       </Card>
     </Layout>
