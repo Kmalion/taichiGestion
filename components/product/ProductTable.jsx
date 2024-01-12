@@ -11,7 +11,6 @@ import { Rating } from 'primereact/rating';
 import { Toolbar } from 'primereact/toolbar';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { RadioButton } from 'primereact/radiobutton';
-import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
@@ -22,8 +21,9 @@ import '@/app/styles/styles.css'
 import { v4 as uuidv4 } from 'uuid';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
+import exportToExcel from '@/utils/exports/excelExport';
+import { format } from 'date-fns';
 
 
 
@@ -78,68 +78,107 @@ export default function ProductTable() {
 
     const referenceColumn = useRef(null);
 
+
+ ///////////////////////// EXPORTAR A PDF ///////////////////////////////////   
     const exportPDF = () => {
         const unit = 'pt';
-        const size = 'A4'; // Use A1, A2, A3, A4, etc.
-        const orientation = 'landscape'; // portrait or landscape
+        const size = 'A4';
+        const orientation = 'landscape';
         const doc = new jsPDF(orientation, unit, size);
-
+      
         doc.setFontSize(12);
         doc.text('Productos en stock', 40, 40);
-
-        const headers = [['Ref', 'Descripción', 'Marca', 'Seriales', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiracion', 'Creado por']];
-
-        const data = products.map(product => [
+      
+        const headers = [['Ref', 'Descripción', 'Marca', 'Seriales', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiración', 'Creado por']];
+      
+        const data = products.map(product => {
+          const serialsValue = Array.isArray(product.serials)
+            ? product.serials.map(serial => {
+                if (serial && serial.serial) {
+                  return `Serial: ${serial.serial}, Estado: ${serial.status || 'No Disponible'}`;
+                } else {
+                  return 'Invalid Serial';
+                }
+              }).join(', ')
+            : 'No Serials';
+      
+          const formattedExpDate = product.exp_date ? format(new Date(product.exp_date), 'dd MMM yyyy HH:mm') : '';
+      
+          return [
             product.reference,
             product.description,
             product.brand,
-            product.serials.join(', '),
+            serialsValue,
             product.quantity,
             formatCurrency(product.price),
             product.category,
             product.inventoryStatus,
+            formattedExpDate,
             product.owner,
             product.cost,
-            product.ubicacion,
-            product.exp_date,
-            product.lote.join(', '),
-        ]);
-
-        autoTable(doc, {
-            head: headers,
-            body: data,
-            startY: 50,
-            theme: 'grid',
-            styles: { fontSize: 10, cellPadding: 5, textColor: [50, 50, 50] },
-            columnStyles: { 0: { cellWidth: 40 } },
+          ];
         });
+      
+        autoTable(doc, {
+          head: headers,
+          body: data,
+          startY: 50,
+          theme: 'grid',
+          styles: { fontSize: 10, cellPadding: 5, textColor: [50, 50, 50] },
+          columnStyles: { 0: { cellWidth: 40 } },
+        });
+      
+        doc.save('Taichi_productos.pdf');
+      };
 
-        doc.save('Taichi productos.pdf');
-    };
-
-    const exportExcel = () => {
-        const headers = [['Referencia', 'Descripción', 'Marca', 'Seriales', 'Imagen', 'Cantidad', 'Precio', 'Categoría', 'Estado', 'Creado por', 'Ubicacion', 'Costo']];
-        const data = products.map(product => [
-            product.reference,
-            product.description,
-            product.brand,
-            product.serials.join(', '),
-            product.image,
-            product.quantity,
-            formatCurrency(product.price),
-            product.category,
-            product.inventoryStatus,
-            product.owner,
-            product.ubicacion,
-            product.cost,
-            product.exp_date
-        ]);
-
-        const ws = XLSX.utils.aoa_to_sheet([].concat(headers, data));
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Productos');
-        XLSX.writeFile(wb, 'productos.xlsx');
-    };
+///////////// EXPORTAR A EXCEL //////////////////////
+const exportExcel = () => {
+    const headers = ['Referencia', 'Descripción', 'Marca', 'Seriales', 'Imagen', 'Cantidad', 'Precio', 'Categoría', 'Estado', 'Creado por', 'Ubicacion', 'Costo', 'Fecha de Expiración'];
+  
+    const data = products.map(product => {
+      const serialsValue = Array.isArray(product.serials)
+        ? product.serials.map(serial => {
+            if (serial && serial.serial) {
+              return `Serial: ${serial.serial}, Estado: ${serial.status || 'No Disponible'}`;
+            } else {
+              return 'Invalid Serial';
+            }
+          }).join(', ')
+        : 'No Serials';
+  
+      const formattedExpDate = product.exp_date ? format(new Date(product.exp_date), 'dd MMM yyyy HH:mm') : '';
+  
+      return [
+        product.reference,
+        product.description,
+        product.brand,
+        serialsValue,
+        product.image,
+        product.quantity,
+        formatCurrency(product.price),
+        product.category,
+        product.inventoryStatus,
+        product.owner,
+        product.ubicacion,
+        product.cost,
+        formattedExpDate
+      ];
+    });
+  
+    
+        exportToExcel(headers, data, 'productos.xlsx', 'Productos')
+          .then(buffer => {
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'productos.xlsx';
+            link.click();
+          })
+          .catch(error => {
+            console.error('Error al exportar a Excel:', error);
+          });
+      };
+////////////////////////////////////////////
 
     const onFileChange = (e) => {
         const file = e.files && e.files.length > 0 ? e.files[0] : null;

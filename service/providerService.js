@@ -33,6 +33,7 @@ const providerService = {
 
   updateProvider: async (idp, providerData) => {
     try {
+      console.log(`/api/providers/updateProvider/${idp}`);
       const response = await axios.put(`/api/providers/updateProvider/${idp}`, providerData);
 
       if (response.status === 200) {

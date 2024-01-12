@@ -4,7 +4,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
-import providerService from '@/service/providerService'; // Ajusta la importación según tu estructura de carpetas
+import providerService from '@/service/providerService'; 
 import { useRouter } from 'next/navigation';
 
 const ProvidersForm = ({ showDialog, hideDialog, onSubmit }) => {
@@ -23,13 +23,29 @@ const ProvidersForm = ({ showDialog, hideDialog, onSubmit }) => {
       },
     });
   };
+
+  const handleSubmit = async (values, { resetForm }) => {
+    try {
+      // Llama a la función createProvider del servicio
+      await providerService.createProvider(values);
+
+      // Muestra el Toast de éxito
+      showToast('success', 'Éxito', 'Proveedor registrado correctamente');
+
+      // Limpia el formulario después de registrar el proveedor
+      resetForm();
+    } catch (error) {
+      // Muestra el Toast de error
+      showToast('error', 'Error al crear el proveedor', 'Hubo un problema al crear el proveedor. Por favor, inténtalo de nuevo.');
+    }
+  };
   return (
     <Dialog
-      visible={showDialog}
-      style={{ width: '30vw' }}
-      header="Nuevo Proveedor"
-      onHide={() => hideDialog && hideDialog()}
-    >
+    visible={showDialog}
+    style={{ width: '30vw' }}
+    header="Nuevo Proveedor"
+    onHide={() => hideDialog && hideDialog()}
+  >
       <Toast ref={toast} />
       <Formik
         initialValues={{
@@ -41,7 +57,6 @@ const ProvidersForm = ({ showDialog, hideDialog, onSubmit }) => {
           direccion: '',
           ciudad: '',
           created: new Date(),
-          // Agrega más campos aquí
         }}
         validate={(values) => {
             const errors = {};
@@ -82,22 +97,8 @@ const ProvidersForm = ({ showDialog, hideDialog, onSubmit }) => {
   
             return errors;
           }}
-        onSubmit={(values, { resetForm }) => {
-          providerService
-            .createProvider(values)
-            .then(() => {
-              showToast('success', 'Éxito', 'Proveedor registrado correctamente');
-              resetForm();
-            })
-            .catch((error) => {
-              showToast(
-                'error',
-                'Error al crear el proveedor',
-                'Hubo un problema al crear el proveedor. Por favor, inténtalo de nuevo.'
-              );
-            });
-        }}
-      >
+          onSubmit={handleSubmit}
+          >
         <Form>
           <div className="p-fluid p-formgrid p-grid">
             <div className="p-field p-col-12">
@@ -159,7 +160,7 @@ const ProvidersForm = ({ showDialog, hideDialog, onSubmit }) => {
             {/* Agrega más campos aquí */}
 
             <div className="p-col-12 mt-4">
-              <Button type="submit" label="Registrar" />
+            <Button type="submit" label="Registrar" />
             </div>
           </div>
         </Form>
