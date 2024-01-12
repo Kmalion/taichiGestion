@@ -182,7 +182,7 @@ const ClientTable = () => {
         first={first}
         paginator
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-        rows={5}
+        rows={10}
         onPage={onPageChange}
         className='mt-4'
         selectionMode="single"

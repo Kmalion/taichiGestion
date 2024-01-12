@@ -1,61 +1,44 @@
 'use client'
-import React, { useRef } from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import React from 'react';
+import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
-import { Toast } from 'primereact/toast';
-import clientService from '@/service/clientService';
-import { useRouter } from 'next/navigation';
+import { Formik, Field, Form, ErrorMessage } from 'formik';
 
-const ClientForm = ({ showDialog, hideDialog, onSubmit}) => {
-  const toast = useRef(null);
-  const router = useRouter();
+const NewClientForm = ({ visible, onSave, onCancel }) => {
+  const initialValues = {
+    idc: '',
+    nombre: '',
+    contacto: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    ciudad: '',
+    created: new Date(),
+  };
 
-const showToast = (severity, summary, detail) => {
-  toast.current.show({
-    severity,
-    summary,
-    detail,
-    life: 3000,
-    onClose: () => {
-      // Cerrar el diálogo
-      hideDialog && hideDialog();
-      
-      // Redirigir a /clientes después de cerrar el diálogo
-      router.push('/clientes');
-    },
-  });
-};
+  const handleSubmit = (values) => {
+    onSave(values);
+    // Puedes agregar lógica adicional aquí, como cerrar el diálogo después de guardar
+  };
+
+  const handleCancel = () => {
+    onCancel();
+  };
 
   return (
     <Dialog
-    visible={showDialog}
-    style={{ width: '30vw' }}
-    header="Nuevo Cliente"
-    onHide={() => {
-      // Cerrar el diálogo y, si es necesario, llamar a la función hideDialog proporcionada
-      hideDialog && hideDialog();
-    }}
-  >
-      <Toast ref={toast} />
+      visible={visible}
+      style={{ width: '30vw' }}
+      header="Nuevo Cliente"
+      onHide={handleCancel}
+    >
       <Formik
-        initialValues={{
-          idc: '',
-          nombre: '',
-          contacto: '',
-          email: '',
-          telefono: '',
-          direccion: '',
-          ciudad: '',
-          created: new Date(), // Inicializar 'created' con la fecha actual
-        }}
+        initialValues={initialValues}
         validate={(values) => {
           const errors = {};
-
-          // Validaciones
           if (!values.idc.trim()) {
-            errors.idc = 'CC / NIT es requerido';
+            errors.idc = 'ID de cliente es requerido';
           }
 
           if (!values.nombre.trim()) {
@@ -84,28 +67,9 @@ const showToast = (severity, summary, detail) => {
 
           return errors;
         }}
-        onSubmit={(values, { resetForm }) => {
-          // ... (lógica de validación y envío)
-
-          clientService
-          .createClient(values)
-          .then(() => {
-            // Muestra el Toast de éxito
-            showToast('success', 'Éxito', 'Cliente registrado correctamente');
-            // También puedes intentar resetear el formulario después de mostrar el Toast
-            resetForm();
-          })
-          .catch((error) => {
-            // Muestra el Toast de error
-            showToast(
-              'error',
-              'Error al crear el cliente',
-              'Hubo un problema al crear el cliente. Por favor, inténtalo de nuevo.'
-            );
-          });
-      }}
-    >
-        <Form>
+        onSubmit={handleSubmit}
+      >
+         <Form>
           <div className="p-fluid p-formgrid p-grid">
             <div className="p-field p-col-12">
               <span className="p-float-label mt-4">
@@ -158,13 +122,12 @@ const showToast = (severity, summary, detail) => {
             <div className="p-field p-col-12">
               <span className="p-float-label mt-4">
                 <Field type="text" id="ciudad" name="ciudad" as={InputText} />
-                <label htmlFor="ciudad">Ciudad</label>
+                <label htmlFor="ciudad">Ciudad / Pais</label>
               </span>
               <ErrorMessage name="ciudad" component="small" className="p-error" />
             </div>
 
             <div className="p-col-12 mt-4">
-            
               <Button type="submit" label="Registrar" />
             </div>
           </div>
@@ -174,4 +137,4 @@ const showToast = (severity, summary, detail) => {
   );
 };
 
-export default ClientForm;
+export default NewClientForm;

@@ -8,6 +8,7 @@ import { Toast } from 'primereact/toast';
 import ProviderService from '@/service/providerService';
 import { useSession } from 'next-auth/react';
 import { Dialog } from 'primereact/dialog';
+import { FilterMatchMode, FilterOperator } from 'primereact/api';
 
 const ProvidersTable = () => {
   const [providers, setProviders] = useState([]);
@@ -15,8 +16,14 @@ const ProvidersTable = () => {
   const [editFormVisible, setEditFormVisible] = useState(false);
   const [deleteConfirmationVisible, setDeleteConfirmationVisible] = useState(false);
   const { data: session } = useSession();
+  const [globalFilter, setGlobalFilter] = useState(null);
+  const [first, setFirst] = useState(0);
+  const [filterMatchMode, setFilterMatchMode] = useState('contains');
 
-  // Ref para el Toast
+  const onPageChange = (event) => {
+    setFirst(event.first);
+  };
+
   const toast = useRef(null);
 
   useEffect(() => {
@@ -89,7 +96,12 @@ const ProvidersTable = () => {
     // Cierra el cuadro de diálogo de confirmación
     setDeleteConfirmationVisible(false);
   };
-
+  const customFilterOptions = [
+    { label: 'Contiene', value: 'contains' },
+    { label: 'Empieza con', value: 'startsWith' },
+    { label: 'Termina con', value: 'endsWith' },
+    // Agrega otras opciones según sea necesario
+  ];
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -140,15 +152,38 @@ const ProvidersTable = () => {
           <Button label="Cancelar" icon="pi pi-times" onClick={cancelDelete} className="p-button-text p-button-rounded p-button-danger p-button-outlined" />
         </div>
       </Dialog>
-      <DataTable value={providers} className="mt-4" selectionMode="single" selection={selectedProvider} onSelectionChange={(e) => setSelectedProvider(e.value)}>
+      <DataTable value={providers} first={first}
+        paginator
+        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+        rows={10}
+        onPage={onPageChange}
+        className='mt-4'
+        selectionMode="single"
+        selection={selectedProvider} 
+        onSelectionChange={(e) => setSelectedProvider(e.value)}
+        globalFilter={globalFilter}
+        emptyMessage="No se encontraron clientes"
+        >
         <Column field="idp" header="ID Proveedor"></Column>
-        <Column field="nombre" header="Nombre"></Column>
-        <Column field="contacto" header="Contacto"></Column>
-        <Column field="email" header="Email"></Column>
-        <Column field="telefono" header="Teléfono"></Column>
-        <Column field="direccion" header="Dirección"></Column>
-        <Column field="ciudad" header="Ciudad"></Column>
-        <Column field="created" header="Fecha de Creación" body={(rowData) => formatDate(rowData.created)}></Column>
+        <Column field="nombre" header="Nombre" filter
+          filterMatchMode={filterMatchMode}
+          filterOptions={customFilterOptions}></Column>
+        <Column field="contacto" header="Contacto" filter
+          filterMatchMode={filterMatchMode}
+          filterOptions={customFilterOptions}></Column>
+        <Column field="email" header="Email" filter
+          filterMatchMode={filterMatchMode}
+          filterOptions={customFilterOptions}></Column>
+        <Column field="telefono" header="Teléfono" filter
+          filterMatchMode={filterMatchMode}
+          filterOptions={customFilterOptions}></Column>
+        <Column field="direccion" header="Dirección" filter
+          filterMatchMode={filterMatchMode}
+          filterOptions={customFilterOptions}></Column>
+        <Column field="ciudad" header="Ciudad" filter
+          filterMatchMode={filterMatchMode}
+          filterOptions={customFilterOptions}></Column>
+        <Column field="created" header="Fecha de Creación" sortable body={(rowData) => formatDate(rowData.created)}></Column>
         <Column body={actionBodyTemplate}></Column>
       </DataTable>
 
