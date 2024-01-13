@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import React, { useEffect, useState } from 'react';
 import { Menubar } from 'primereact/menubar';
 import Image from 'next/image';
@@ -102,13 +102,14 @@ export default function MenuBar() {
     },
   ];
 
-  const start = (
+  const start = logoSrc ? (
     <div>
       <Link href="/dashboard">
         <Image src={logoSrc} alt="Logo" width={50} height={50} />
       </Link>
     </div>
-  );
+  ) : null;
+  
 
   const end = (
     <div className="flex flex-wrap gap-2">

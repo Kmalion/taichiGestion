@@ -13,12 +13,11 @@ const Profile = () => {
   }
 
   const { email, nombre, apellido, role, cargo, foto } = session.user;
-  console.log('Contenido de la sesión:', session);
   
  
   return (
-    <Card style={{ width: "150%", padding: "5px", height: "85vh" }}>
-      <div className="p-grid p-fluid mt-0">
+    <Card  style={{ width: "150%", padding: "5px", height: "65vh" }}>
+      <div className="p-grid p-fluid mt-0 mb-5">
         <div className="p-col-12">
           <h2 className="text-center mt-0 highlight-label ">Perfil de usuario</h2>
         </div>
