@@ -8,12 +8,15 @@ import { Toast } from 'primereact/toast';
 import { Paginator } from 'primereact/paginator';
 import { useRouter } from 'next/navigation';
 import { Dialog } from 'primereact/dialog';
+import {deleteSerialFromProduct} from '@/service/productService'
 
 
 
 const EntryTable = () => {
   const [commentDialogVisible, setCommentDialogVisible] = useState(false);
   const [selectedEntryComment, setSelectedEntryComment] = useState('');
+  const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
+  const [selectedEntryToDelete, setSelectedEntryToDelete] = useState(null);
   const [entries, setEntries] = useState([]);
   const [expandedRows, setExpandedRows] = useState(null);
   const [first, setFirst] = useState(0); // Para el paginador
@@ -73,6 +76,71 @@ const EntryTable = () => {
     setCommentDialogVisible(false);
   };
 
+  const confirmDeleteEntry = (entry) => {
+    setSelectedEntryToDelete(entry);
+    setConfirmDialogVisible(true);
+  };
+  
+
+  const hideConfirmDialog = () => {
+    // Oculta el cuadro de diálogo de confirmación
+    setConfirmDialogVisible(false);
+  };
+
+  const onConfirmDelete = () => {
+    // Lógica para confirmar la eliminación
+    if (selectedEntryToDelete) {
+      deleteEntry(selectedEntryToDelete);
+    }
+
+    // Oculta el cuadro de diálogo después de la acción
+    hideConfirmDialog();
+  };
+
+  const deleteEntry = async (entry) => {
+    try {
+      // Obtén la entrada antes de eliminarla para acceder a los detalles, como el serial
+      const entrada = await EntryService.getEntries(entry.entradaNo);
+      console.log("Entrada a eliminar", entrada);
+  
+      // Asegúrate de que hay seriales antes de intentar acceder a ellos
+      if (entrada.serials && entrada.serials.length > 0) {
+        const serialToDelete = entrada.serials[0].serial;
+        console.log("Serial a Eliminar", serialToDelete);
+  
+        // Lógica para eliminar el serial (reemplázala con tu código real)
+        // Por ejemplo, si tienes un servicio llamado SerialService, podrías hacer algo como:
+        // await SerialService.deleteSerial(serialToDelete);
+        await deleteSerialFromProduct(entry.idp, serialToDelete);
+      }
+  
+      // Elimina la entrada
+      await EntryService.deleteEntry(entry.entradaNo);
+  
+      // Muestra un mensaje de éxito con Toast
+      toast.current.show({
+        severity: 'success',
+        summary: 'Entrada eliminada',
+        detail: `La entrada No. ${entry.entradaNo} ha sido eliminada exitosamente.`,
+      });
+  
+      // Actualiza la lista de entradas después de la eliminación
+      setEntries((prevEntries) => prevEntries.filter((e) => e.entradaNo !== entry.entradaNo));
+  
+      // Cierra el cuadro de diálogo de confirmación si se utiliza una referencia
+      hideConfirmDialog();
+    } catch (error) {
+      console.error('Error al eliminar la entrada:', error);
+  
+      // Muestra un mensaje de error con Toast si la eliminación falla
+     toast.current.show({
+        severity: 'error',
+        summary: 'Error al eliminar la entrada',
+        detail: 'Hubo un problema al eliminar la entrada. Por favor, inténtalo de nuevo.',
+      });
+    }
+  };
+  
   const commentColumn = (rowData) => (
     <Button
       icon="pi pi-eye"
@@ -195,8 +263,27 @@ const EntryTable = () => {
       return 'N/A';
     }
   };
+  const renderCliente = (cliente) => {
+    if (typeof cliente === 'string') {
+      // Si es una cadena (valor anterior), simplemente muéstrala
+      return cliente;
+    } else if (typeof cliente === 'object') {
+      // Si es un objeto, probablemente un objeto con label y value
+      return cliente.label || 'N/A'; // Puedes ajustar esto según tus necesidades
+    } else {
+      // Otros tipos o valores inesperados
+      return 'N/A';
+    }
+  };
   
-
+  const deleteButtonColumn = (rowData) => (
+    <Button
+      icon="pi pi-trash"
+      onClick={() => confirmDeleteEntry(rowData)}
+      className="p-button-text p-button-rounded p-button-danger"
+    />
+  );
+  
 
   return (
     <div className="card">
@@ -234,7 +321,7 @@ const EntryTable = () => {
           )}
         />
         <Column field="totalQuantity" header="Cantidad Total" sortable />
-        <Column field="cliente" header="Cliente" sortable />
+        <Column field="cliente" header="Cliente" sortable body={(rowData) => renderCliente(rowData.cliente)} />
         <Column field="document" header="Documento" body={DocumentColumn} sortable />
         <Column field="comment" header="Comentario" body={commentColumn} sortable />
         <Column
@@ -244,7 +331,24 @@ const EntryTable = () => {
           body={(rowData) => rowData.asigned_to.label}
         />
         <Column field="created_by" header="Creado por" sortable />
+        <Column body={deleteButtonColumn} />
       </DataTable>
+      <Dialog
+        visible={confirmDialogVisible}
+        onHide={hideConfirmDialog}
+        header="Confirmar Eliminación"
+        modal
+        footer={
+          <div>
+            <Button label="Cancelar" icon="pi pi-times" onClick={hideConfirmDialog} className="p-button-text" />
+            <Button label="Confirmar" icon="pi pi-check" onClick={onConfirmDelete} autoFocus />
+          </div>
+        }
+      >
+        <div>
+          ¿Estás seguro de que deseas eliminar la entrada No. {selectedEntryToDelete?.entradaNo}?
+        </div>
+      </Dialog>
       <Paginator
         first={first}
         rows={rows}

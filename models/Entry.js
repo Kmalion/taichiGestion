@@ -20,6 +20,10 @@ try {
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
+    cliente: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
+    },
     tipo: {
       type: String,
       required: true,
@@ -82,9 +86,6 @@ try {
       type: String,
     },
     document: {
-      type: String,
-    },
-    cliente: {
       type: String,
     },
     comment: {

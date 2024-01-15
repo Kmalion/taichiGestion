@@ -55,7 +55,16 @@ export const EntryService = {
       throw error;
     }
   },
-
+  ///// Funcion de borrar 
+  deleteEntry: async (entryNo) => {
+    try {
+      // Realiza una petición al backend para eliminar la entrada
+      await axios.delete(`/api/entries/deleteEntry/${entryNo}`);
+    } catch (error) {
+      console.error('Error al eliminar la entrada:', error);
+      throw error;
+    }
+  },
   // Nueva función para obtener el número de entrada antes de guardar
   generateAndRetrieveEntryNo: async () => {
     try {

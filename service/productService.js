@@ -32,3 +32,14 @@ export const updateProductQuantity = async (reference, newQuantity) => {
     throw error;
   }
 };
+
+export const deleteSerialFromProduct = async (idp, serialToDelete) => {
+  try {
+    const response = await axios.patch(`/api/products/deleteSerialFromProduct/${idp}`, { serialToDelete });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar el serial del producto:', error);
+    throw error;
+  }
+};

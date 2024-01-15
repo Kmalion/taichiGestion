@@ -11,11 +11,13 @@ import { classNames } from 'primereact/utils';
 import { InputTextarea } from 'primereact/inputtextarea';
 import uploadFile from '../../service/fileUploadService'
 import providersService from '@/service/providerService'
+import clientService from '@/service/clientService';
 import { Dropdown } from 'primereact/dropdown';
 
 const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   const toast = useRef(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]); 
 
   const searchProviders = async (event) => {
     const query = event.query;
@@ -23,6 +25,12 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     const providers = await providersService.searchProviders(query);
     setFilteredProviders(providers);
   };
+  const searchClients = async (event) => {
+    const query = event.query;
+    const clients = await clientService.searchClients(query);
+    setFilteredClients(clients);
+  };
+
 
   const formik = useFormik({
     initialValues: {
@@ -46,7 +54,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
         errors.fechaEntrada = 'Fecha de Entrada es requerido';
       }
 
-     
+
       if (data.tipo === 'devoluciones' && !data.cliente.trim()) {
         errors.cliente = 'Cliente es requerido para devoluciones';
       }
@@ -167,49 +175,52 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
             </span>
             {getFormErrorMessage('fechaEntrada')}
           </div>
-          
+
           <div className="p-col-12">
             <span className="p-float-label">
-            <AutoComplete
-  id="proveedor"
-  name="proveedor"
-  value={formik.values.proveedor || ''}
-  suggestions={filteredProviders}
-  completeMethod={searchProviders}
-  field="label"
-  onChange={(e) => {
-    setEntryData({ ...entryData, proveedor: e.value });
-    formik.handleChange({ target: { name: 'proveedor', value: e.value } });
-  }}
-  onBlur={formik.handleBlur}
-  placeholder="Seleccionar proveedor"
-  filter
-  className={classNames({ 'p-invalid': isFormFieldInvalid('proveedor') })}
-/>
-
-
+              <AutoComplete
+                id="proveedor"
+                name="proveedor"
+                value={formik.values.proveedor || ''}
+                suggestions={filteredProviders}
+                completeMethod={searchProviders}
+                field="label"
+                onChange={(e) => {
+                  setEntryData({ ...entryData, proveedor: e.value });
+                  formik.handleChange({ target: { name: 'proveedor', value: e.value } });
+                }}
+                onBlur={formik.handleBlur}
+                placeholder="Seleccionar proveedor"
+                filter
+                className={classNames({ 'p-invalid': isFormFieldInvalid('proveedor') })}
+              />
               <label htmlFor="proveedor">Proveedor</label>
             </span>
             {getFormErrorMessage('proveedor')}
           </div>`
 
           <div className="p-col-12">
-            <span className="p-float-label">
-              <InputText
-                id="cliente"
-                name="cliente"
-                value={formik.values.cliente || ''}
-                onChange={(e) => {
-                  setEntryData({ ...entryData, cliente: e.target.value });
-                  formik.handleChange(e);
-                }}
-                onBlur={formik.handleBlur}
-                className={classNames({ 'p-invalid': isFormFieldInvalid('cliente') })}
-              />
-              <label htmlFor="cliente">Cliente</label>
-            </span>
-            {getFormErrorMessage('cliente')}
-          </div>
+  <span className="p-float-label">
+    <AutoComplete
+      id="cliente"
+      name="cliente"
+      value={formik.values.cliente || ''}
+      suggestions={filteredClients}
+      completeMethod={searchClients}
+      field="label" 
+      onChange={(e) => {
+        setEntryData({ ...entryData, cliente: e.value });
+        formik.handleChange({ target: { name: 'cliente', value: e.value } });
+      }}
+      onBlur={formik.handleBlur}
+      placeholder="Seleccionar cliente"
+      filter
+      className={classNames({ 'p-invalid': isFormFieldInvalid('cliente') })}
+    />
+    <label htmlFor="cliente">Cliente</label>
+  </span>
+  {getFormErrorMessage('cliente')}
+</div>
 
           <div className="p-col-12">
             <span className="p-float-label">
@@ -283,9 +294,6 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
               />
               <label htmlFor="comment">Comentarios</label>
             </span>
-
-
-
             {getFormErrorMessage('comentario')}
           </div>
           <div className="p-col-12">

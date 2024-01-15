@@ -87,6 +87,20 @@ const clientService = {
       throw error;
     }
   },
+  searchClients: async (query) => {
+    try {
+      const response = await axios.get(`/api/clients/getClients?query=${query}`);
+
+      if (response.status === 200) {
+        return response.data.map((provider) => ({ label: provider.nombre, value: provider.nombre }));
+      } else {
+        throw new Error('Error al buscar proveedores');
+      }
+    } catch (error) {
+      console.error('Error en la solicitud HTTP:', error.message);
+      throw error;
+    }
+  },
 
 };
 
