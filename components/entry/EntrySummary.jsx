@@ -178,7 +178,6 @@ const EntrySummary = () => {
             ? product.serials
             : [product.serials]; // Convierte a array si no lo es
 
-      
 
           // Verifica si algún serial ya existe en la base de datos
           const duplicateSerial = productSerials.find((serial) =>
@@ -233,6 +232,8 @@ const EntrySummary = () => {
 
     try {
       const entradaNo = await generateEntryNo();
+
+      console.log('Datos a enviar al backend:', updatedEntryData);
       // Envía los datos al backend usando Axios
       const response = await axios.post('/api/entries/createEntry', {
         ...updatedEntryData,

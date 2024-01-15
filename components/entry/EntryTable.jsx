@@ -183,7 +183,19 @@ const EntryTable = () => {
       />
     );
   };
-
+  const renderProveedor = (proveedor) => {
+    if (typeof proveedor === 'string') {
+      // Si es una cadena (valor anterior), simplemente muéstrala
+      return proveedor;
+    } else if (typeof proveedor === 'object') {
+      // Si es un objeto, probablemente un objeto con label y value
+      return proveedor.label || 'N/A'; // Puedes ajustar esto según tus necesidades
+    } else {
+      // Otros tipos o valores inesperados
+      return 'N/A';
+    }
+  };
+  
 
 
   return (
@@ -206,7 +218,7 @@ const EntryTable = () => {
         <Column expander style={{ width: '3rem', fontSize: '5px' }} />
         <Column field="entradaNo" header="Entrada No." sortable />
         <Column field="fechaEntrada" header="Fecha" sortable />
-        <Column field="proveedor" header="Proveedor" sortable />
+        <Column field="proveedor" header="Proveedor" sortable body={(rowData) => renderProveedor(rowData.proveedor)} />
         <Column field="tipo" header="Tipo" sortable />
         <Column
           field="totalCost"

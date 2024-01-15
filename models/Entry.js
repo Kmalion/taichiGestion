@@ -17,7 +17,7 @@ try {
       required: true,
     },
     proveedor: {
-      type: String,
+      type: mongoose.Schema.Types.Mixed,
       required: true,
     },
     tipo: {
