@@ -26,6 +26,8 @@ export const getProductByReference = async (reference) => {
 
 export const updateProductQuantity = async (reference, newQuantity) => {
   try {
+    console.log("Referencia a actualizar servicio: ", reference)
+    console.log("Nueva cantidad servicio: ", newQuantity)
     await axios.put(`/api/products/updateProductQuantity/${reference}`, { quantity: newQuantity });
   } catch (error) {
     console.error('Error al actualizar la cantidad del producto:', error);
@@ -33,13 +35,30 @@ export const updateProductQuantity = async (reference, newQuantity) => {
   }
 };
 
-export const deleteSerialFromProduct = async (idp, serialToDelete) => {
+export const deleteSerialFromProduct = async (reference, serialToDelete, loteToDelete, ubicacionToDelete) => {
   try {
-    const response = await axios.patch(`/api/products/deleteSerialFromProduct/${idp}`, { serialToDelete });
+    console.log("Referencia a eliminar SERVICIO", reference);
+    console.log("Serial desde el servicio: ", serialToDelete);
+    console.log("Lote desde el servicio: ", loteToDelete);
+    console.log("Ubicación desde el servicio: ", ubicacionToDelete);
+
+    // Configura axios para enviar datos como JSON
+    axios.defaults.headers['Content-Type'] = 'application/json';
+
+    // Envia la solicitud DELETE con los datos en el cuerpo
+    const response = await axios.delete(`/api/products/deleteSerialFromProduct/${reference}`, {
+      data: {
+        serials: serialToDelete,
+        lote: loteToDelete,
+        ubicacion: ubicacionToDelete,
+      },
+    });
+
     console.log(response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al eliminar el serial del producto:', error);
+    console.error('Error al eliminar el serial, lote y ubicación del producto:', error);
     throw error;
   }
 };
+

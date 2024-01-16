@@ -31,6 +31,24 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     setFilteredClients(clients);
   };
 
+  const loadAsignedToOptions = async () => {
+    try {
+      // Lógica para obtener los datos desde el servidor, por ejemplo, mediante una solicitud HTTP
+      const response = await axios.get('/api/asignedTo/getAsignedToOptions');
+      const data = response.data;
+
+      // Actualiza el estado con los datos obtenidos
+      setTipoOptions(data);
+    } catch (error) {
+      console.error('Error al obtener opciones de "Asignado a":', error);
+      // Manejar el error según tus necesidades
+    }
+  };
+
+  useEffect(() => {
+    // Cargar los datos de "Asignado a" al montar el componente
+    loadAsignedToOptions();
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -222,7 +240,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   {getFormErrorMessage('cliente')}
 </div>
 
-          <div className="p-col-12">
+    <div className="p-col-12">
             <span className="p-float-label">
               <Dropdown
                 id="asigned_to"
@@ -236,6 +254,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                 }}
                 onBlur={formik.handleBlur}
                 placeholder="Seleccionar usuario"
+                onShow={loadAsignedToOptions}  // Llama a la función solo para el Dropdown de "Asignado a"
                 className={classNames({ 'p-invalid': isFormFieldInvalid('asigned_to') })}
               />
               <label htmlFor="asigned_to">Asignado a</label>

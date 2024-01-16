@@ -68,6 +68,7 @@ export default function ProductTable() {
     const [serialsDialog, setSerialsDialog] = useState(false);
     const [loteDialog, setLoteDialog] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [ubicacionDialogVisible, setUbicacionDialogVisible] = useState(false);
     const [filters, setFilters] = useState({
         global: { value: '', matchMode: FilterMatchMode.CONTAINS },
         reference: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
@@ -79,106 +80,106 @@ export default function ProductTable() {
     const referenceColumn = useRef(null);
 
 
- ///////////////////////// EXPORTAR A PDF ///////////////////////////////////   
+    ///////////////////////// EXPORTAR A PDF ///////////////////////////////////   
     const exportPDF = () => {
         const unit = 'pt';
         const size = 'A4';
         const orientation = 'landscape';
         const doc = new jsPDF(orientation, unit, size);
-      
+
         doc.setFontSize(12);
         doc.text('Productos en stock', 40, 40);
-      
-        const headers = [['Ref', 'Descripción', 'Marca', 'Seriales', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiración', 'Creado por']];
-      
-        const data = products.map(product => {
-          const serialsValue = Array.isArray(product.serials)
-            ? product.serials.map(serial => {
-                if (serial && serial.serial) {
-                  return `Serial: ${serial.serial}, Estado: ${serial.status || 'No Disponible'}`;
-                } else {
-                  return 'Invalid Serial';
-                }
-              }).join(', ')
-            : 'No Serials';
-      
-          const formattedExpDate = product.exp_date ? format(new Date(product.exp_date), 'dd MMM yyyy HH:mm') : '';
-      
-          return [
-            product.reference,
-            product.description,
-            product.brand,
-            serialsValue,
-            product.quantity,
-            formatCurrency(product.price),
-            product.category,
-            product.inventoryStatus,
-            formattedExpDate,
-            product.owner,
-            product.cost,
-          ];
-        });
-      
-        autoTable(doc, {
-          head: headers,
-          body: data,
-          startY: 50,
-          theme: 'grid',
-          styles: { fontSize: 10, cellPadding: 5, textColor: [50, 50, 50] },
-          columnStyles: { 0: { cellWidth: 40 } },
-        });
-      
-        doc.save('Taichi_productos.pdf');
-      };
 
-///////////// EXPORTAR A EXCEL //////////////////////
-const exportExcel = () => {
-    const headers = ['Referencia', 'Descripción', 'Marca', 'Seriales', 'Imagen', 'Cantidad', 'Precio', 'Categoría', 'Estado', 'Creado por', 'Ubicacion', 'Costo', 'Fecha de Expiración'];
-  
-    const data = products.map(product => {
-      const serialsValue = Array.isArray(product.serials)
-        ? product.serials.map(serial => {
-            if (serial && serial.serial) {
-              return `Serial: ${serial.serial}, Estado: ${serial.status || 'No Disponible'}`;
-            } else {
-              return 'Invalid Serial';
-            }
-          }).join(', ')
-        : 'No Serials';
-  
-      const formattedExpDate = product.exp_date ? format(new Date(product.exp_date), 'dd MMM yyyy HH:mm') : '';
-  
-      return [
-        product.reference,
-        product.description,
-        product.brand,
-        serialsValue,
-        product.image,
-        product.quantity,
-        formatCurrency(product.price),
-        product.category,
-        product.inventoryStatus,
-        product.owner,
-        product.ubicacion,
-        product.cost,
-        formattedExpDate
-      ];
-    });
-  
-    
+        const headers = [['Ref', 'Descripción', 'Marca', 'Seriales', 'Cantidad', 'Costo', 'Categoría', 'Estado', 'Fecha expiración', 'Creado por']];
+
+        const data = products.map(product => {
+            const serialsValue = Array.isArray(product.serials)
+                ? product.serials.map(serial => {
+                    if (serial && serial.serial) {
+                        return `Serial: ${serial.serial}, Estado: ${serial.status || 'No Disponible'}`;
+                    } else {
+                        return 'Invalid Serial';
+                    }
+                }).join(', ')
+                : 'No Serials';
+
+            const formattedExpDate = product.exp_date ? format(new Date(product.exp_date), 'dd MMM yyyy HH:mm') : '';
+
+            return [
+                product.reference,
+                product.description,
+                product.brand,
+                serialsValue,
+                product.quantity,
+                formatCurrency(product.price),
+                product.category,
+                product.inventoryStatus,
+                formattedExpDate,
+                product.owner,
+                product.cost,
+            ];
+        });
+
+        autoTable(doc, {
+            head: headers,
+            body: data,
+            startY: 50,
+            theme: 'grid',
+            styles: { fontSize: 10, cellPadding: 5, textColor: [50, 50, 50] },
+            columnStyles: { 0: { cellWidth: 40 } },
+        });
+
+        doc.save('Taichi_productos.pdf');
+    };
+
+    ///////////// EXPORTAR A EXCEL //////////////////////
+    const exportExcel = () => {
+        const headers = ['Referencia', 'Descripción', 'Marca', 'Seriales', 'Imagen', 'Cantidad', 'Precio', 'Categoría', 'Estado', 'Creado por', 'Ubicacion', 'Costo', 'Fecha de Expiración'];
+
+        const data = products.map(product => {
+            const serialsValue = Array.isArray(product.serials)
+                ? product.serials.map(serial => {
+                    if (serial && serial.serial) {
+                        return `Serial: ${serial.serial}, Estado: ${serial.status || 'No Disponible'}`;
+                    } else {
+                        return 'Invalid Serial';
+                    }
+                }).join(', ')
+                : 'No Serials';
+
+            const formattedExpDate = product.exp_date ? format(new Date(product.exp_date), 'dd MMM yyyy HH:mm') : '';
+
+            return [
+                product.reference,
+                product.description,
+                product.brand,
+                serialsValue,
+                product.image,
+                product.quantity,
+                formatCurrency(product.price),
+                product.category,
+                product.inventoryStatus,
+                product.owner,
+                product.ubicacion,
+                product.cost,
+                formattedExpDate
+            ];
+        });
+
+
         exportToExcel(headers, data, 'productos.xlsx', 'Productos')
-          .then(buffer => {
-            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = 'productos.xlsx';
-            link.click();
-          })
-          .catch(error => {
-            console.error('Error al exportar a Excel:', error);
-          });
-      };
-////////////////////////////////////////////
+            .then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = 'productos.xlsx';
+                link.click();
+            })
+            .catch(error => {
+                console.error('Error al exportar a Excel:', error);
+            });
+    };
+    ////////////////////////////////////////////
 
     const onFileChange = (e) => {
         const file = e.files && e.files.length > 0 ? e.files[0] : null;
@@ -218,7 +219,7 @@ const exportExcel = () => {
         try {
             const response = await axios.get('/api/products/getProducts');
 
-
+           
             // Actualiza el estado inventoryStatus antes de establecer los productos
             const updatedProducts = response.data.map(product => ({
                 ...product,
@@ -630,7 +631,7 @@ const exportExcel = () => {
     );
 
     const serialsBodyTemplate = (rowData) => {
-  
+
         return (
             <React.Fragment>
                 <Button icon="pi pi-search" onClick={() => showSerialsDialog(rowData)} />
@@ -680,6 +681,28 @@ const exportExcel = () => {
         setRows(event.rows);
     };
 
+    const ubicacionBodyTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                {rowData.ubicacion ? (
+                    <React.Fragment>
+                        <Button icon="pi pi-map-marker" onClick={() => showUbicacionDialog(rowData)} className="p-button-rounded p-button-text" />
+                    </React.Fragment>
+                ) : (
+                    <span>No hay ubicaciones disponibles</span>
+                )}
+            </React.Fragment>
+        );
+    };
+
+    const showUbicacionDialog = (rowData) => {
+        setProduct(rowData); // Esto asume que `setProduct` es tu función para actualizar el estado del producto
+        setUbicacionDialogVisible(true); // Esto asume que `setUbicacionDialog` es tu función para mostrar el diálogo de ubicación
+    };
+    const hideUbicacionDialog = () => {
+        setUbicacionDialogVisible(false);
+    };
+
 
     return (
         <div>
@@ -711,7 +734,7 @@ const exportExcel = () => {
                     <Column field="serials" header="Serial" sortable style={{ minWidth: '12rem' }} body={serialsBodyTemplate}></Column>
                     <Column field="category" header="Categoria" sortable style={{ minWidth: '10rem' }}></Column>
                     <Column field="cost" header="Costo" body={costBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
-                    <Column field="ubicacion" header="Ubicacion" sortable style={{ minWidth: '12rem' }}></Column>
+                    <Column field="ubicacion" header="Ubicacion" sortable style={{ minWidth: '12rem' }} body={ubicacionBodyTemplate}></Column>
                     <Column field="inventoryStatus" header="Estado" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="price" header="Precio" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
                     <Column field="lote" header="Lote" sortable style={{ minWidth: '12rem' }} body={loteBodyTemplate}></Column>
@@ -737,31 +760,47 @@ const exportExcel = () => {
                     {selectedImage && <img src={selectedImage} alt="Imagen más grande" style={{ width: '100%' }} />}
                 </Dialog>
                 <Dialog
-    visible={serialsDialog}
-    style={{ width: '30rem' }}
-    header={`Seriales de ${product.reference}`}
-    modal
-    onHide={hideSerialsDialog}
-    footer={serialsDialogFooter}
->
-    {product.serials && Array.isArray(product.serials) && product.serials.length > 0 ? (
-        <ul>
-            {product.serials.map((serialItem, index) => (
-                <li key={index}>
-                    <div>
-                        <strong></strong> {serialItem.serial} <span className={`p-tag ${serialItem.status === 'disponible' ? 'p-tag-success' : 'p-tag-danger'}`}>
-                            {serialItem.status}
-                        </span>
-                    </div>
-                   
-                </li>
-            ))}
-        </ul>
-    ) : (
-        <p>No hay seriales disponibles para este producto.</p>
-    )}
-</Dialog>
+                    visible={serialsDialog}
+                    style={{ width: '30rem' }}
+                    header={`Seriales de ${product.reference}`}
+                    modal
+                    onHide={hideSerialsDialog}
+                    footer={serialsDialogFooter}
+                >
+                    {product.serials && Array.isArray(product.serials) && product.serials.length > 0 ? (
+                        <ul>
+                            {product.serials.map((serialItem, index) => (
+                                <li key={index}>
+                                    <div>
+                                        <strong></strong> {serialItem.serial} <span className={`p-tag ${serialItem.status === 'disponible' ? 'p-tag-success' : 'p-tag-danger'}`}>
+                                            {serialItem.status}
+                                        </span>
+                                    </div>
 
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No hay seriales disponibles para este producto.</p>
+                    )}
+                </Dialog>
+
+                <Dialog
+                    visible={ubicacionDialogVisible}
+                    style={{ width: '30rem' }}
+                    header={`Ubicación de ${product.reference}`}
+                    modal
+                    onHide={hideUbicacionDialog}
+                >
+                    {product.ubicacion && product.ubicacion.length > 0 ? (
+                        <div>
+                            <p>Ubicación: {product.ubicacion}</p>
+                            {/* Agrega aquí cualquier otro contenido relacionado con la ubicación */}
+                        </div>
+                    ) : (
+                        <p>No hay ubicaciones disponibles para este producto.</p>
+                    )}
+                </Dialog>
 
 
                 <Dialog

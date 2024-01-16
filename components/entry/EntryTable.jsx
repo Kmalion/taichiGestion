@@ -8,7 +8,8 @@ import { Toast } from 'primereact/toast';
 import { Paginator } from 'primereact/paginator';
 import { useRouter } from 'next/navigation';
 import { Dialog } from 'primereact/dialog';
-import {deleteSerialFromProduct} from '@/service/productService'
+import { deleteSerialFromProduct, getProductByReference } from '@/service/productService'
+import { updateProductQuantity } from '@/service/productService';
 
 
 
@@ -80,7 +81,7 @@ const EntryTable = () => {
     setSelectedEntryToDelete(entry);
     setConfirmDialogVisible(true);
   };
-  
+
 
   const hideConfirmDialog = () => {
     // Oculta el cuadro de diálogo de confirmación
@@ -99,48 +100,81 @@ const EntryTable = () => {
 
   const deleteEntry = async (entry) => {
     try {
-      // Obtén la entrada antes de eliminarla para acceder a los detalles, como el serial
-      const entrada = await EntryService.getEntries(entry.entradaNo);
-      console.log("Entrada a eliminar", entrada);
-  
-      // Asegúrate de que hay seriales antes de intentar acceder a ellos
-      if (entrada.serials && entrada.serials.length > 0) {
-        const serialToDelete = entrada.serials[0].serial;
-        console.log("Serial a Eliminar", serialToDelete);
-  
-        // Lógica para eliminar el serial (reemplázala con tu código real)
-        // Por ejemplo, si tienes un servicio llamado SerialService, podrías hacer algo como:
-        // await SerialService.deleteSerial(serialToDelete);
-        await deleteSerialFromProduct(entry.idp, serialToDelete);
+      // Verifica si hay productos
+      if (!entry || !entry.products || entry.products.length === 0) {
+        console.warn("La entrada no tiene productos o es undefined.");
+        // Puedes manejar esta situación según tus necesidades
+      } else {
+        // Itera sobre los productos de la entrada
+        for (const product of entry.products) {
+       
+
+          // Verifica si hay seriales en el producto
+          if (!product || !product.serials || product.serials.length === 0) {
+            console.warn("El producto no tiene seriales o es undefined.");
+            // Puedes manejar esta situación según tus necesidades
+          } else {
+            try {
+              // Obtiene la cantidad anterior del producto
+              const oldProduct = await getProductByReference(product.reference);
+              const oldQuantity = oldProduct.quantity;
+              
+
+              // Calcula la nueva cantidad restando la cantidad de la entrada
+              const newQuantity = oldQuantity - product.quantity;
+              
+
+              for (const serial of product.serials) {
+                
+
+                try {
+                  // Llama a la función para eliminar el serial, lote y ubicación
+                  await deleteSerialFromProduct(product.reference, serial.serial, product.lote, product.ubicacion);
+                  
+
+                  // Actualiza la cantidad de producto existente utilizando la nueva cantidad calculada
+                  await updateProductQuantity(product.reference, newQuantity);
+                } catch (error) {
+                
+                  // Puedes manejar el error según tus necesidades
+                }
+              }
+            } catch (error) {
+              console.error('Error al obtener la información del producto:', error);
+              // Puedes manejar el error según tus necesidades
+            }
+          }
+        }
       }
-  
+
       // Elimina la entrada
       await EntryService.deleteEntry(entry.entradaNo);
-  
+
       // Muestra un mensaje de éxito con Toast
       toast.current.show({
         severity: 'success',
         summary: 'Entrada eliminada',
         detail: `La entrada No. ${entry.entradaNo} ha sido eliminada exitosamente.`,
       });
-  
+
       // Actualiza la lista de entradas después de la eliminación
       setEntries((prevEntries) => prevEntries.filter((e) => e.entradaNo !== entry.entradaNo));
-  
+
       // Cierra el cuadro de diálogo de confirmación si se utiliza una referencia
       hideConfirmDialog();
     } catch (error) {
       console.error('Error al eliminar la entrada:', error);
-  
+
       // Muestra un mensaje de error con Toast si la eliminación falla
-     toast.current.show({
+      toast.current.show({
         severity: 'error',
         summary: 'Error al eliminar la entrada',
         detail: 'Hubo un problema al eliminar la entrada. Por favor, inténtalo de nuevo.',
       });
     }
   };
-  
+
+
   const commentColumn = (rowData) => (
     <Button
       icon="pi pi-eye"
@@ -275,7 +309,7 @@ const EntryTable = () => {
       return 'N/A';
     }
   };
-  
+
   const deleteButtonColumn = (rowData) => (
     <Button
       icon="pi pi-trash"
@@ -283,7 +317,7 @@ const EntryTable = () => {
       className="p-button-text p-button-rounded p-button-danger"
     />
   );
-  
+
 
   return (
     <div className="card">

@@ -75,7 +75,7 @@ try {
       required: true,
     },
     ubicacion: {
-      type: String,
+      type: [String],
       default: '',
     },
     exp_date: {
