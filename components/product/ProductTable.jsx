@@ -61,7 +61,7 @@ export default function ProductTable() {
     const { data: session } = useSession();
     const [first, setFirst] = useState(0);
     const [rows, setRows] = useState(10);
-    const [totalRecords, setTotalRecords] = useState(0);
+    const totalRecords = products.length;
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [serialsDialogVisible, setSerialsDialogVisible] = useState(false);
     const [selectedSerials, setSelectedSerials] = useState([]);
@@ -679,19 +679,16 @@ export default function ProductTable() {
     const onPageChange = (event) => {
         setFirst(event.first);
         setRows(event.rows);
-    };
+      };
+      
 
     const ubicacionBodyTemplate = (rowData) => {
         return (
-            <React.Fragment>
-                {rowData.ubicacion ? (
+           
                     <React.Fragment>
                         <Button icon="pi pi-map-marker" onClick={() => showUbicacionDialog(rowData)} className="p-button-rounded p-button-text" />
                     </React.Fragment>
-                ) : (
-                    <span>No hay ubicaciones disponibles</span>
-                )}
-            </React.Fragment>
+            
         );
     };
 
@@ -716,8 +713,8 @@ export default function ProductTable() {
                     selection={selectedProducts}
                     onSelectionChange={(e) => setSelectedProducts(e.value)}
                     dataKey="id"
-
                     rows={10}
+                    paginator
                     rowsPerPageOptions={[5, 10, 25]}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
@@ -742,12 +739,7 @@ export default function ProductTable() {
                     <Column field="owner" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                 </DataTable>
-                <Paginator
-                    first={first}
-                    rows={rows}
-                    totalRecords={products.length}
-                    onPageChange={onPageChange}
-                />
+
 
                 <Dialog
                     visible={showImageDialog}

@@ -21,6 +21,8 @@ import * as productService from '../../service/productService';
 import { getProductByReference } from '@/service/productService'; // Reemplaza 'ruta/del/servicio' con la ruta real a tu servicio
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { ProgressBar } from 'primereact/progressbar';
+
 
 
 
@@ -44,6 +46,8 @@ const EntrySummary = () => {
 
   const toast = useRef(null);
   const [showForm, setShowForm] = useState(false);
+  const [showProgressBar, setShowProgressBar] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [entryData, setEntryData] = useState({
     entradaNo: entradaNo,
     fechaEntrada: getCurrentDate(),
@@ -135,9 +139,7 @@ const EntrySummary = () => {
 
 
   const handleSaveEntry = async () => {
-
-
-    // Verifica si la lista de productos está vacía
+    setLoading(true)
     if (products.length === 0) {
       toast.current.show({
         severity: 'error',
@@ -239,7 +241,7 @@ const EntrySummary = () => {
         ...updatedEntryData,
         entradaNo: entradaNo, // Usa el número de entrada obtenido
       });
-      // Muestra una notificación de éxito
+      setLoading(false);
       toast.current.show({ severity: 'success', summary: 'Entrada guardada con éxito', detail: response.data.message });
       router.push('/entradas');
       // Reinicia el estado del formulario
@@ -270,6 +272,7 @@ const EntrySummary = () => {
       });
 
     } catch (error) {
+      setLoading(false);
       // Maneja errores si la solicitud al backend falla
       console.error('Error al guardar la entrada:', error);
       toast.current.show({
@@ -280,61 +283,78 @@ const EntrySummary = () => {
     }
   };
 
+// Función para generar el PDF
+const generatePDF = (entryData) => {
+  // Crear un documento PDF con orientación horizontal
+  const pdfDoc = new jsPDF({ orientation: 'landscape' });
 
-  // Función para generar el PDF
-  const generatePDF = (entryData) => {
-    // Crear un documento PDF con orientación horizontal
-    const pdfDoc = new jsPDF({ orientation: 'landscape' });
+  // Establecer el tamaño de letra más pequeño
+  pdfDoc.setFontSize(10);
+  pdfDoc.setTextColor(0, 0, 0); // Color de texto negro
 
-    // Establecer el tamaño de letra más pequeño
-    pdfDoc.setFontSize(10);
-    pdfDoc.setTextColor(0, 0, 0); // Color de texto negro
+  // Sección de Información de la Entrada
+  const entryInfoLines = [
+    `Entrada No: ${entryData.entradaNo}`,
+    `Fecha: ${entryData.fechaEntrada}`,
+    `Proveedor: ${entryData.proveedor.value}`,
+    `Tipo: ${entryData.tipo}`,
+    `Asignado a: ${entryData.asigned_to ? entryData.asigned_to.label : 'N/A'}`,
+    `Cliente: ${entryData.cliente.value || 'N/A'}`,
+    `Total: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(entryData.totalCost)}`
+  ];
 
-    // Sección de Información de la Entrada
-    const entryInfoLines = [
-      `Entrada No: ${entryData.entradaNo}`,
-      `Fecha: ${entryData.fechaEntrada}`,
-      `Proveedor: ${entryData.proveedor}`,
-      `Tipo: ${entryData.tipo}`,
-      `Asignado a: ${entryData.asigned_to ? entryData.asigned_to.label : 'N/A'}`,
-      `Cliente: ${entryData.cliente || 'N/A'}`,
-      `Total: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(entryData.totalCost)}`
-    ];
+  const lineHeight = 10; // Espaciado entre líneas
 
-    const lineHeight = 10; // Espaciado entre líneas
+  entryInfoLines.forEach((line, index) => {
+    const yPosition =  index * lineHeight;
+    pdfDoc.text(pdfDoc.splitTextToSize(line, 190), 10, yPosition);
+  });
 
-    entryInfoLines.forEach((line, index) => {
-      const yPosition = 10 + index * lineHeight;
-      pdfDoc.text(pdfDoc.splitTextToSize(line, 190), 10, yPosition);
-    });
 
-    // Añadir la tabla de productos al PDF
-    const productHeaders = ['Referencia', 'Serial', 'Ubicación', 'Lote', 'Costo', 'Cantidad', 'Subtotal'];
-    const productData = entryData.products.map(product => {
-      const subtotal = calculateSubtotal(product);
-      return [
-        product.reference,
-        Array.isArray(product.serials) ? product.serials.join(', ') : product.serials,
-        product.ubicacion,
-        Array.isArray(product.lote) ? product.lote.join(', ') : product.lote,
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.cost),
-        product.quantity,
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(subtotal),
-      ];
-    });
+// Añadir la tabla de productos al PDF
+const productHeaders = ['Referencia', 'Serial', 'Ubicación', 'Lote', 'Costo', 'Cantidad', 'Subtotal'];
+const productData = entryData.products.map(product => {
+  const formattedSerials = formatSerials(product.serials);
+  const formattedLote = Array.isArray(product.lote) ? product.lote.join(', ') : product.lote;
+  const subtotal = calculateSubtotal(product);
 
-    // Sección de Tabla de Productos
-    pdfDoc.autoTable({
-      head: [productHeaders],
-      body: productData,
-      startY: 120, // Ajustar la posición de inicio de la tabla
-      margin: { top: 10 }, // Ajustar el margen superior
-    });
+  return [
+    product.reference,
+    formattedSerials, // Usa la variable, no la función
+    product.ubicacion,
+    formattedLote,
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.cost),
+    product.quantity,
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(subtotal),
+  ];
+});
 
-    // Guardar el PDF con el nombre personalizado
-    const fileName = `EntradaTHC_${entryData.entradaNo}.pdf`;
-    pdfDoc.save(fileName);
-  };
+
+  // Sección de Tabla de Productos
+  pdfDoc.autoTable({
+    head: [productHeaders],
+    body: productData,
+    startY: 70, // Ajustar la posición de inicio de la tabla
+    margin: { top: 10 }, // Ajustar el margen superior
+  });
+
+  // Guardar el PDF con el nombre personalizado
+  const fileName = `EntradaTHC_${entryData.entradaNo}.pdf`;
+  pdfDoc.save(fileName);
+};
+
+
+const formatSerials = (serials) => {
+  if (!serials || !Array.isArray(serials)) {
+    return ''; // O cualquier valor predeterminado que desees mostrar
+  }
+
+  return serials.map(serialObj => {
+    const { serial, status } = serialObj;
+    return `${serial} (${status})`;
+  }).join(', ');
+};
+
 
 
   useEffect(() => {
@@ -481,6 +501,14 @@ const EntrySummary = () => {
                 )}
               />
             </DataTable>
+            <Dialog
+  visible={loading}
+  modal
+  onHide={() => setLoading(false)}
+  header="Procesando solicitud"
+>
+  <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
+</Dialog>
           </div>
         )}
       </Card>
