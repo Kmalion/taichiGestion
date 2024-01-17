@@ -18,18 +18,43 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   const toast = useRef(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]); 
+  const [loading, setLoading] = useState(false);
+
 
   const searchProviders = async (event) => {
-    const query = event.query;
-    console.log('Query desde el front', query)
-    const providers = await providersService.searchProviders(query);
-    setFilteredProviders(providers);
+    try {
+      setLoading(true);
+      const query = event.query || '';
+      console.log('Query desde el front', query);
+      const providers = await providersService.searchProviders(query);
+      console.log("Respuesta desde el backend Proveedores: ", providers)
+      
+      const filteredProviders = providers.map((provider) => ({ label: provider.nombre }));
+      
+      setFilteredProviders(filteredProviders);
+    } catch (error) {
+      console.error('Error al buscar proveedores:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+  
   const searchClients = async (event) => {
-    const query = event.query;
-    const clients = await clientService.searchClients(query);
-    setFilteredClients(clients);
+    try {
+      setLoading(true);
+      const query = event.query || '';
+      const clients = await clientService.searchClients(query);
+  
+      // Filtrar los clientes basados en la consulta
+      const filteredClients = clients.map((client) => ({ label: client.nombre }));
+      setFilteredClients(filteredClients);
+    } catch (error) {
+      console.error('Error al buscar clientes:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   const loadAsignedToOptions = async () => {
     try {

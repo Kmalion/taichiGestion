@@ -61,20 +61,26 @@ const providerService = {
       throw error;
     }
   },
-  searchProviders: async (query) => {
+  searchProviders : async (query) => {
     try {
-      const response = await axios.get(`/api/providers/getProviders?query=${query}`);
-
-      if (response.status === 200) {
-        return response.data.map((provider) => ({ label: provider.nombre, value: provider.nombre }));
+      const url = new URL('/api/providers/searchProviders', window.location.origin);
+      url.searchParams.set('q', query);
+  
+      const response = await fetch(url.toString());
+  
+      if (response.ok) {
+        const providers = await response.json();
+        console.log("Proveedores servicio: ", providers)
+        return providers;
       } else {
-        throw new Error('Error al buscar proveedores');
+        console.error('Error al obtener proveedores:', response.statusText);
+        throw new Error('Error al obtener proveedores');
       }
     } catch (error) {
-      console.error('Error en la solicitud HTTP:', error.message);
+      console.error('Error al buscar proveedores:', error);
       throw error;
     }
-  },
+  }
 };
 
 export default providerService;

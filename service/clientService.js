@@ -89,18 +89,23 @@ const clientService = {
   },
   searchClients: async (query) => {
     try {
-      const response = await axios.get(`/api/clients/getClients?query=${query}`);
-
-      if (response.status === 200) {
-        return response.data.map((provider) => ({ label: provider.nombre, value: provider.nombre }));
+      const url = new URL('/api/clients/searchClients', window.location.origin);
+      url.searchParams.set('q', query);
+  
+      const response = await fetch(url.toString());
+  
+      if (response.ok) {
+        const clients = await response.json();
+        return clients;
       } else {
-        throw new Error('Error al buscar proveedores');
+        console.error('Error al obtener clientes:', response.statusText);
+        throw new Error('Error al obtener clientes');
       }
     } catch (error) {
-      console.error('Error en la solicitud HTTP:', error.message);
+      console.error('Error al buscar clientes:', error);
       throw error;
     }
-  },
+  }
 
 };
 
