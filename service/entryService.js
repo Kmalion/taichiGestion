@@ -73,4 +73,26 @@ export const EntryService = {
       throw error;
     }
   },
+ 
+};
+// Función para buscar productos por referencia
+export const searchProducts = async (query) => {
+  try {
+    const url = new URL('/api/products/getProductsSearch', window.location.origin);
+    url.searchParams.set('q', query);
+
+
+    const response = await fetch(url.toString());
+
+    if (response.ok) {
+      const products = await response.json();
+      return products;
+    } else {
+      console.error('Error al obtener productos:', response.statusText);
+      throw new Error('Error al obtener productos');
+    }
+  } catch (error) {
+    console.error('Error al buscar productos:', error);
+    throw error;
+  }
 };

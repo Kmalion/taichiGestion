@@ -61,7 +61,7 @@ export default function ProductTable() {
     const { data: session } = useSession();
     const [first, setFirst] = useState(0);
     const [rows, setRows] = useState(10);
-    const totalRecords = products.length;
+    const [totalRecords, setTotalRecords] = useState(0);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [serialsDialogVisible, setSerialsDialogVisible] = useState(false);
     const [selectedSerials, setSelectedSerials] = useState([]);

@@ -8,6 +8,24 @@ import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
+import { searchProducts } from '@/service/entryService';
+
+const searchReferences = async (searchQuery) => {
+  const query = String(searchQuery).toLowerCase();
+
+  try {
+    const products = await EntryService.searchProducts(query);
+
+    // Filtra las referencias basadas en la consulta
+    const filteredReferences = products
+      .map((product) => ({ label: product.reference }));
+
+    setFilteredReferences(filteredReferences);
+  } catch (error) {
+    console.error('Error al buscar referencias:', error);
+  }
+};
+
 
 const EntryProductForm = ({ onHide, onAddProduct }) => {
   const [form, setForm] = useState({
@@ -47,21 +65,23 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
   };
 
 
-  const searchReferences = async (searchQuery) => {
-    const query = String(searchQuery).toLowerCase();
-
+  const searchReferences = async (event) => {
     try {
-      const response = await fetch(`/api/products/getProducts?query=${query}`);
-      const suggestions = await response.json();
-      const data = suggestions.map((product) => product.reference);
-      const references = suggestions.map((product) => ({ label: product.reference }));
+      setLoading(true);
+      const query = event.query || ''; // Obtener la consulta del evento
+      const products = await searchProducts(query);
+      console.log("Products FRONT: ", products);
 
-
+      // Filtrar las referencias basadas en la consulta
+      const references = products.map((product) => ({ label: product.reference }));
       setFilteredReferences(references);
     } catch (error) {
       console.error('Error al buscar referencias:', error);
+    } finally {
+      setLoading(false);
     }
   };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -85,7 +105,6 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
           <div className="p-field p-col-12 p-md-6">
             <label htmlFor="reference">Referencia:</label>
             <AutoComplete
-              key={filteredReferences.length.toString()}
               id="reference"
               name="reference"
               value={form.reference}
