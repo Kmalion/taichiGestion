@@ -35,6 +35,14 @@ if (!mongoose.modelNames().includes('User')) {
         enum: ['admin', 'user', 'premium'], // Define roles permitidos
         required: true,
       },
+      resetToken: {
+        type: String,
+        required: false,
+      },
+      resetTokenExpiry: {
+        type: Date,
+        required: false,
+      },
     },
     { timestamps: true }
   );
