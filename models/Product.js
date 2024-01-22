@@ -83,7 +83,6 @@ try {
     },
     created: {
       type: Date,
-      required: true,
     },
   });
 

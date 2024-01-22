@@ -1,23 +1,24 @@
+'use client'
 import React, { useState, useEffect } from "react";
-import { getAllProducts } from "../../service/productService"; // Asegúrate de tener la ruta correcta
-import { EntryService } from "../../service/entryService"; // Asegúrate de tener la ruta correcta
+import { Skeleton } from "primereact/skeleton";
+import { getAllProducts } from "../../service/productService";
+import { EntryService } from "../../service/entryService";
 
 const SummaryItems = () => {
   const [inventoryCost, setInventoryCost] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalEntries, setTotalEntries] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const calculateInventoryCost = async () => {
     try {
       const allProducts = await getAllProducts();
-      const entries = await EntryService.getEntries(); // Llama a la función getEntries
+      const entries = await EntryService.getEntries();
 
-      let totalCost = 0;
-      let quantitySum = 0;
+      let totalCost = null;
+      let quantitySum = null;
 
-      // Iterar sobre cada producto y sumar su costo y cantidad
       for (const product of allProducts) {
-        // Asegúrate de que el producto tenga cantidad y costo definidos antes de calcular su costo total
         if (product && product.quantity && product.cost) {
           const productCost = product.quantity * product.cost;
           totalCost += productCost;
@@ -30,14 +31,31 @@ const SummaryItems = () => {
       setTotalEntries(entries.length);
     } catch (error) {
       console.error("Error al calcular el resumen:", error);
+    } finally {
+      setLoading(false); // Marca que la carga ha finalizado, ya sea con éxito o error
     }
   };
 
   useEffect(() => {
     calculateInventoryCost();
   }, []);
+  const renderSkeleton = () => (
+    <div className="grid">
+      {[1, 2, 3, 4].map((key) => (
+        <div key={key} className="col-12 md:col-6 lg:col-3">
+          <div className="surface-0 shadow-2 p-3 border-1 border-50 border-round">
+            <Skeleton className="mb-2"></Skeleton>
+            <Skeleton width="10rem" className="mb-2"></Skeleton>
+            <Skeleton height="3rem" className="mb-2"></Skeleton>
+            <Skeleton width="80%" height="2rem" className="mb-2"></Skeleton>
+            <Skeleton width="10rem" height="4rem"></Skeleton>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
-  return (
+  const renderSummaryItems = () => (
     <div className="grid">
       <div className="col-12 md:col-6 lg:col-3">
         <div className="surface-0 shadow-2 p-3 border-1 border-50 border-round">
@@ -46,12 +64,16 @@ const SummaryItems = () => {
               <span className="block text-500 font-medium mb-3">
                 Costo Inventario
               </span>
-              <div className="text-900 font-medium text-xl">
-                {inventoryCost.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
-              </div>
+              {inventoryCost !== null && inventoryCost !== undefined && inventoryCost !== 0 ? (
+                <div className="text-900 font-medium text-xl">
+                  {inventoryCost.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                </div>
+              ) : (
+                <Skeleton width="100px" />
+              )}
             </div>
             <div
               className="flex align-items-center justify-content-center bg-blue-100 border-round"
@@ -69,9 +91,13 @@ const SummaryItems = () => {
               <span className="block text-500 font-medium mb-3">
                 Cantidad de Unidades
               </span>
-              <div className="text-900 font-medium text-xl">
-                {totalQuantity}
-              </div>
+              {totalQuantity !== null && totalQuantity !== undefined && totalQuantity !== 0 ? (
+                <div className="text-900 font-medium text-xl">
+                  {totalQuantity}
+                </div>
+              ) : (
+                <Skeleton width="80%" height="1.5rem" />
+              )}
             </div>
             <div
               className="flex align-items-center justify-content-center bg-orange-100 border-round"
@@ -87,7 +113,13 @@ const SummaryItems = () => {
           <div className="flex justify-content-between mb-3">
             <div>
               <span className="block text-500 font-medium mb-3">Entradas</span>
-              <div className="text-900 font-medium text-xl">{totalEntries}</div>
+              {totalEntries !== null && totalEntries !== undefined && totalEntries !== 0 ? (
+                <div className="text-900 font-medium text-xl">
+                  {totalEntries}
+                </div>
+              ) : (
+                <Skeleton width="80%" height="1.5rem" />
+              )}
             </div>
             <div
               className="flex align-items-center justify-content-center bg-cyan-100 border-round"
@@ -103,7 +135,16 @@ const SummaryItems = () => {
           <div className="flex justify-content-between mb-3">
             <div>
               <span className="block text-500 font-medium mb-3">Salidas</span>
-              <div className="text-900 font-medium text-xl">152</div>
+              {/* {totalExits !== null && totalExits !== undefined && totalExits !== 0 ? (
+                <div className="text-900 font-medium text-xl">
+                  {totalExits}
+                </div>
+              ) : (
+                <Skeleton width="80%" height="1.5rem" />
+              )} */}
+              <div className="text-900 font-medium text-xl">
+                  0
+                </div>
             </div>
             <div
               className="flex align-items-center justify-content-center bg-purple-100 border-round"
@@ -115,6 +156,18 @@ const SummaryItems = () => {
         </div>
       </div>
     </div>
+  );
+  
+  return (
+    <div className="p-d-flex p-jc-center p-ai-center" style={{ minHeight: '100vh' }}>
+    <div className="p-grid">
+      <div>
+        {loading ? renderSkeleton() : renderSummaryItems()}
+      </div>
+    </div>
+  </div>
+  
+  
   );
 };
 

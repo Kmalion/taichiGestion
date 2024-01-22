@@ -11,6 +11,9 @@ import { Dialog } from 'primereact/dialog';
 import { deleteSerialFromProduct, getProductByReference } from '@/service/productService'
 import { updateProductQuantity } from '@/service/productService';
 import { useSession } from 'next-auth/react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 
 
 
@@ -325,8 +328,86 @@ const EntryTable = () => {
       onClick={() => confirmDeleteEntry(rowData)}
       className="p-button-text p-button-rounded p-button-danger"
     />
+  );const handleDownloadPDF = (entryData) => {
+    // Crea un nuevo objeto jsPDF
+    const doc = new jsPDF({
+      orientation: 'landscape', // Establece la orientación a horizontal
+    });
+  
+    // Primer título
+    const firstTitle = `Taichi Holdings Entrada No. ${entryData.entradaNo}`;
+    const firstTitleWidth = doc.getStringUnitWidth(firstTitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+    const firstTitleX = (doc.internal.pageSize.width - firstTitleWidth) / 2;
+    doc.text(firstTitle, firstTitleX, 5);
+  
+    // Ajusta la posición inicial de la segunda tabla
+    const secondTableStartY = 38; // Establece la posición fija
+  
+  
+  
+    doc.autoTable({
+      head: [
+        ['Entrada No.', 'Fecha', 'Proveedor', 'Cliente', 'Responsable', 'Tipo', 'Documento', 'Comentario'],
+      ],
+      body: [
+        [
+          entryData.entradaNo || '',
+          entryData.fechaEntrada || '',
+          Array.isArray(entryData.proveedor)
+            ? entryData.proveedor.map(item => item.label).join(', ')
+            : entryData.proveedor?.label || '',
+          Array.isArray(entryData.cliente)
+            ? entryData.cliente.map(item => item.label).join(', ')
+            : entryData.cliente?.label || '',
+          entryData.asigned_to?.label || '',
+          entryData.tipo || '',
+          entryData.document || '',
+          entryData.comment || '',
+        ],
+      ],
+    });
+  
+    // Ajusta la posición vertical del segundo título
+    const secondTitleY = secondTableStartY - 2; // Ajusta el valor de acuerdo a tu preferencia
+  
+    // Segundo título
+    const secondTitle = 'Productos en la Entrada';
+    const secondTitleWidth = doc.getStringUnitWidth(secondTitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
+    const secondTitleX = (doc.internal.pageSize.width - secondTitleWidth) / 2;
+    doc.text(secondTitle, secondTitleX, secondTitleY);
+  
+    doc.autoTable({
+      startY: secondTableStartY, // Usa la posición ajustada
+      head: [
+        ['Referencia', 'Cantidad', 'Costo', 'Serials', 'Lote', 'Ubicación', 'Fecha de Expiración'],
+      ],
+      body: entryData.products.map((product) => [
+        product.reference,
+        product.quantity,
+        product.cost,
+        product.serials.map((serialData) => `${serialData.serial}, ${serialData.status}`).join('\n'),
+        product.lote,
+        product.ubicacion,
+        product.exp_date ? new Intl.DateTimeFormat('es-ES', {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+        }).format(new Date(product.exp_date)) : '',
+      ]),
+    });
+  
+    // Guarda el PDF o abre una nueva ventana para descargarlo
+    doc.save(`Entrada_${entryData.entradaNo}.pdf`);
+  };
+  
+  
+  const downloadButtonColumn = (rowData) => (
+    <Button
+      icon="pi pi-download"
+      onClick={() => handleDownloadPDF(rowData)}
+      className="p-button-text p-button-rounded"
+    />
   );
-
 
   return (
     <div className="card">
@@ -374,6 +455,7 @@ const EntryTable = () => {
           body={(rowData) => rowData.asigned_to.label}
         />
         <Column field="created_by" header="Creado por" sortable />
+        <Column body={downloadButtonColumn} />
         <Column body={deleteButtonColumn} />
       </DataTable>
       <Dialog

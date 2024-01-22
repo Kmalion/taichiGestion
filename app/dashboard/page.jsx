@@ -50,14 +50,6 @@ export default function Home() {
         {!loading && (
           <Card>
             <SummaryItems />
-            <div style={{ ...containerStyle, ...{ flexDirection: 'row', gap: '20px' } }}>
-              <Card className='text-center mt-2' title="Ventas" style={cardStyle}>
-                <SalesChart />
-              </Card>
-              <div className='mt-2'>
-                <BestProduct />
-              </div>
-            </div>
           </Card>
         )}
       </div>
