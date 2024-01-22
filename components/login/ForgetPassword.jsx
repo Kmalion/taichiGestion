@@ -65,7 +65,7 @@ const ForgetPassword = () => {
         showError("El usuario con este email no está registrado");
       } else if (res.status === 200) {
         showSuccess("Éxito");
-        router.push("/dashboard");
+        router.push("/login");
       }
     } catch (error) {
       showError("Error, vuelva a intentarlo");

@@ -7,13 +7,16 @@ import { Card } from "primereact/card";
 import { Toast } from 'primereact/toast'
 import { FileUpload } from "primereact/fileupload";
 import axios from 'axios';
+import { useSession } from 'next-auth/react';
 
 const RegisterPage = () => {
+  const { data: session } = useSession();
   const [selectedRole, setSelectedRole] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const toast = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const isAdmin = session?.user?.role === 'admin';
 
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -109,9 +112,19 @@ const RegisterPage = () => {
     console.log("Archivo seleccionado:", file);
   };
 
+  const showNoCredentialsMessage = () => {
+    return (
+      <Card style={{ width: "100%", padding: "20px", textAlign: "center" }}>
+        <img src="img/triste.png" alt="Triste" style={{ maxWidth: "100px" }} />
+        <h4>No tienes credenciales para crear usuarios.</h4>
+      </Card>
+    );
+  };
+
   
   return (
-    <div className=" " style={{ height: "100vh" }}>
+    <div className=" " style={{ height: "150vh" }}>
+      {isAdmin ? (
       <Card style={{ width: "100%", padding: "20px", height: "140vh" }}>
         <form onSubmit={handleSubmit}>
           <div className="p-grid p-fluid mt-0">
@@ -222,6 +235,7 @@ const RegisterPage = () => {
                 label="Registrar"
                 type="submit"
                 className="p-d-block p-mx-auto p-mt-2 mt-2"
+                disabled={!isAdmin} // Deshabilita el botón si no es admin
               />
             </div>
           </div>
@@ -229,6 +243,9 @@ const RegisterPage = () => {
         </form>
         <Toast ref={toast} />
       </Card>
+       ) : (
+        showNoCredentialsMessage()
+      )}
     </div>
 
   );

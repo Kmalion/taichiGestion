@@ -93,6 +93,11 @@ export default function MenuBar() {
           icon: 'pi pi-fw pi-user',
           command: () => handleMenuClick('/usuarios'),
         },
+        {
+          label: 'Registrar Usuario',
+          icon: 'pi pi-fw pi-user',
+          command: () => handleMenuClick('/register'),
+        },
       ],
     },
     {
