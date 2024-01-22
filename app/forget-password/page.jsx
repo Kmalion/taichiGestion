@@ -2,7 +2,7 @@
 import Head from 'next/head';
 import ForgetPassword from '@/components/login/ForgetPassword';
 
-const LoginPage = () => {
+const ForgetPasswordComponent = () => {
   return (
     <div className="login-container">
       <Head>
@@ -54,5 +54,5 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default ForgetPasswordComponent;
 

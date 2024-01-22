@@ -1,3 +1,4 @@
+'use client'
 import { useState, useEffect, useRef } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
@@ -64,7 +65,7 @@ const ForgetPassword = () => {
         showError("El usuario con este email no está registrado");
       } else if (res.status === 200) {
         showSuccess("Éxito");
-        router.push("/login");
+        router.push("/dashboard");
       }
     } catch (error) {
       showError("Error, vuelva a intentarlo");

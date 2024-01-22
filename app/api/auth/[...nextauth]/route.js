@@ -18,13 +18,13 @@ const handler = NextAuth({
         const user = await User.findOne({ email: credentials.email });
 
         if (!user) {
-          throw new Error("User not found");
+          throw new Error("Usuario no encontrado");
         }
 
         const passwordMatch = await bcrypt.compare(credentials.password, user.password);
 
         if (!passwordMatch) {
-          throw new Error("Incorrect password");
+          throw new Error("Contraseña incorrecta");
         }
 
         return Promise.resolve(user);
