@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { Dialog } from 'primereact/dialog';
 import { deleteSerialFromProduct, getProductByReference } from '@/service/productService'
 import { updateProductQuantity } from '@/service/productService';
+import { useSession } from 'next-auth/react';
 
 
 
@@ -24,6 +25,9 @@ const EntryTable = () => {
   const [rows, setRows] = useState(10);
   const toast = useRef(null);
   const router = useRouter();
+  const { data: session } = useSession();
+
+  const isAdminPremium = session?.user?.role === 'admin' || session?.user?.role === 'premium';
 
 
 
@@ -257,12 +261,17 @@ const EntryTable = () => {
 
 
   const header = (
-    <div className="flex flex-wrap justify-content-between">
-      <Button className="p-button-success" icon="pi pi-plus" label="Registrar Entrada" onClick={() => router.push('/entradas/registro')} />
-      <Button icon="pi pi-minus" label="Colapsar Todo" onClick={collapseAll} text />
-
-    </div>
-  );
+  <div className="flex flex-wrap justify-content-between">
+    <Button 
+      className="p-button-success" 
+      icon="pi pi-plus" 
+      label="Registrar Entrada" 
+      onClick={() => router.push('/entradas/registro')} 
+      disabled={!isAdminPremium}  // Deshabilita el botón si no es admin o premium
+    />
+    <Button icon="pi pi-minus" label="Colapsar Todo" onClick={collapseAll} text />
+  </div>
+);
 
   const DocumentColumn = (data) => {
     const handleDownload = () => {

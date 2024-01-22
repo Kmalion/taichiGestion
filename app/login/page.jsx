@@ -1,8 +1,22 @@
 'use client'
 import Head from 'next/head';
 import Login from '@/components/login/Login';
+import { ProgressSpinner } from 'primereact/progressspinner';
+import { useEffect, useState } from 'react';
 
 const LoginPage = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simula una carga asincrónica para el ejemplo.
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    // Limpia el temporizador cuando el componente se desmonta.
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
     <div className="login-container">
       <Head>
@@ -13,9 +27,13 @@ const LoginPage = () => {
 
       <div className="login-content">
         <div className="centered-container">
-          <div className="login-page mt-5">
-            <Login />
-          </div>
+          {loading ? (
+            <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" fill="#EEEEEE" animationDuration=".5s" />
+          ) : (
+            <div className="login-page mt-5">
+              <Login />
+            </div>
+          )}
         </div>
       </div>
 
@@ -55,4 +73,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

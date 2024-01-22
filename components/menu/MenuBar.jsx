@@ -85,7 +85,7 @@ export default function MenuBar() {
       items: [
         {
           label: 'Perfil',
-          icon: 'pi pi-fw pi-user-plus',
+          icon: 'pi pi-fw pi-user',
           command: () => handleMenuClick('/perfil'),
         },
         {
@@ -94,8 +94,8 @@ export default function MenuBar() {
           command: () => handleMenuClick('/usuarios'),
         },
         {
-          label: 'Registrar Usuario',
-          icon: 'pi pi-fw pi-user',
+          label: 'Registrar usuario',
+          icon: 'pi pi-fw pi-user-plus',
           command: () => handleMenuClick('/register'),
         },
       ],

@@ -2,8 +2,22 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { Button } from 'primereact/button';
+import { ProgressSpinner } from 'primereact/progressspinner';
+import { useEffect, useState } from 'react';
 
 const Home = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simula una carga asincrónica para el ejemplo.
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    // Limpia el temporizador cuando el componente se desmonta.
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
     <div className="home-container">
       <Head>
@@ -15,10 +29,16 @@ const Home = () => {
       <main>
         <section className="hero">
           <div className="hero-content">
-            <h1>Bienvenido a THC</h1>
-            <Link href="/login">
-              <Button label="Iniciar Sesión" icon="pi pi-sign-in" />
-            </Link>
+            {loading ? (
+              <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" fill="#EEEEEE" animationDuration=".5s" />
+            ) : (
+              <>
+                <h1>Bienvenido a THC</h1>
+                <Link href="/login">
+                  <Button label="Iniciar Sesión" icon="pi pi-sign-in" />
+                </Link>
+              </>
+            )}
           </div>
         </section>
       </main>

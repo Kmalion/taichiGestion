@@ -14,11 +14,13 @@ import providersService from '@/service/providerService'
 import clientService from '@/service/clientService';
 import { Dropdown } from 'primereact/dropdown';
 
+
 const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   const toast = useRef(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]); 
   const [loading, setLoading] = useState(false);
+
 
 
   const searchProviders = async (event) => {
