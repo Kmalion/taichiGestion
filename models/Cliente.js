@@ -32,16 +32,33 @@ try {
       type: String,
       default: '',
     },
-    ciudad: {
-      type: String,
-      default: '',
-    },
+
     fechaNacimiento: {
       type: Date,
     },
     created: {
       type: Date,
       required: true,
+    },
+    linea: {
+      type: String,
+      enum: ['medica', 'veterinaria', 'simulacion', 'servicio', 'odontologia', 'laboratorio', 'externo'],
+      default: 'medica',
+    },
+    asesor: {
+      type: mongoose.Schema.Types.Mixed,
+      ref: 'User',  // Referencia al modelo User
+    },
+    especialidad: {
+      type: String,
+    },
+    ubicacion: {
+      type: String,
+    },
+    tipoCliente: {
+      type: String,
+      enum: ['Cliente potencial', 'Distribuidor', 'Speaker', 'Otro'],
+      default: 'Cliente potencial',
     },
   });
 

@@ -96,3 +96,11 @@
 .edit-button {
   background-color: #5bc0de; /* Establece el color de fondo para el botón de editar */
 }
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espacio entre SummaryItems y BestProduct */
+  padding: 20px; /* Ajusta el relleno según sea necesario */
+}
+
+/* Agrega estilos adicionales según sea necesario */

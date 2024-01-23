@@ -78,7 +78,7 @@ const EntrySummary = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get('/api/users/getUsers');
-        const updatedOptions = response.data.users.map(user => ({ label: user.nombre, email: user.email }));
+        const updatedOptions = response.data.users.map(user => ({  label: `${user.nombre} ${user.apellido}`, email: user.email }));
         setUserList(updatedOptions);
       } catch (error) {
         console.error('Error fetching users:', error);

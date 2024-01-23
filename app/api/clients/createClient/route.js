@@ -8,7 +8,7 @@ export const POST = async (request) => {
     await connectDB();
 
     // Extrae los datos de la solicitud
-    const { idc, nombre, contacto, email, telefono, direccion, ciudad, created } = await request.json();
+    const { idc, nombre, contacto, email, telefono, direccion, ubicacion, created, linea, asesor, especialidad, tipoCliente } = await request.json();
 
  
 
@@ -20,8 +20,12 @@ export const POST = async (request) => {
       email,
       telefono,
       direccion,
-      ciudad,
-      created
+      ubicacion,
+      created,
+      linea,
+      asesor,
+      especialidad,
+      tipoCliente
     });
 
     // Guarda el nuevo cliente en la base de datos

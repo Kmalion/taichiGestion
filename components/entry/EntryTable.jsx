@@ -13,6 +13,7 @@ import { updateProductQuantity } from '@/service/productService';
 import { useSession } from 'next-auth/react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { ProgressBar } from 'primereact/progressbar';
 
 
 
@@ -29,8 +30,10 @@ const EntryTable = () => {
   const toast = useRef(null);
   const router = useRouter();
   const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
 
   const isAdminPremium = session?.user?.role === 'admin' || session?.user?.role === 'premium';
+  const isAdmin = session?.user?.role === 'admin'
 
 
 
@@ -107,6 +110,7 @@ const EntryTable = () => {
 
   const deleteEntry = async (entry) => {
     try {
+      setLoading(true);
       // Verifica si hay productos
       if (!entry || !entry.products || entry.products.length === 0) {
         console.warn("La entrada no tiene productos o es undefined.");
@@ -178,6 +182,8 @@ const EntryTable = () => {
         summary: 'Error al eliminar la entrada',
         detail: 'Hubo un problema al eliminar la entrada. Por favor, inténtalo de nuevo.',
       });
+    }finally {
+      setLoading(false); // Oculta la barra de progreso al finalizar la acción, ya sea con éxito o error
     }
   };
 
@@ -325,10 +331,13 @@ const EntryTable = () => {
   const deleteButtonColumn = (rowData) => (
     <Button
       icon="pi pi-trash"
-      onClick={() => confirmDeleteEntry(rowData)}
+      onClick={() => isAdmin && confirmDeleteEntry(rowData)}
       className="p-button-text p-button-rounded p-button-danger"
+      disabled={!isAdmin}
     />
-  );const handleDownloadPDF = (entryData) => {
+  );
+  
+  const handleDownloadPDF = (entryData) => {
     // Crea un nuevo objeto jsPDF
     const doc = new jsPDF({
       orientation: 'landscape', // Establece la orientación a horizontal
@@ -411,6 +420,7 @@ const EntryTable = () => {
 
   return (
     <div className="card">
+      {loading && <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>}
       <Toast ref={toast} />
       <DataTable
         value={entries.slice(first, first + rows)} // Aplicar la paginación

@@ -3,24 +3,112 @@ import React from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-import { Formik, Field, Form, ErrorMessage } from 'formik';
+import { Dropdown } from 'primereact/dropdown';
+import { useFormik } from 'formik';
+import { classNames } from 'primereact/utils';
+import { useState, useEffect } from 'react';
+import userService from '@/service/userService';
+
 
 const NewClientForm = ({ visible, onSave, onCancel }) => {
-  const initialValues = {
-    idc: '',
-    nombre: '',
-    contacto: '',
-    email: '',
-    telefono: '',
-    direccion: '',
-    ciudad: '',
-    created: new Date(),
-  };
+  const [userList, setUserList] = useState([]);
+  const formik = useFormik({
+    initialValues: {
+      idc: '',
+      nombre: '',
+      contacto: '',
+      email: '',
+      telefono: '',
+      direccion: '',
+      created: new Date(),
+      linea: 'medica', // Establecer el valor predeterminado para la línea
+      asesor: '', // Ajustar según sea necesario
+      especialidad: '',
+      ubicacion: '',
+      tipoCliente: 'Cliente potencial', // Establecer el valor predeterminado para el tipo de cliente
+    },
+    validate: (values) => {
+      const errors = {};
+      if (!values.idc.trim()) {
+        errors.idc = 'ID de cliente es requerido';
+      }
+      if (!values.nombre.trim()) {
+        errors.nombre = 'El nombre es requerido';
+      }
+      if (!values.contacto.trim()) {
+        errors.contacto = 'El contacto es requerido';
+      }
+      if (!values.email.trim()) {
+        errors.email = 'El email es requerido';
+      }
+      if (!values.telefono.trim()) {
+        errors.telefono = 'El teléfono es requerido';
+      }
+      if (!values.direccion.trim()) {
+        errors.direccion = 'La dirección es requerida';
+      }
+      if (!values.ubicacion.trim()) {
+        errors.ubicacion = 'La ciudad es requerida';
+      }
+      // if (!values.asesor.trim()) {
+      //   errors.asesor = 'El nombre del asesor es requerido';
+      // }
 
-  const handleSubmit = (values) => {
-    onSave(values);
-    // Puedes agregar lógica adicional aquí, como cerrar el diálogo después de guardar
+      if (!values.especialidad.trim()) {
+        errors.especialidad = 'La especialidad es requerida';
+      }
+      return errors;
+    },
+    onSubmit: (values) => {
+      console.log(values)
+      onSave(values);
+
+    },
+  });
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await userService.getUsers()
+        const updatedOptions = response.users.map(user => ({
+          label: `${user.nombre} ${user.apellido}`
+        }));
+
+        setUserList(updatedOptions);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+console.log('Lista de usuarios ', userList)
+  const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
+
+  const getFormErrorMessage = (name) => {
+    return isFormFieldInvalid(name) ? (
+      <small className="p-error">{formik.errors[name]}</small>
+    ) : (
+      <small className="p-error">&nbsp;</small>
+    );
   };
+  const lineas = [
+    { label: 'Medica', value: 'medica' },
+    { label: 'Veterinaria', value: 'veterinaria' },
+    { label: 'Simulacion', value: 'simulacion' },
+    { label: 'Servicio', value: 'servicio' },
+    { label: 'Odontologia', value: 'odontologia' },
+    { label: 'Laboratorio', value: 'laboratorio' },
+    { label: 'Externo', value: 'externo' },
+  ];
+
+  const tiposCliente = [
+    { label: 'Cliente potencial', value: 'Cliente potencial' },
+    { label: 'Distribuidor', value: 'Distribuidor' },
+    { label: 'Speaker', value: 'Speaker' },
+    { label: 'Otro', value: 'Otro' },
+  ];
+
 
   const handleCancel = () => {
     onCancel();
@@ -33,106 +121,192 @@ const NewClientForm = ({ visible, onSave, onCancel }) => {
       header="Nuevo Cliente"
       onHide={handleCancel}
     >
-      <Formik
-        initialValues={initialValues}
-        validate={(values) => {
-          const errors = {};
-          if (!values.idc.trim()) {
-            errors.idc = 'ID de cliente es requerido';
-          }
 
-          if (!values.nombre.trim()) {
-            errors.nombre = 'El nombre es requerido';
-          }
-
-          if (!values.contacto.trim()) {
-            errors.contacto = 'El contacto es requerido';
-          }
-
-          if (!values.email.trim()) {
-            errors.email = 'El email es requerido';
-          }
-
-          if (!values.telefono.trim()) {
-            errors.telefono = 'El teléfono es requerido';
-          }
-
-          if (!values.direccion.trim()) {
-            errors.direccion = 'La dirección es requerida';
-          }
-
-          if (!values.ciudad.trim()) {
-            errors.ciudad = 'La ciudad es requerida';
-          }
-
-          return errors;
-        }}
-        onSubmit={handleSubmit}
-      >
-         <Form>
-          <div className="p-fluid p-formgrid p-grid">
-            <div className="p-field p-col-12">
-              <span className="p-float-label mt-4">
-                <Field type="text" id="idc" name="idc" as={InputText} />
-                <label htmlFor="idc">C.C. / NIT</label>
-              </span>
-              <ErrorMessage name="idc" component="small" className="p-error" />
-            </div>
-
-            <div className="p-field p-col-12">
-              <span className="p-float-label mt-4">
-                <Field type="text" id="nombre" name="nombre" as={InputText} />
-                <label htmlFor="nombre">Nombre</label>
-              </span>
-              <ErrorMessage name="nombre" component="small" className="p-error" />
-            </div>
-
-            <div className="p-field p-col-12">
-              <span className="p-float-label mt-4">
-                <Field type="text" id="contacto" name="contacto" as={InputText} />
-                <label htmlFor="contacto">Contacto</label>
-              </span>
-              <ErrorMessage name="contacto" component="small" className="p-error" />
-            </div>
-
-            <div className="p-field p-col-12">
-              <span className="p-float-label mt-4">
-                <Field type="text" id="email" name="email" as={InputText} />
-                <label htmlFor="email">Email</label>
-              </span>
-              <ErrorMessage name="email" component="small" className="p-error" />
-            </div>
-
-            <div className="p-field p-col-12">
-              <span className="p-float-label mt-4">
-                <Field type="text" id="telefono" name="telefono" as={InputText} />
-                <label htmlFor="telefono">Teléfono</label>
-              </span>
-              <ErrorMessage name="telefono" component="small" className="p-error" />
-            </div>
-
-            <div className="p-field p-col-12">
-              <span className="p-float-label mt-4">
-                <Field type="text" id="direccion" name="direccion" as={InputText} />
-                <label htmlFor="direccion">Dirección</label>
-              </span>
-              <ErrorMessage name="direccion" component="small" className="p-error" />
-            </div>
-
-            <div className="p-field p-col-12">
-              <span className="p-float-label mt-4">
-                <Field type="text" id="ciudad" name="ciudad" as={InputText} />
-                <label htmlFor="ciudad">Ciudad / Pais</label>
-              </span>
-              <ErrorMessage name="ciudad" component="small" className="p-error" />
-            </div>
-
-            <div className="p-col-12 mt-4">
-              <Button type="submit" label="Registrar" />
-            </div>
+      <form onSubmit={formik.handleSubmit}>
+        <div className="p-fluid p-formgrid p-grid">
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <InputText
+                id="idc"
+                name="idc"
+                value={formik.values.idc}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('idc') })}
+              />
+              <label htmlFor="idc">C.C. / NIT</label>
+            </span>
+            {getFormErrorMessage('idc')}
           </div>
-        </Form>
-      </Formik>
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <InputText
+                id="nombre"
+                name="nombre"
+                value={formik.values.nombre}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('nombre') })}
+              />
+              <label htmlFor="nombre">Nombre</label>
+            </span>
+            {getFormErrorMessage('nombre')}
+          </div>
+
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <InputText
+                id="contacto"
+                name="contacto"
+                value={formik.values.contacto}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('contacto') })}
+              />
+              <label htmlFor="contacto">Contacto</label>
+            </span>
+            {getFormErrorMessage('contacto')}
+          </div>
+
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <InputText
+                id="email"
+                name="email"
+                value={formik.values.email}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('email') })}
+              />
+              <label htmlFor="email">Email</label>
+            </span>
+            {getFormErrorMessage('email')}
+          </div>
+
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <InputText
+                id="telefono"
+                name="telefono"
+                value={formik.values.telefono}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('telefono') })}
+              />
+              <label htmlFor="telefono">Teléfono</label>
+            </span>
+            {getFormErrorMessage('telefono')}
+          </div>
+
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <InputText
+                id="direccion"
+                name="direccion"
+                value={formik.values.direccion}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('direccion') })}
+              />
+              <label htmlFor="direccion">Dirección</label>
+            </span>
+            {getFormErrorMessage('direccion')}
+          </div>
+
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <InputText
+                id="ubicacion"
+                name="ubicacion"
+                value={formik.values.ubicacion}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('ubicacion') })}
+              />
+              <label htmlFor="ubicacion">Ubicacion</label>
+            </span>
+            {getFormErrorMessage('ubicacion')}
+          </div>
+
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <Dropdown
+                id="linea"
+                name="linea"
+                options={lineas}
+                onChange={(e) => {
+                  const { value } = e.target;
+                  formik.handleChange(e);
+                  formik.setFieldValue('linea', value);
+                }}
+                value={formik.values.linea}
+                placeholder="Seleccione una línea"
+              />
+              <label htmlFor="linea">Línea</label>
+            </span>
+            {getFormErrorMessage('linea')}
+          </div>
+
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <Dropdown
+                id="asesor"
+                name="asesor"
+                options={userList}
+                value={formik.values.asesor}  // Deberías cambiar esto al valor correcto (p. ej., .email)
+                onChange={(e) => {
+                  const { value } = e.target;
+                  formik.setFieldValue('asesor', value);
+                }}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('asesor') })}
+                optionLabel="label"  // Especifica la propiedad del objeto a mostrar en el Dropdown
+              />
+              <label htmlFor="asesor">Asesor</label>
+            </span>
+            {getFormErrorMessage('asesor')}
+          </div>
+
+          <div className="p-field p-col-12">
+
+            <span className="p-float-label mt-4">
+              <InputText
+                id="especialidad"
+                name="especialidad"
+                value={formik.values.especialidad}
+                onChange={(e) => formik.handleChange(e)}
+                onBlur={formik.handleBlur}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('especialidad') })}
+              />
+              <label htmlFor="especialidad">Especialidad</label>
+            </span>
+            {getFormErrorMessage('especialidad')}
+          </div>
+
+          <div className="p-field p-col-12">
+            <span className="p-float-label mt-4">
+              <Dropdown
+                id="tipoCliente"
+                name="tipoCliente"
+                options={tiposCliente}
+                onChange={(e) => {
+                  const { value } = e.target;
+                  formik.handleChange(e);
+                  formik.setFieldValue('tipoCliente', value);
+                }}
+                value={formik.values.tipoCliente}
+                placeholder="Seleccione un tipo de cliente"
+              />
+              <label htmlFor="tipoCliente">Tipo de Cliente</label>
+            </span>
+          </div>
+
+          <div className="p-col-12 mt-4">
+            <Button type="submit" label="Registrar" />
+          </div>
+        </div>
+      </form>
+
     </Dialog>
   );
 };

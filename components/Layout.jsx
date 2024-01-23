@@ -22,9 +22,7 @@ export default function Layout({ children }) {
         <link rel="stylesheet" href={`primereact/resources/themes/${theme}/theme.css`} type="text/css" key={theme} />
       </Head>
       <MenuBar />
-      
       {children}
-
       <Footer></Footer>
     </div>
 

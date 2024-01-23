@@ -47,8 +47,8 @@ const SummaryItems = () => {
             <Skeleton className="mb-2"></Skeleton>
             <Skeleton width="10rem" className="mb-2"></Skeleton>
             <Skeleton height="3rem" className="mb-2"></Skeleton>
-            <Skeleton width="80%" height="2rem" className="mb-2"></Skeleton>
-            <Skeleton width="10rem" height="4rem"></Skeleton>
+            <Skeleton width="80%" height="0.5rem" className="mb-2"></Skeleton>
+            <Skeleton width="10rem" height="0.5rem"></Skeleton>
           </div>
         </div>
       ))}
