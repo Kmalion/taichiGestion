@@ -11,6 +11,8 @@ import EditClientForm from '@/components/clientes/EditClientForm';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import filterTranslations from '@/utils/filterTranslations';
 import { useSession } from 'next-auth/react';
+import { ProgressBar } from 'primereact/progressbar';
+
 
 
 const ClientTable = () => {
@@ -22,6 +24,8 @@ const ClientTable = () => {
   const [globalFilter, setGlobalFilter] = useState(null);
   const [filterMatchMode, setFilterMatchMode] = useState('contains');
   const { data: session } = useSession();
+  const [processing, setProcessing] = useState(false);
+
 
   const onPageChange = (event) => {
     setFirst(event.first);
@@ -31,16 +35,21 @@ const ClientTable = () => {
   const toast = useRef(null);
 
   useEffect(() => {
-
     locale('es');
     addLocale('es', { filter: filterTranslations });
-    // Obtener la lista de clientes
+  
+    // Obtener la lista de clientes y ordenarla por 'created' de forma descendente
     ClientService.getClients()
-    
-      .then((data) => setClients(data))
+      .then((data) => {
+        const sortedClients = data.sort((a, b) => new Date(b.created) - new Date(a.created));
+        console.log("Cleintes: ", sortedClients)
+        setClients(sortedClients);
+      })
       .catch((error) => console.error('Error al obtener clientes:', error));
   }, []);
-  console.log("Clientes: ", clients)
+
+
+  
   const handleEdit = (client) => {
     setSelectedClient(client);
     setEditFormVisible(true);
@@ -53,16 +62,19 @@ const ClientTable = () => {
 
   const confirmDelete = async () => {
     try {
+      // Muestra la barra de progreso
+      setProcessing(true);
+  
       // Lógica para eliminar el cliente utilizando el servicio
-      await ClientService.deleteClient(selectedClient.idc);
-
+      await ClientService.deleteClient(selectedClient._id);
+  
       // Refresca la lista de clientes después de la eliminación
       const updatedClients = await ClientService.getClients();
       setClients(updatedClients);
-
+  
       // Cierra el cuadro de diálogo de confirmación
       setDeleteConfirmationVisible(false);
-
+  
       // Muestra el Toast de éxito
       toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Cliente eliminado con éxito' });
     } catch (error) {
@@ -71,8 +83,13 @@ const ClientTable = () => {
       setDeleteConfirmationVisible(false);
       // Muestra el Toast de error
       toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al eliminar el cliente' });
+    } finally {
+      // Oculta la barra de progreso después de la eliminación, incluso si hay un error
+      setProcessing(false);
     }
   };
+  
+  
   const customFilterOptions = [
     { label: 'Contiene', value: 'contains' },
     { label: 'Empieza con', value: 'startsWith' },
@@ -93,16 +110,15 @@ const ClientTable = () => {
 
   const handleEditSave = async (formData) => {
     try {
+      // Muestra el Dialog de progreso
+      setProcessing(true);
+
       // Actualiza el cliente utilizando el servicio
-      await ClientService.updateClient(selectedClient.idc, formData);
+      await ClientService.updateClient(selectedClient._id, formData);
 
       // Refresca la lista de clientes después de la actualización
       const updatedClients = await ClientService.getClients();
       setClients(updatedClients);
-
-      // Cierra el formulario después de guardar
-      setEditFormVisible(false);
-      setSelectedClient(null);
 
       // Muestra el Toast de éxito
       toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Cliente actualizado con éxito' });
@@ -110,8 +126,16 @@ const ClientTable = () => {
       console.error('Error al guardar datos editados:', error.message);
       // Muestra el Toast de error
       toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al actualizar el cliente' });
+    } finally {
+      // Oculta el Dialog de progreso después de la solicitud, incluso si hay un error
+      setProcessing(false);
+      // Cierra el formulario después de guardar
+      setEditFormVisible(false);
+      // Limpiar el cliente seleccionado
+      setSelectedClient(null);
     }
   };
+
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -151,19 +175,42 @@ const ClientTable = () => {
 
   return (
     <div>
-      <Dialog
-        header={'Confirmar Eliminación'}
+ <Dialog
+        header={processing ? 'Eliminando...' : 'Confirmar Eliminación'}
         visible={deleteConfirmationVisible}
         style={{ width: '30vw' }}
         onHide={cancelDelete}
       >
-        <div>
-          ¿Estás seguro de que deseas eliminar este cliente?
-        </div>
-        <div className=" flex justify-content-center mt-4">
-          <Button label="Eliminar" icon="pi pi-trash" onClick={confirmDelete} autoFocus className="p-button-text p-button-rounded p-button-success p-button-outlined" />
-          <Button label="Cancelar" icon="pi pi-times" onClick={cancelDelete} className="p-button-text p-button-rounded p-button-danger p-button-outlined" />
-        </div>
+        {processing && <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>}
+        {!processing && (
+          <React.Fragment>
+            <div>
+              ¿Estás seguro de que deseas eliminar este cliente?
+            </div>
+            <div className=" flex justify-content-center mt-4">
+              <Button label="Eliminar" icon="pi pi-trash" onClick={confirmDelete} autoFocus className="p-button-text p-button-rounded p-button-success p-button-outlined" />
+              <Button label="Cancelar" icon="pi pi-times" onClick={cancelDelete} className="p-button-text p-button-rounded p-button-danger p-button-outlined" />
+            </div>
+          </React.Fragment>
+        )}
+      </Dialog>
+
+      <Dialog
+        header={processing ? 'Actualizando...' : 'Editar Cliente'}
+        visible={editFormVisible}
+        style={{ width: '30vw' }}
+        onHide={closeEditForm}
+      >
+        {processing && <ProgressBar mode="indeterminate" style={{ height: '6px' }} />}
+        {!processing && (
+          <React.Fragment>
+            <EditClientForm
+              client={selectedClient}
+              onSave={handleEditSave}
+              onClose={closeEditForm}
+            />
+          </React.Fragment>
+        )}
       </Dialog>
 
       <Dialog
@@ -214,20 +261,18 @@ const ClientTable = () => {
           filterMatchMode={filterMatchMode}></Column>
         <Column field="direccion" header="Dirección" filter
           filterMatchMode={filterMatchMode}></Column>
-        <Column field="ciudad" header="Ciudad" filter
-          filterMatchMode={filterMatchMode}></Column>
-        <Column field="created" header="Fecha de Creación" sortable
-          body={(rowData) => formatDate(rowData.created)}></Column>
         <Column field="linea" header="Línea" filter
           filterMatchMode={filterMatchMode}></Column>
         <Column field="asesor" header="Asesor" filter
           filterMatchMode={filterMatchMode}></Column>
-        <Column field="Especialidad" header="Especialidad" filter
+        <Column field="especialidad" header="Especialidad" filter
           filterMatchMode={filterMatchMode}></Column>
-        <Column field="ubicación" header="Ubicación" filter
+        <Column field="ubicacion" header="Ubicacion" filter
           filterMatchMode={filterMatchMode}></Column>
         <Column field="tipoCliente" header="Tipo de Cliente" filter
           filterMatchMode={filterMatchMode}></Column>
+           <Column field="created" header="Fecha de Creación" sortable
+          body={(rowData) => formatDate(rowData.created)}></Column>
         <Column body={actionBodyTemplate}></Column>
       </DataTable>
 

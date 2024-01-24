@@ -33,7 +33,7 @@ const ClientSummary = () => {
       await clientService.createClient(formData);
 
       // Cierra el formulario después de guardar
-      setShowNewClientForm(false);
+       setNewShowClientForm(false);
 
       // Muestra un mensaje de éxito utilizando Toast
       toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Cliente guardado con éxito' });

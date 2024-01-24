@@ -2,16 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
 
 
 const EditClientForm = ({ client, onSave, onClose }) => {
   const [formData, setFormData] = useState({
+    idc: '',
     nombre: '',
     contacto: '',
     email: '',
     telefono: '',
     direccion: '',
-    ciudad: '',
+    ubicación: '',
+    tipoCliente: '',
+    created: '',
+    linea: '',
+    asesor: '',
+    especialidad: ''
 
   });
 
@@ -19,12 +26,17 @@ const EditClientForm = ({ client, onSave, onClose }) => {
     // Si hay un cliente proporcionado, actualiza el estado del formulario con sus datos
     if (client) {
       setFormData({
+        idc: client.idc || '',
         nombre: client.nombre || '',
         contacto: client.contacto || '',
         email: client.email || '',
         telefono: client.telefono || '',
         direccion: client.direccion || '',
-        ciudad: client.ciudad || '',
+        ubicación: client.ubicación || '',
+        tipoCliente: client.tipoCliente || '',
+        linea: client.linea || '',
+        asesor: client.asesor || '',
+        especialidad: client.especialidad || '',
      
       });
     }
@@ -39,11 +51,25 @@ const EditClientForm = ({ client, onSave, onClose }) => {
     onSave(formData);
   };
 
+  const lineasOptions = [
+    { label: 'Médica', value: 'medica' },
+    { label: 'Veterinaria', value: 'veterinaria' },
+    { label: 'Simulación', value: 'simulacion' },
+    { label: 'Servicio', value: 'servicio' },
+    { label: 'Odontología', value: 'odontologia' },
+    { label: 'Laboratorio', value: 'laboratorio' },
+    { label: 'Externo', value: 'externo' },
+  ];
+
   return (
    
       <div>
         {/* Renderiza tus campos de formulario aquí, por ejemplo: */}
         <div className="p-fluid p-formgrid p-grid">
+        <div className="p-field p-col">
+            <label htmlFor="idc">C.C. / NIT </label>
+            <InputText id="idc" name="idc" value={formData.idc} onChange={handleInputChange} />
+          </div>
           <div className="p-field p-col">
             <label htmlFor="nombre">Nombre</label>
             <InputText id="nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} />
@@ -64,9 +90,31 @@ const EditClientForm = ({ client, onSave, onClose }) => {
             <label htmlFor="direccion">Dirección</label>
             <InputText id="direccion" name="direccion" value={formData.direccion} onChange={handleInputChange} />
           </div>
+          <div className="p-field p-col mt-2">
+            <label htmlFor="linea">Linea</label>
+            <Dropdown
+          id="linea"
+          name="linea"
+          value={formData.linea}
+          options={lineasOptions}
+          onChange={(e) => handleInputChange({ target: { name: 'linea', value: e.value } })}
+          placeholder="Selecciona una línea"
+        />
+          </div>
+          <div className="p-field p-col mt-2">
+            <label htmlFor="asesor">Asesor</label>
+            <InputText id="asesor" name="asesor" value={formData.asesor} onChange={handleInputChange} />
+          </div>
           <div className="p-field p-col mt-2 mb-3">
-            <label htmlFor="ciudad">Ciudad</label>
-            <InputText id="ciudad" name="ciudad" value={formData.ciudad} onChange={handleInputChange} />
+            <label htmlFor="ubicación">Ubicación</label>
+            <InputText id="ubicación" name="ubicación" value={formData.ubicación} onChange={handleInputChange} />
+          </div>
+          <div className="p-field p-col mt-2 mb-3">
+            <label htmlFor="especialidad">Especialidad</label>
+            <InputText id="especialidad" name="especialidad" value={formData.especialidad} onChange={handleInputChange} />
+          </div><div className="p-field p-col mt-2 mb-3">
+            <label htmlFor="tipoCliente">Tipo de cliente</label>
+            <InputText id="tipoCliente" name="tipoCliente" value={formData.tipoCliente} onChange={handleInputChange} />
           </div>
           {/* Agrega otros campos según sea necesario */}
         </div>

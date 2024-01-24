@@ -31,11 +31,11 @@ const providerService = {
     }
   },
 
-  updateProvider: async (idp, providerData) => {
+  updateProvider: async (_id, providerData) => {
     try {
-      console.log(`/api/providers/updateProvider/${idp}`);
-      const response = await axios.put(`/api/providers/updateProvider/${idp}`, providerData);
-
+      console.log(`/api/providers/updateProvider/${_id}`);
+      const response = await axios.put(`/api/providers/updateProvider/${_id}`, providerData);
+  
       if (response.status === 200) {
         return response.data;
       } else {
@@ -46,11 +46,11 @@ const providerService = {
       throw error;
     }
   },
-
-  deleteProvider: async (idp) => {
+  
+  deleteProvider: async (_id) => {
     try {
-      const response = await axios.delete(`/api/providers/deleteProvider/${idp}`);
-
+      const response = await axios.delete(`/api/providers/deleteProvider/${_id}`);
+  
       if (response.status === 200) {
         return response.data;
       } else {
@@ -61,6 +61,7 @@ const providerService = {
       throw error;
     }
   },
+  
   searchProviders : async (query) => {
     try {
       const url = new URL('/api/providers/searchProviders', window.location.origin);

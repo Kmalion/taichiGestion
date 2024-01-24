@@ -49,35 +49,37 @@ const ProvidersTable = () => {
     // Puedes realizar otras acciones después de cerrar el formulario si es necesario
   };
 
- const handleSaveEditForm = async (formData) => {
+  const handleSaveEditForm = async (formData) => {
     try {
       // Muestra el ProgressBar al inicio de la solicitud
       setProcessing(true);
-
+  
       // Actualiza el proveedor utilizando el servicio
-      await ProviderService.updateProvider(selectedProvider.idp, formData);
-
+      await ProviderService.updateProvider(selectedProvider._id, formData);
+  
       // Refresca la lista de proveedores después de la actualización
       const updatedProviders = await ProviderService.getProviders();
       setProviders(updatedProviders);
-
+  
       // Cierra el formulario después de guardar
       setEditFormVisible(false);
       setSelectedProvider(null);
-
+  
       // Muestra el Toast de éxito
       toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Proveedor actualizado con éxito' });
     } catch (error) {
       console.error('Error al guardar datos editados:', error.message);
-
+  
       // Muestra el Toast de error
       toast.current.show({ severity: 'error', summary: 'Error', detail: 'Error al actualizar el proveedor' });
     } finally {
       // Oculta el ProgressBar después de la solicitud, incluso si hay un error
       setProcessing(false);
-      router.push('/proveedores')
+      router.push('/proveedores');
     }
   };
+
+
   const handleDelete = (provider) => {
     setSelectedProvider(provider);
     setDeleteConfirmationVisible(true);
@@ -87,17 +89,17 @@ const ProvidersTable = () => {
     try {
       // Muestra el ProgressBar al inicio de la solicitud de eliminación
       setProcessing(true);
-
+  
       // Lógica para eliminar el proveedor utilizando el servicio
-      await ProviderService.deleteProvider(selectedProvider.idp);
-
+      await ProviderService.deleteProvider(selectedProvider._id);
+  
       // Refresca la lista de proveedores después de la eliminación
       const updatedProviders = await ProviderService.getProviders();
       setProviders(updatedProviders);
-
+  
       // Cierra el cuadro de diálogo de confirmación
       setDeleteConfirmationVisible(false);
-
+  
       // Muestra el Toast de éxito
       toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Proveedor eliminado con éxito' });
     } catch (error) {
@@ -109,9 +111,10 @@ const ProvidersTable = () => {
     } finally {
       // Oculta el ProgressBar después de la solicitud, incluso si hay un error
       setProcessing(false);
-      router.push('/proveedores')
+      router.push('/proveedores');
     }
   };
+  
 
   const cancelDelete = () => {
     // Cierra el cuadro de diálogo de confirmación

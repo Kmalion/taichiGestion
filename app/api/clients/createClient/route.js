@@ -8,7 +8,7 @@ export const POST = async (request) => {
     await connectDB();
 
     // Extrae los datos de la solicitud
-    const { idc, nombre, contacto, email, telefono, direccion, ubicacion, created, linea, asesor, especialidad, tipoCliente } = await request.json();
+    const { idc, nombre, contacto, email, telefono, direccion, ubicación, created, linea, asesor, especialidad, tipoCliente } = await request.json();
 
  
 
@@ -20,7 +20,7 @@ export const POST = async (request) => {
       email,
       telefono,
       direccion,
-      ubicacion,
+      ubicación,
       created,
       linea,
       asesor,

@@ -24,7 +24,7 @@ const NewClientForm = ({ visible, onSave, onCancel }) => {
       linea: 'medica', // Establecer el valor predeterminado para la línea
       asesor: '', // Ajustar según sea necesario
       especialidad: '',
-      ubicacion: '',
+      ubicación: '',
       tipoCliente: 'Cliente potencial', // Establecer el valor predeterminado para el tipo de cliente
     },
     validate: (values) => {
@@ -47,8 +47,8 @@ const NewClientForm = ({ visible, onSave, onCancel }) => {
       if (!values.direccion.trim()) {
         errors.direccion = 'La dirección es requerida';
       }
-      if (!values.ubicacion.trim()) {
-        errors.ubicacion = 'La ciudad es requerida';
+      if (!values.ubicación.trim()) {
+        errors.ubicación = 'La ciudad es requerida';
       }
       // if (!values.asesor.trim()) {
       //   errors.asesor = 'El nombre del asesor es requerido';
@@ -71,7 +71,8 @@ const NewClientForm = ({ visible, onSave, onCancel }) => {
       try {
         const response = await userService.getUsers()
         const updatedOptions = response.users.map(user => ({
-          label: `${user.nombre} ${user.apellido}`
+          label: `${user.nombre} ${user.apellido}`,
+          value: user.nombre,
         }));
 
         setUserList(updatedOptions);
@@ -216,16 +217,16 @@ console.log('Lista de usuarios ', userList)
           <div className="p-field p-col-12">
             <span className="p-float-label mt-4">
               <InputText
-                id="ubicacion"
-                name="ubicacion"
-                value={formik.values.ubicacion}
+                id="ubicación"
+                name="ubicación"
+                value={formik.values.ubicación}
                 onChange={(e) => formik.handleChange(e)}
                 onBlur={formik.handleBlur}
-                className={classNames({ 'p-invalid': isFormFieldInvalid('ubicacion') })}
+                className={classNames({ 'p-invalid': isFormFieldInvalid('ubicación') })}
               />
-              <label htmlFor="ubicacion">Ubicacion</label>
+              <label htmlFor="ubicación">Ubicación</label>
             </span>
-            {getFormErrorMessage('ubicacion')}
+            {getFormErrorMessage('ubicación')}
           </div>
 
           <div className="p-field p-col-12">

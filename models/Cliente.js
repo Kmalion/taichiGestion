@@ -9,8 +9,9 @@ try {
   // Si el modelo no existe, crea uno nuevo
   const clienteSchema = new mongoose.Schema({
     idc: {
-      type: Number,
+      type: String,
       required: true,
+      unique: true,
     },
     nombre: {
       type: String,
@@ -43,13 +44,13 @@ try {
       default: 'medica',
     },
     asesor: {
-      type: mongoose.Schema.Types.Mixed,
-      ref: 'User',  // Referencia al modelo User
+      type: String,
+        // Referencia al modelo User
     },
     especialidad: {
       type: String,
     },
-    ubicacion: {
+    ubicación: {
       type: String,
     },
     tipoCliente: {

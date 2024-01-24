@@ -3,10 +3,10 @@ import connectDB from '@/utils/db';
 import { NextResponse } from 'next/server';
 
 export const DELETE = async (request, { params }) => {
-    const idp = params.idp;
+    const _id = params._id;
 
-    // Manejar el caso donde idp es undefined
-    if (!idp) {
+    // Manejar el caso donde _id es undefined
+    if (!_id) {
         return new NextResponse('IDP no proporcionado', { status: 400 });
     }
 
@@ -16,8 +16,8 @@ export const DELETE = async (request, { params }) => {
         // Conecta a la base de datos
         connection = await connectDB();
 
-        // Busca el proveedor por idp
-        const existingProvider = await Provider.findOne({ idp });
+        // Busca el proveedor por _id
+        const existingProvider = await Provider.findOne({ _id });
 
         // Si no se encuentra el proveedor, responde con un error 404
         if (!existingProvider) {
