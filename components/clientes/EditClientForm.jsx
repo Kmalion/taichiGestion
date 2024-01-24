@@ -13,7 +13,7 @@ const EditClientForm = ({ client, onSave, onClose }) => {
     email: '',
     telefono: '',
     direccion: '',
-    ubicación: '',
+    ubicacion: '',
     tipoCliente: '',
     created: '',
     linea: '',
@@ -32,7 +32,7 @@ const EditClientForm = ({ client, onSave, onClose }) => {
         email: client.email || '',
         telefono: client.telefono || '',
         direccion: client.direccion || '',
-        ubicación: client.ubicación || '',
+        ubicacion: client.ubicacion || '',
         tipoCliente: client.tipoCliente || '',
         linea: client.linea || '',
         asesor: client.asesor || '',
@@ -106,8 +106,8 @@ const EditClientForm = ({ client, onSave, onClose }) => {
             <InputText id="asesor" name="asesor" value={formData.asesor} onChange={handleInputChange} />
           </div>
           <div className="p-field p-col mt-2 mb-3">
-            <label htmlFor="ubicación">Ubicación</label>
-            <InputText id="ubicación" name="ubicación" value={formData.ubicación} onChange={handleInputChange} />
+            <label htmlFor="ubicacion">Ubicación</label>
+            <InputText id="ubicacion" name="ubicacion" value={formData.ubicacion} onChange={handleInputChange} />
           </div>
           <div className="p-field p-col mt-2 mb-3">
             <label htmlFor="especialidad">Especialidad</label>
