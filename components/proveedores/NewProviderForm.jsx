@@ -5,6 +5,8 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 
+
+
 const NewProviderForm = ({ visible, onSave, onCancel }) => {
   const initialValues = {
     idp: '',
@@ -13,11 +15,12 @@ const NewProviderForm = ({ visible, onSave, onCancel }) => {
     email: '',
     telefono: '',
     direccion: '',
-    ciudad: '',
+    ubicacion: '',
+    especialidad:'',
     created: new Date(),
 
   };
-
+ 
   const handleSubmit = (values) => {
     onSave(values);
     // Puedes agregar lógica adicional aquí, como cerrar el diálogo después de guardar
@@ -62,8 +65,11 @@ const NewProviderForm = ({ visible, onSave, onCancel }) => {
             errors.direccion = 'La dirección es requerida';
           }
 
-          if (!values.ciudad.trim()) {
-            errors.ciudad = 'La ciudad es requerida';
+          if (!values.ubicacion.trim()) {
+            errors.ubicacion = 'La ubicacion es requerida';
+          }
+          if (!values.especialidad.trim()) {
+            errors.especialidad = 'La especialidad es requerida';
           }
 
           return errors;
@@ -122,10 +128,18 @@ const NewProviderForm = ({ visible, onSave, onCancel }) => {
 
             <div className="p-field p-col-12">
               <span className="p-float-label mt-4">
-                <Field type="text" id="ciudad" name="ciudad" as={InputText} />
-                <label htmlFor="ciudad">Ciudad</label>
+                <Field type="text" id="ubicacion" name="ubicacion" as={InputText} />
+                <label htmlFor="ubicacion">Ubicacion</label>
               </span>
-              <ErrorMessage name="ciudad" component="small" className="p-error" />
+              <ErrorMessage name="ubicacion" component="small" className="p-error" />
+            </div>
+
+            <div className="p-field p-col-12">
+              <span className="p-float-label mt-4">
+                <Field type="text" id="especialidad" name="especialidad" as={InputText} />
+                <label htmlFor="especialidad">Especialidad</label>
+              </span>
+              <ErrorMessage name="especialidad" component="small" className="p-error" />
             </div>
 
             <div className="p-col-12 mt-4">

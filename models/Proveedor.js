@@ -33,22 +33,14 @@ try {
       type: String,
       default: '',
     },
-    ciudad: {
+    ubicacion: {
       type: String,
       default: '',
     },
-    productos: [
-      {
-        referencia: {
-          type: String,
-          required: true,
-        },
-        cantidad: {
-          type: Number,
-          default: 0,
-        },
-      },
-    ],
+    especialidad: {
+      type: String,
+      default: '',
+    },
     created: {
       type: Date,
       required: true,

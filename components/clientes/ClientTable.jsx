@@ -36,10 +36,11 @@ const ClientTable = () => {
     addLocale('es', { filter: filterTranslations });
     // Obtener la lista de clientes
     ClientService.getClients()
+    
       .then((data) => setClients(data))
       .catch((error) => console.error('Error al obtener clientes:', error));
   }, []);
-
+  console.log("Clientes: ", clients)
   const handleEdit = (client) => {
     setSelectedClient(client);
     setEditFormVisible(true);
@@ -217,6 +218,16 @@ const ClientTable = () => {
           filterMatchMode={filterMatchMode}></Column>
         <Column field="created" header="Fecha de Creación" sortable
           body={(rowData) => formatDate(rowData.created)}></Column>
+        <Column field="linea" header="Línea" filter
+          filterMatchMode={filterMatchMode}></Column>
+        <Column field="asesor" header="Asesor" filter
+          filterMatchMode={filterMatchMode}></Column>
+        <Column field="Especialidad" header="Especialidad" filter
+          filterMatchMode={filterMatchMode}></Column>
+        <Column field="ubicación" header="Ubicación" filter
+          filterMatchMode={filterMatchMode}></Column>
+        <Column field="tipoCliente" header="Tipo de Cliente" filter
+          filterMatchMode={filterMatchMode}></Column>
         <Column body={actionBodyTemplate}></Column>
       </DataTable>
 

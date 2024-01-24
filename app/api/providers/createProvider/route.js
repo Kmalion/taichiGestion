@@ -7,7 +7,7 @@ export const POST = async (request) => {
     await connectDB();
 
     // Extrae los datos de la solicitud
-    const { idp, nombre, contacto, email, telefono, direccion, ciudad, productos, created } = await request.json();
+    const { idp, nombre, contacto, email, telefono, direccion, ubicacion, especialidad, created } = await request.json();
 
     // Crea un nuevo proveedor
     const newProvider = new Provider({
@@ -17,8 +17,8 @@ export const POST = async (request) => {
       email,
       telefono,
       direccion,
-      ciudad,
-      productos,
+      ubicacion,
+      especialidad,
       created,
     });
 

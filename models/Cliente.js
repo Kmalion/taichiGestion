@@ -33,9 +33,6 @@ try {
       default: '',
     },
 
-    fechaNacimiento: {
-      type: Date,
-    },
     created: {
       type: Date,
       required: true,

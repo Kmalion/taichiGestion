@@ -5,12 +5,14 @@ import { Button } from 'primereact/button';
 
 const EditProviderForm = ({ provider, onSave, onClose }) => {
   const [formData, setFormData] = useState({
+    idp: '',
     nombre: '',
     contacto: '',
     email: '',
     telefono: '',
     direccion: '',
-    ciudad: '',
+    ubicacion: '',
+    especialidad:''
     // Agrega otros campos según sea necesario
   });
 
@@ -18,12 +20,14 @@ const EditProviderForm = ({ provider, onSave, onClose }) => {
     // Si hay un proveedor proporcionado, actualiza el estado del formulario con sus datos
     if (provider) {
       setFormData({
+        idp: provider.idp || '',
         nombre: provider.nombre || '',
         contacto: provider.contacto || '',
         email: provider.email || '',
         telefono: provider.telefono || '',
         direccion: provider.direccion || '',
-        ciudad: provider.ciudad || '',
+        ubicacion: provider.ubicacion || '',
+        especialidad: provider.especialidad || '',
         // Actualiza otros campos según sea necesario
       });
     }
@@ -42,6 +46,10 @@ const EditProviderForm = ({ provider, onSave, onClose }) => {
     <div>
       <h3>Editar Proveedor</h3>
       <div className="p-fluid p-formgrid p-grid">
+      <div className="p-field p-col mt-2 mb-3">
+          <label htmlFor="idp">C.C. / NIT</label>
+          <InputText id="idp" name="idp" value={formData.idp} onChange={handleInputChange} />
+        </div>
         <div className="p-field p-col">
           <label htmlFor="nombre">Nombre</label>
           <InputText id="nombre" name="nombre" value={formData.nombre} onChange={handleInputChange} />
@@ -63,10 +71,13 @@ const EditProviderForm = ({ provider, onSave, onClose }) => {
           <InputText id="direccion" name="direccion" value={formData.direccion} onChange={handleInputChange} />
         </div>
         <div className="p-field p-col mt-2 mb-3">
-          <label htmlFor="ciudad">Ciudad</label>
-          <InputText id="ciudad" name="ciudad" value={formData.ciudad} onChange={handleInputChange} />
+          <label htmlFor="ubicacion">Ubicacion</label>
+          <InputText id="ubicacion" name="ubicacion" value={formData.ubicacion} onChange={handleInputChange} />
         </div>
-        {/* Agrega otros campos según sea necesario */}
+        <div className="p-field p-col mt-2 mb-3">
+          <label htmlFor="especialidad">Especialidad</label>
+          <InputText id="especialidad" name="especialidad" value={formData.especialidad} onChange={handleInputChange} />
+        </div>
       </div>
 
       <div className="flex justify-content-center mt-4 gap-3">

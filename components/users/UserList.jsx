@@ -112,10 +112,10 @@ const UsersList = () => {
           <div className="info-label">Cargo:</div>
           <div className="info-value">{user.cargo}</div>
         </div>
-        <div className="user-info">
+        {/* <div className="user-info">
           <div className="info-label">Role:</div>
           <div className="info-value">{user.role}</div>
-        </div>
+        </div> */}
         {/* Agrega más campos según tu modelo de usuario */}
         <div className="user-actions">
           {session && session.user.role === 'admin' && (
