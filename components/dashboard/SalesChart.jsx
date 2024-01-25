@@ -11,8 +11,8 @@ export default function SalesChart({ cardWidth, cardHeight }) {
       labels: ['Q1', 'Q2', 'Q3', 'Q4'],
       datasets: [
         {
-          label: 'Sales',
-          data: [540, 325, 702, 620],
+          label: 'Ventas',
+          data: [2000, 3000, 4000, 5000],
           backgroundColor: [
             'rgba(255, 159, 64, 0.2)',
             'rgba(75, 192, 192, 0.2)',

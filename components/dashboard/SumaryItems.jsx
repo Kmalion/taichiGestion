@@ -46,7 +46,7 @@ const SummaryItems = () => {
           <div className="surface-0 shadow-2 p-3 border-1 border-50 border-round">
             <Skeleton className="mb-2"></Skeleton>
             <Skeleton width="10rem" className="mb-2"></Skeleton>
-            <Skeleton height="3rem" className="mb-2"></Skeleton>
+            <Skeleton height="1rem" className="mb-2"></Skeleton>
             <Skeleton width="80%" height="0.5rem" className="mb-2"></Skeleton>
             <Skeleton width="10rem" height="0.5rem"></Skeleton>
           </div>
@@ -159,7 +159,7 @@ const SummaryItems = () => {
   );
   
   return (
-    <div className="p-d-flex p-jc-center p-ai-center" style={{ minHeight: '100vh' }}>
+    <div className="p-d-flex p-jc-center p-ai-center" >
     <div className="p-grid">
       <div>
         {loading ? renderSkeleton() : renderSummaryItems()}

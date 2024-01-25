@@ -42,7 +42,6 @@ const ClientTable = () => {
     ClientService.getClients()
       .then((data) => {
         const sortedClients = data.sort((a, b) => new Date(b.created) - new Date(a.created));
-        console.log("Cleintes: ", sortedClients)
         setClients(sortedClients);
       })
       .catch((error) => console.error('Error al obtener clientes:', error));

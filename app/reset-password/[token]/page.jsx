@@ -63,13 +63,13 @@ const ResetPassword = ({params}) => {
 
   const showSuccess = (message) => {
     setError(''); // Limpiar el estado de error
-    toast.current.show({ severity: 'success', summary: 'Comprobación ok', detail: message, life: 3000 });
+    
   };
 
   const showError = (message) => {
     setVerified(true); // Marcar como verificado para evitar la llamada continua a showSuccess
     setError(message); // Establecer el mensaje de error
-    toast.current.show({ severity: 'error', summary: 'Error', detail: message, life: 3000 });
+    toast.current.show({ severity: 'error', summary: 'Error', detail: message, life: 5000 });
   };
 
   const handleSubmit = async (e) => {
@@ -108,7 +108,7 @@ const ResetPassword = ({params}) => {
         showError("El usuario con este email no está registrado");
       } else if (res.status === 200) {
         showSuccess("Éxito, revise su correo para cambiar su contraseña");
-        router.push("/dashboard");
+        router.push("/login");
       }
     } catch (error) {
       showError("Error, vuelva a intentarlo");
@@ -116,58 +116,64 @@ const ResetPassword = ({params}) => {
     }
 
   }; return (
-    <div className="p-grid pcenter" style={{ height: '100vh', width: '500px' }}>
-      <Card style={{ width: '100%', padding: '30px', height: '60vh' }}>
-        <form onSubmit={handleSubmit}>
-          <div className="p-grid p-fluid mt-0">
-            <div className="p-col-12">
-              <h2 className="text-center mt-0">Reset Password</h2>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+    <Card className="p-col-12" style={{ width: '400px', padding: '30px' }}>
+      <img
+        src="/img/Taichi_logo_negro.png"
+        alt="Logo"
+        style={{ width: '300px', height: '100px', display: 'block', margin: 'auto', marginBottom: '20px' }}
+      />
+      <form onSubmit={handleSubmit}>
+        <div className="p-grid p-fluid mt-0">
+          <div className="p-col-12">
+            <h2 className="text-center mt-0">Reset Password</h2>
+          </div>
+          <div className="p-col-12">
+            <div className="p-field mt-2">
+              <label style={{ textAlign: 'left', display: 'block' }} htmlFor="password">
+                Contraseña:
+              </label>
+              <InputText
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Introduzca su contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="p-inputtext"
+              />
             </div>
-            <div className="p-col-12 p-md-6">
-              <div className="p-field mt-2">
-                <label style={{ textAlign: 'left', display: 'block' }} htmlFor="password">
-                  Contraseña:
-                </label>
-                <InputText
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Introduzca su contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="p-inputtext"
-                />
-              </div>
-              <div className="p-field mt-2">
-                <label style={{ textAlign: 'left', display: 'block' }} htmlFor="confirmPassword">
-                  Confirmar Contraseña:
-                </label>
-                <InputText
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="Confirme su contraseña"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="p-inputtext"
-                />
-              </div>
-            </div>
-            <div className="p-col-12 mt-2">
-              <Button
-                label="Reset password"
-                type="submit"
-                disabled={error.length > 0}
-                className="p-d-block p-mx-auto p-mt-2 mt-2"
+            <div className="p-field mt-2">
+              <label style={{ textAlign: 'left', display: 'block' }} htmlFor="confirmPassword">
+                Confirmar Contraseña:
+              </label>
+              <InputText
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="Confirme su contraseña"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="p-inputtext"
               />
             </div>
           </div>
-        </form>
-        <Toast ref={toast} />
-      </Card>
-    </div>
+          <div className="p-col-12 mt-2">
+            <Button
+              label="Reset Password"
+              type="submit"
+              disabled={error.length > 0}
+              className="p-d-block p-mx-auto p-mt-2 mt-2"
+            />
+          </div>
+        </div>
+      </form>
+      <Toast ref={toast} />
+    </Card>
+  </div>
+  
   );
 };
 

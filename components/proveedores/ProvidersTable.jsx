@@ -34,7 +34,11 @@ const ProvidersTable = () => {
 
   useEffect(() => {
     ProviderService.getProviders()
-      .then((data) => setProviders(data))
+      .then((data) => {
+        const sortedProviders = data.sort((a, b) => new Date(b.created) - new Date(a.created));
+        console.log("Proveedores: ", sortedProviders)
+        setProviders(sortedProviders);
+      })
       .catch((error) => console.error('Error al obtener proveedores:', error));
   }, []);
 
@@ -209,7 +213,7 @@ const ProvidersTable = () => {
         selection={selectedProvider} 
         onSelectionChange={(e) => setSelectedProvider(e.value)}
         globalFilter={globalFilter}
-        emptyMessage="No se encontraron clientes"
+        emptyMessage="No se encontraron proveedores"
         >
         <Column field="idp" header="ID Proveedor"></Column>
         <Column field="nombre" header="Nombre" filter
