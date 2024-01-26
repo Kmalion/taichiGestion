@@ -64,10 +64,12 @@ const clientService = {
   searchClients: async (query) => {
     try {
       const url = new URL('/api/clients/searchClients', window.location.origin);
-      url.searchParams.set('q', query);
-
+      
+      // Asegúrate de que coincida con el nombre del parámetro que espera tu API del servidor
+      url.searchParams.set('valor', query);
+  
       const response = await fetch(url.toString());
-
+  
       if (response.ok) {
         const clients = await response.json();
         return clients;
@@ -80,6 +82,7 @@ const clientService = {
       throw error;
     }
   }
+  
 };
 
 export default clientService;

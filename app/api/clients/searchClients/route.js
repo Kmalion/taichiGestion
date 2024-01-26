@@ -9,14 +9,14 @@ export const GET = async (params) => {
     // Conecta a la base de datos
     client = await connectDB();
 
-    // Asegúrate de que searchParams esté definido
+    // Asegúrate de que query.valor esté definido
     const queryUrl = params.url;
     const encodedQueryValue = queryUrl.split('=')[1] || '';
     const queryValue = decodeURIComponent(encodedQueryValue.replace(/\+/g, ' '));
-
-    // Realiza la operación para obtener clientes que coincidan con el nombre
+    
+    // Verifica si 'valor' está presente antes de intentar acceder
     const clients = await Client.find({
-      nombre: { $regex: new RegExp(queryValue, 'i') }, // Filtra insensible a mayúsculas y minúsculas
+      nombre: { $regex: new RegExp(queryValue, 'i') },
     });
 
     return new NextResponse(JSON.stringify(clients), {
