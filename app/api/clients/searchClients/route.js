@@ -1,6 +1,7 @@
 import connectDB from '@/utils/db';
 import Client from '@/models/Cliente';
 import { NextResponse } from 'next/server';
+export const dynamic = 'auto'
 
 export const GET = async (params) => {
   let client;
