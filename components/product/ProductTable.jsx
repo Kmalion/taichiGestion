@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { classNames } from 'primereact/utils';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -25,6 +25,7 @@ import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import exportToExcel from '@/utils/exports/excelExport';
 import { format } from 'date-fns';
 import Image from 'next/image';
+import { fetchDataEffect } from '@/utils/productEffects'
 
 
 
@@ -240,39 +241,24 @@ export default function ProductTable() {
     };
 
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Obtener datos del servicio de productos
-                const data = await fetchProducts(first, rows);
-    
-                if (data && data.products) {
-                    setProducts(data.products);
-                    setTotalRecords(data.totalRecords);
-                } else {
-                    console.error('La respuesta del servicio de productos no tiene la estructura esperada:', data);
-                }
-            } catch (error) {
-                console.error('Error al obtener productos:', error);
-            }
-        };
-    
-        fetchData();
-    }, [first, rows, fetchProducts]);
-    
+    const memoizedFetchDataEffect = useCallback(() => {
+        fetchDataEffect(first, rows, fetchProducts, setProducts, setTotalRecords);
+    }, []);
 
 
-    useEffect(() => {
-        const applyFilter = () => {
-            if (typeof globalFilter === 'string') {
-                filterProducts(globalFilter);
-            }
-        };
-    
-        applyFilter();
+    const applyFilter = useCallback(() => {
+        if (typeof globalFilter === 'string') {
+            filterProducts(globalFilter);
+        }
     }, [globalFilter, filterProducts]);
 
-
+    useEffect(() => {
+        memoizedFetchDataEffect();
+    }, [memoizedFetchDataEffect]);
+    
+    useEffect(() => {
+        applyFilter();
+    }, [applyFilter]);
 
     const formatCurrency = (value) => {
         return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -854,8 +840,8 @@ export default function ProductTable() {
                     <Image
                         src={product.image}
                         alt={product.image}
-                        width={width} // Especifica el ancho deseado
-                        height={height} // Especifica la altura deseada
+                        width={5000} // Especifica el ancho deseado
+                        height={2500} // Especifica la altura deseada
                         className="product-image block m-auto pb-3"
                     />
                 )}

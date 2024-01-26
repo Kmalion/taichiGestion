@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
@@ -395,10 +395,21 @@ const formatSerials = (serials) => {
     setTotalQuantity(quantityTotal);
   };
   
-  useEffect(() => {
+  const calculateTotalCallback = useCallback(() => {
     calculateTotal();
+}, [calculateTotal]);
+
+const calculateTotalQuantityCallback = useCallback(() => {
     calculateTotalQuantity();
-  }, [products, calculateTotal, calculateTotalQuantity]);
+}, [calculateTotalQuantity]);
+
+
+useEffect(() => {
+  calculateTotalCallback();
+  calculateTotalQuantityCallback();
+}, [products, calculateTotalCallback, calculateTotalQuantityCallback]);
+
+  
 
   const handleAddProduct = (product) => {
     const cost = parseFloat(product.cost) || 0;

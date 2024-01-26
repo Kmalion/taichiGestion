@@ -123,6 +123,8 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     // Cargar los datos de "Asignado a" al montar el componente
     loadAsignedToOptions();
   }, [formik]);
+
+
   const onUpload = async (event) => {
     // Manejar la lógica de la carga de archivos aquí
     // event.files contiene los archivos cargados
@@ -167,7 +169,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     } else {
       formik.setFieldValue('entradaNo', entryData.entradaNo || '');
     }
-  }, [entryData]);
+  }, [entryData, formik]);
 
   const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
 
