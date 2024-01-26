@@ -24,6 +24,7 @@ import autoTable from 'jspdf-autotable';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import exportToExcel from '@/utils/exports/excelExport';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 
 
@@ -219,7 +220,7 @@ export default function ProductTable() {
         try {
             const response = await axios.get('/api/products/getProducts');
 
-           
+
             // Actualiza el estado inventoryStatus antes de establecer los productos
             const updatedProducts = response.data.map(product => ({
                 ...product,
@@ -240,27 +241,36 @@ export default function ProductTable() {
 
 
     useEffect(() => {
-        // Obtener datos del servicio de productos
-        fetchProducts(first, rows)
-            .then((data) => {
+        const fetchData = async () => {
+            try {
+                // Obtener datos del servicio de productos
+                const data = await fetchProducts(first, rows);
+    
                 if (data && data.products) {
                     setProducts(data.products);
                     setTotalRecords(data.totalRecords);
                 } else {
                     console.error('La respuesta del servicio de productos no tiene la estructura esperada:', data);
                 }
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error('Error al obtener productos:', error);
-            });
-    }, [first, rows]);
+            }
+        };
+    
+        fetchData();
+    }, [first, rows, fetchProducts]);
+    
 
 
     useEffect(() => {
-        if (typeof globalFilter === 'string') {
-            filterProducts(globalFilter);
-        }
-    }, [globalFilter, products]);
+        const applyFilter = () => {
+            if (typeof globalFilter === 'string') {
+                filterProducts(globalFilter);
+            }
+        };
+    
+        applyFilter();
+    }, [globalFilter, filterProducts]);
 
 
 
@@ -532,7 +542,13 @@ export default function ProductTable() {
     const imageBodyTemplate = (rowData) => {
         return (
             <div className="zoomable-image" onClick={() => openImageDialog(rowData.image)}>
-                <img src={`${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />
+                <Image
+                    src={rowData.image}
+                    alt={rowData.image}
+                    width={64}
+                    height={64}
+                    className="shadow-2 border-round"
+                />
             </div>
         );
     };
@@ -679,16 +695,16 @@ export default function ProductTable() {
     const onPageChange = (event) => {
         setFirst(event.first);
         setRows(event.rows);
-      };
-      
+    };
+
 
     const ubicacionBodyTemplate = (rowData) => {
         return (
-           
-                    <React.Fragment>
-                        <Button icon="pi pi-map-marker" onClick={() => showUbicacionDialog(rowData)} className="p-button-rounded p-button-text" />
-                    </React.Fragment>
-            
+
+            <React.Fragment>
+                <Button icon="pi pi-map-marker" onClick={() => showUbicacionDialog(rowData)} className="p-button-rounded p-button-text" />
+            </React.Fragment>
+
         );
     };
 
@@ -743,14 +759,23 @@ export default function ProductTable() {
 
                 <Dialog
                     visible={showImageDialog}
-                    style={{ width: 'auto' }}
+                    style={{ width: '50%', maxWidth: '2000px' }} // Ajusta el porcentaje y el máximo ancho según tus necesidades
                     header={`${product.reference}`}
                     modal
                     onHide={closeImageDialog}
                     footer={<Button label="Cerrar" icon="pi pi-times" onClick={closeImageDialog} />}
                 >
-                    {selectedImage && <img src={selectedImage} alt="Imagen más grande" style={{ width: '100%' }} />}
+                    {selectedImage && (
+                        <Image
+                            src={selectedImage}
+                            alt="Imagen más grande"
+                            layout="responsive"
+                            width={2000}  // Ajusta el valor según tus preferencias
+                            height={1200}  // Ajusta el valor según tus preferencias
+                        />
+                    )}
                 </Dialog>
+
                 <Dialog
                     visible={serialsDialog}
                     style={{ width: '30rem' }}
@@ -825,7 +850,15 @@ export default function ProductTable() {
                 footer={productDialogFooter}
                 onHide={hideDialog}
             >
-                {product.image && <img src={`${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
+                {product.image && (
+                    <Image
+                        src={product.image}
+                        alt={product.image}
+                        width={width} // Especifica el ancho deseado
+                        height={height} // Especifica la altura deseada
+                        className="product-image block m-auto pb-3"
+                    />
+                )}
 
                 <div className="field">
                     <label htmlFor="reference" className="font-bold">

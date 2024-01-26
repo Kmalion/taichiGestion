@@ -72,10 +72,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     }
   };
 
-  useEffect(() => {
-    // Cargar los datos de "Asignado a" al montar el componente
-    loadAsignedToOptions();
-  }, []);
+
 
   const formik = useFormik({
     initialValues: {
@@ -121,7 +118,11 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
       formik.resetForm();
     },
   });
-
+  
+  useEffect(() => {
+    // Cargar los datos de "Asignado a" al montar el componente
+    loadAsignedToOptions();
+  }, [formik]);
   const onUpload = async (event) => {
     // Manejar la lógica de la carga de archivos aquí
     // event.files contiene los archivos cargados

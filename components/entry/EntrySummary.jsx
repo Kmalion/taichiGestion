@@ -357,10 +357,7 @@ const formatSerials = (serials) => {
 
 
 
-  useEffect(() => {
-    calculateTotal();
-    calculateTotalQuantity();
-  }, [products]);
+
 
 
 
@@ -397,7 +394,11 @@ const formatSerials = (serials) => {
     }, 0);
     setTotalQuantity(quantityTotal);
   };
-
+  
+  useEffect(() => {
+    calculateTotal();
+    calculateTotalQuantity();
+  }, [products, calculateTotal, calculateTotalQuantity]);
 
   const handleAddProduct = (product) => {
     const cost = parseFloat(product.cost) || 0;
