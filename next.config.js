@@ -6,6 +6,9 @@ const nextConfig = {
   }
    
   module.exports = {
+    images: {
+      domains: ['nyc3.digitaloceanspaces.com', 'diagnosticomedico.pe', 'taichi-holdings-colombia.com'],
+    },
     compiler: {
       styledComponents: true,
     },

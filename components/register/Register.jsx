@@ -8,6 +8,7 @@ import { Toast } from 'primereact/toast'
 import { FileUpload } from "primereact/fileupload";
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
+import Image from "next/image";
 
 const RegisterPage = () => {
   const { data: session } = useSession();
@@ -115,7 +116,14 @@ const RegisterPage = () => {
   const showNoCredentialsMessage = () => {
     return (
       <Card style={{ width: "100%", padding: "20px", textAlign: "center" }}>
-        <img src="img/triste.png" alt="Triste" style={{ maxWidth: "100px" }} />
+       <Image
+  src="/img/triste.png"
+  alt="Triste"
+  width={100} // ajusta el valor según tus necesidades
+  height={100} // ajusta el valor según tus necesidades
+  style={{ maxWidth: "100px" }}
+/>
+
         <h4>No tienes credenciales para crear usuarios.</h4>
       </Card>
     );

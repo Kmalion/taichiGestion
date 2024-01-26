@@ -3,7 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
-import { Toast } from 'primereact/toast'; // Importa el componente Toast
+import { Toast } from 'primereact/toast'; 
+import Image from 'next/image';
 import { useTheme } from '@/context/ThemeContext';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -118,11 +119,13 @@ const ResetPassword = ({params}) => {
   }; return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
     <Card className="p-col-12" style={{ width: '400px', padding: '30px' }}>
-      <img
-        src="/img/Taichi_logo_negro.png"
-        alt="Logo"
-        style={{ width: '300px', height: '100px', display: 'block', margin: 'auto', marginBottom: '20px' }}
-      />
+    <Image
+          src={logoSrc} // Utiliza la variable logoSrc que se establece dinámicamente según el tema
+          alt="Logo"
+          width={300}
+          height={100}
+          style={{ display: 'block', margin: 'auto', marginBottom: '20px' }}
+        />
       <form onSubmit={handleSubmit}>
         <div className="p-grid p-fluid mt-0">
           <div className="p-col-12">

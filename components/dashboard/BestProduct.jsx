@@ -1,12 +1,15 @@
 'use client'
 import React from 'react';
+import Image from 'next/image';
 import { Card } from 'primereact/card';
 
 export default function BestProduct() {
   const header = (
-    <img
+    <Image
       alt="Card"
       src="https://diagnosticomedico.pe/wp-content/uploads/2022/05/ecografo_chison_sonoeye_P2_01.jpg"
+      width={500} // Ajusta el ancho según sea necesario
+      height={300} // Ajusta la altura según sea necesario
     />
   );
 
@@ -21,9 +24,8 @@ export default function BestProduct() {
         style={{ flex: 1 }}
       >
         <p className="m-2">Vendidos 45</p>
-    
       </Card>
-
     </div>
   );
 }
+

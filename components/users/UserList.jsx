@@ -11,6 +11,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast'; // Agregado Toast
 import { useSession } from 'next-auth/react';
 import '@/app/styles/styles.css';
+import Image from 'next/image';
 
 const UsersList = () => {
   const [users, setUsers] = useState([]);
@@ -96,14 +97,17 @@ const UsersList = () => {
 
   const itemTemplate = (user) => (
     <div key={user._id} className="p-col-12 p-md-4 p-lg-3">
-      <Card title={`${user.nombre} ${user.apellido}`} className="custom-card">
-        <div className="circular-image-container zoomable-image">
-          <img
-            src={user.foto ? user.foto : '/img/generic-avatar.png'}
-            alt={`${user.nombre} ${user.apellido}`}
-            className="circular-image"
-          />
-        </div>
+    <Card title={`${user.nombre} ${user.apellido}`} className="custom-card">
+      <div className="circular-image-container zoomable-image">
+        {/* Utiliza el componente Image de next/image correctamente */}
+        <Image
+          src={user.foto ? user.foto : '/img/generic-avatar.png'}
+          alt={`${user.nombre} ${user.apellido}`}
+          width={100}
+          height={100}
+          className="circular-image"
+        />
+      </div>
         <div className="user-info">
           <div className="info-label">Email:</div>
           <div className="info-value">{user.email}</div>

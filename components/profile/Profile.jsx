@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import '@/app/styles/styles.css'
 import Link from 'next/link';
+import Image from 'next/image'
 
 
 const Profile = () => {
@@ -33,7 +34,7 @@ const Profile = () => {
         </div>
         <div className="p-col-12 p-md-6 d-flex align-items-center justify-content-center">
           <div className="circular-image-container  d-flex align-items-center">
-            <img src={foto} alt="Perfil" className="circular-image" />
+          <Image src={foto} alt="Perfil" width={100} height={100} className="circular-image" />
           </div>
         </div>
         <div className="p-col-12 p-md-6">
