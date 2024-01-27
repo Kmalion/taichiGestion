@@ -62,16 +62,18 @@ const providerService = {
     }
   },
   
-  searchProviders : async (query) => {
+  searchProviders: async (query) => {
     try {
       const url = new URL('/api/providers/searchProviders', window.location.origin);
       url.searchParams.set('q', query);
   
-      const response = await fetch(url.toString());
+      const response = await fetch(url.toString(), {
+        cache: 'force-cache', // Establecer la opción de caché
+      });
   
       if (response.ok) {
         const providers = await response.json();
-        console.log("Proveedores servicio: ", providers)
+        console.log("Proveedores servicio: ", providers);
         return providers;
       } else {
         console.error('Error al obtener proveedores:', response.statusText);
@@ -82,6 +84,7 @@ const providerService = {
       throw error;
     }
   }
+  
 };
 
 export default providerService;
