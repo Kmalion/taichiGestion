@@ -8,6 +8,7 @@ import 'primeflex/primeflex.css';
 import Providers from '@/utils/Providers';
 import { locale, addLocale } from 'primereact/api';
 import filterTranslations from '@/utils/filterTranslations.json';
+export const dynamic = 'force-dynamic'
 
 
 
