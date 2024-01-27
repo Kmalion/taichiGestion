@@ -10,7 +10,7 @@ export const GET = async (request) => {
         // Realiza la operación para obtener todas las entradas
         const entries = await Entry.find().populate('products'); // Asegúrate de ajustar 'products' según el nombre de la propiedad en tu modelo
 
-        // Responde con las entradas en formato JSON con fechas formateadas
+        console.log("Entradas en el server: ", entries)
         const formattedEntries = entries.map(entry => ({
             entradaNo: entry.entradaNo,
             fechaEntrada: `${new Date(entry.fechaEntrada).getDate()}/${new Date(entry.fechaEntrada).getMonth() + 1}/${new Date(entry.fechaEntrada).getFullYear()}`,
@@ -27,6 +27,8 @@ export const GET = async (request) => {
             comment: entry.comment
         }));
 
+        
+        console.log("Entradas FORMATEADAS en el server: ", formattedEntries)
         // Responde con las entradas en formato JSON
         return new NextResponse(JSON.stringify(formattedEntries), {
             status: 200,
