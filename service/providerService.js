@@ -67,12 +67,14 @@ const providerService = {
       const url = new URL('/api/providers/searchProviders', window.location.origin);
       url.searchParams.set('q', query);
   
-      const response = await fetch(url.toString(), {
-        cache: 'force-cache', // Establecer la opción de caché
+      const response = await axios.get(url.toString(), {
+        headers: {
+          'Cache-Control': 'no-cache', // Para evitar el almacenamiento en caché del navegador
+        },
       });
   
-      if (response.ok) {
-        const providers = await response.json();
+      if (response.status === 200) {
+        const providers = response.data;
         console.log("Proveedores servicio: ", providers);
         return providers;
       } else {

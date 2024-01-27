@@ -66,10 +66,14 @@ const userService = {
       const url = new URL('/api/users/searchUsers', window.location.origin);
       url.searchParams.set('q', query);
   
-      const response = await fetch(url.toString());
+      const response = await axios.get(url.toString(), {
+        headers: {
+          'Cache-Control': 'no-cache', // Para evitar el almacenamiento en caché del navegador
+        },
+      });
   
-      if (response.ok) {
-        const users = await response.json();
+      if (response.status === 200) {
+        const users = response.data;
         return users;
       } else {
         console.error('Error al obtener usuarios:', response.statusText);

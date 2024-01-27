@@ -81,11 +81,14 @@ export const searchProducts = async (query) => {
     const url = new URL('/api/products/getProductsSearch', window.location.origin);
     url.searchParams.set('q', query);
 
+    const response = await axios.get(url.toString(), {
+      headers: {
+        'Cache-Control': 'no-cache', // Para evitar el almacenamiento en caché del navegador
+      },
+    });
 
-    const response = await fetch(url.toString());
-
-    if (response.ok) {
-      const products = await response.json();
+    if (response.status === 200) {
+      const products = response.data;
       return products;
     } else {
       console.error('Error al obtener productos:', response.statusText);
@@ -95,4 +98,5 @@ export const searchProducts = async (query) => {
     console.error('Error al buscar productos:', error);
     throw error;
   }
+
 };
