@@ -1,6 +1,7 @@
 import Product from '@/models/Product';
 import connectDB from '@/utils/db';
 import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic'
 
 export const GET = async (request, { params }) => {
   const { reference } = params;
