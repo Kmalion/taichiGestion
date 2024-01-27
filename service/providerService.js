@@ -1,3 +1,4 @@
+'use client'
 import axios from "axios";
 
 const providerService = {
@@ -62,31 +63,37 @@ const providerService = {
     }
   },
   
-  searchProviders: async (query) => {
-    try {
+  searchProviders : async (query) => {
+  try {
+    // Realiza la búsqueda solo en el lado del cliente
+    if (typeof window !== 'undefined') {
       const url = new URL('/api/providers/searchProviders', window.location.origin);
       url.searchParams.set('q', query);
-  
+
       const response = await axios.get(url.toString(), {
         headers: {
           'Cache-Control': 'no-cache', // Para evitar el almacenamiento en caché del navegador
         },
       });
-  
+
       if (response.status === 200) {
         const providers = response.data;
-        console.log("Proveedores servicio: ", providers);
+          
         return providers;
       } else {
         console.error('Error al obtener proveedores:', response.statusText);
         throw new Error('Error al obtener proveedores');
       }
-    } catch (error) {
-      console.error('Error al buscar proveedores:', error);
-      throw error;
+    } else {
+      // Si se está generando estáticamente, devuelve una respuesta vacía o maneja de otra manera
+      return [];
     }
+  } catch (error) {
+    console.error('Error al buscar proveedores:', error);
+    throw error;
   }
-  
+}
+
 };
 
 export default providerService;

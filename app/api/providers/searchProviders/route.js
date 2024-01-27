@@ -13,7 +13,7 @@ export const GET = async (params) => {
     const queryUrl = params.url;
     const encodedQueryValue = queryUrl.split('=')[1] || '';
     const queryValue = decodeURIComponent(encodedQueryValue.replace(/\+/g, ' '));
-    console.log("Busqueda proveedor: ", queryValue)
+  
     // Realiza la operación para obtener proveedores que coincidan con el nombre
     const providers = await Provider.find({
       nombre: { $regex: new RegExp(queryValue, 'i') }, // Filtra insensible a mayúsculas y minúsculas

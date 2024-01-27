@@ -10,21 +10,6 @@ import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { searchProducts } from '@/service/entryService';
 
-const searchReferences = async (searchQuery) => {
-  const query = String(searchQuery).toLowerCase();
-
-  try {
-    const products = await EntryService.searchProducts(query);
-
-    // Filtra las referencias basadas en la consulta
-    const filteredReferences = products
-      .map((product) => ({ label: product.reference }));
-
-    setFilteredReferences(filteredReferences);
-  } catch (error) {
-    console.error('Error al buscar referencias:', error);
-  }
-};
 
 
 const EntryProductForm = ({ onHide, onAddProduct }) => {
