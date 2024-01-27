@@ -378,24 +378,32 @@ const formatSerials = (serials) => {
   }, [products]);
 
 
-  const calculateSubtotal = (product) => {
-    const costo = parseFloat(product.cost) || 0;
-    const cantidad = parseInt(product.quantity, 10) || 0;
-    return isNaN(costo) || isNaN(cantidad) ? 0 : costo * cantidad;
-  };
-  const calculateTotalQuantity = () => {
+const calculateSubtotal = (product) => {
+  const costo = parseFloat(product.cost) || 0;
+  const cantidad = parseInt(product.quantity, 10) || 0;
+  return isNaN(costo) || isNaN(cantidad) ? 0 : costo * cantidad;
+};
+  const calculateTotalQuantity = useCallback(() => {
     const quantityTotal = products.reduce((accumulator, product) => {
       const cantidad = parseInt(product.quantity, 10) || 0;
       return accumulator + cantidad;
     }, 0);
     setTotalQuantity(quantityTotal);
-  };
+  }, [products, calculateTotal]);
   
-
-  useEffect(() => {
+  const calculateTotalCallback = useCallback(() => {
     calculateTotal();
+}, [calculateTotal]);
+
+const calculateTotalQuantityCallback = useCallback(() => {
     calculateTotalQuantity();
-  }, [products]);
+}, [calculateTotalQuantity]);
+
+
+useEffect(() => {
+  calculateTotalCallback();
+  calculateTotalQuantityCallback();
+}, [products, calculateTotalCallback, calculateTotalQuantityCallback]);
 
   
 
