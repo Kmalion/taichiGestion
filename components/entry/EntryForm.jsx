@@ -27,12 +27,17 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     try {
       setLoading(true);
       const query = event.query || '';
-      console.log('Query desde el front', query);
-      const providers = await providersService.searchProviders(query);
-      console.log("Respuesta desde el backend Proveedores: ", providers)
-      
+  
+      // Obtén la URL del servidor en el lado del cliente
+      const serverURL = window.location.origin;
+  
+      // Llama a la función que se ajusta al entorno (cliente o servidor)
+      const providers = await providersService.searchProviders(query, serverURL);
+  
+      console.log("Respuesta desde el backend Proveedores: ", providers);
+  
       const filteredProviders = providers.map((provider) => ({ label: provider.nombre }));
-      
+  
       setFilteredProviders(filteredProviders);
     } catch (error) {
       console.error('Error al buscar proveedores:', error);
