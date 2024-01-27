@@ -122,7 +122,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   useEffect(() => {
     // Cargar los datos de "Asignado a" al montar el componente
     loadAsignedToOptions();
-  }, [formik]);
+  }, []);
 
 
   const onUpload = async (event) => {
@@ -169,7 +169,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     } else {
       formik.setFieldValue('entradaNo', entryData.entradaNo || '');
     }
-  }, [entryData, formik]);
+  }, [entryData]);
 
   const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
 

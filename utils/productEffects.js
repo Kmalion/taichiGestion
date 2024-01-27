@@ -2,7 +2,6 @@
 
 export const fetchDataEffect = async (first, rows, fetchProducts, setProducts, setTotalRecords) => {
     try {
-        // Obtener datos del servicio de productos
         const data = await fetchProducts(first, rows);
 
         if (data && data.products) {

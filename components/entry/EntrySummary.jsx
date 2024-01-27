@@ -358,10 +358,6 @@ const formatSerials = (serials) => {
 
 
 
-
-
-
-
   const handleDeleteProduct = (index) => {
     setProducts((prevProducts) => {
       const updatedProducts = [...prevProducts];
@@ -371,7 +367,7 @@ const formatSerials = (serials) => {
     calculateTotal();
   };
 
-  const calculateTotal = () => {
+  const calculateTotal = useCallback(() => {
     const total = products.reduce((accumulator, product) => {
       const costo = parseFloat(product.cost) || 0;
       const cantidad = parseInt(product.quantity, 10) || 0;
@@ -379,7 +375,7 @@ const formatSerials = (serials) => {
       return accumulator + totalPorProducto; // Actualizado para acumular el total por producto
     }, 0);
     setTotalCost(total);
-  };
+  }, [products]);
 
 
   const calculateSubtotal = (product) => {
@@ -395,19 +391,11 @@ const formatSerials = (serials) => {
     setTotalQuantity(quantityTotal);
   };
   
-  const calculateTotalCallback = useCallback(() => {
+
+  useEffect(() => {
     calculateTotal();
-}, [calculateTotal]);
-
-const calculateTotalQuantityCallback = useCallback(() => {
     calculateTotalQuantity();
-}, [calculateTotalQuantity]);
-
-
-useEffect(() => {
-  calculateTotalCallback();
-  calculateTotalQuantityCallback();
-}, [products, calculateTotalCallback, calculateTotalQuantityCallback]);
+  }, [products]);
 
   
 

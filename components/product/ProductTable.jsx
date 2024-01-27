@@ -206,7 +206,7 @@ export default function ProductTable() {
 
 
 
-    const filterProducts = (value) => {
+    const filterProducts = useCallback(() => {
         if (!Array.isArray(products)) {
             return;
         }
@@ -215,7 +215,7 @@ export default function ProductTable() {
             product.reference && product.reference.toLowerCase().includes(value.toLowerCase())
         );
         setFilteredProducts(filtered);
-    };
+    }, [/* Dependencias relevantes, si las hay */]);
 
     const fetchProducts = async (first, rows) => {
         try {
