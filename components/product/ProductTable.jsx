@@ -206,7 +206,7 @@ export default function ProductTable() {
 
 
 
-    const filterProducts = useCallback(() => {
+    const filterProducts = useCallback((value) => {
         if (!Array.isArray(products)) {
             return;
         }
@@ -250,7 +250,7 @@ export default function ProductTable() {
         if (typeof globalFilter === 'string') {
             filterProducts(globalFilter);
         }
-    }, [globalFilter, filterProducts]);
+    }, [globalFilter]);
 
     useEffect(() => {
         memoizedFetchDataEffect();

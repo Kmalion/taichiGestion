@@ -12,6 +12,7 @@ import { Toast } from 'primereact/toast'; // Agregado Toast
 import { useSession } from 'next-auth/react';
 import '@/app/styles/styles.css';
 import Image from 'next/image';
+import { Carousel } from 'primereact/carousel';
 
 const UsersList = () => {
   const [users, setUsers] = useState([]);
@@ -97,66 +98,77 @@ const UsersList = () => {
 
   const itemTemplate = (user) => (
     <div key={user._id} className="p-col-12 p-md-4 p-lg-3">
-    <Card title={`${user.nombre} ${user.apellido}`} className="custom-card">
-      <div className="circular-image-container zoomable-image">
-        {/* Utiliza el componente Image de next/image correctamente */}
-        <Image
-          src={user.foto ? user.foto : '/img/generic-avatar.png'}
-          alt={`${user.nombre} ${user.apellido}`}
-          width={100}
-          height={100}
-          className="circular-image"
-        />
+      
+      <div className="border-1 surface-border border-round m-2 text-center py-5 px-3">
+        
+        <div className="mb-3">
+          <Image
+            src={user.foto ? user.foto : '/img/generic-avatar.png'}
+            alt={`${user.nombre} ${user.apellido}`}
+            width={220}
+            height={250}
+            className="w-6 shadow-2 rounded-image"
+          />
+        </div>
+        <div>
+          <h4 className="mb-1">{`${user.nombre} ${user.apellido}`}</h4>
+          <div className="user-info">
+            <div className="info-label">Email:</div>
+            <div className="info-value">{user.email}</div>
+          </div>
+          <div className="user-info">
+            <div className="info-label">Cargo:</div>
+            <div className="info-value">{user.cargo}</div>
+          </div>
+          <div className="user-actions">
+            {session && session.user.role === 'admin' && (
+              <>
+                <Button
+                  icon="pi pi-trash"
+                  className="p-button-danger p-button-sm ml-2"
+                  onClick={() => handleDeleteUser(user)}
+                />
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-primary p-button-sm ml-2"
+                  onClick={() => handleEditUser(user)}
+                />
+              </>
+            )}
+          </div>
+        </div>
+      
       </div>
-        <div className="user-info">
-          <div className="info-label">Email:</div>
-          <div className="info-value">{user.email}</div>
-        </div>
-        <div className="user-info">
-          <div className="info-label">Cargo:</div>
-          <div className="info-value">{user.cargo}</div>
-        </div>
-        {/* <div className="user-info">
-          <div className="info-label">Role:</div>
-          <div className="info-value">{user.role}</div>
-        </div> */}
-        {/* Agrega más campos según tu modelo de usuario */}
-        <div className="user-actions">
-          {session && session.user.role === 'admin' && (
-            <>
-              <Button
-                icon="pi pi-trash"
-                className="p-button-danger p-button-sm ml-2"
-                onClick={() => handleDeleteUser(user)}
-              />
-              <Button
-                icon="pi pi-pencil"
-                className="p-button-primary p-button-sm ml-2"
-                onClick={() => handleEditUser(user)}
-              />
-            </>
-          )}
-        </div>
-      </Card>
+
+   
     </div>
   );
 
   const onLayoutChange = (event) => {
     setLayout(event.value);
   };
-
   return (
     <div>
-      <h2 className='text-center pagetitle'>Usuarios</h2>
+        <h2 className='text-center pagetitle'>Usuarios</h2>
       <div className='container'>
-        <DataView value={users} itemTemplate={itemTemplate} layout={layout} rows={9}
-          paginator position="both" paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-          rowsPerPageOptions={[3, 6, 9]}
-        />
-        <DataViewLayoutOptions layout={layout} onChange={onLayoutChange} />
+        <Carousel value={users} numScroll={1} numVisible={3} responsiveOptions={[
+          {
+            breakpoint: '1024px',
+            numVisible: 3,
+            numScroll: 1
+          },
+          {
+            breakpoint: '768px',
+            numVisible: 2,
+            numScroll: 1
+          },
+          {
+            breakpoint: '560px',
+            numVisible: 1,
+            numScroll: 1
+          }
+        ]} itemTemplate={itemTemplate} className="custom-carousel" />
       </div>
-
-      {/* Diálogo de confirmación para eliminar usuario */}
       <Dialog
         visible={deleteConfirmation}
         onHide={() => setDeleteConfirmation(false)}

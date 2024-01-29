@@ -78,7 +78,7 @@ const EntrySummary = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get('/api/users/getUsers');
-        const updatedOptions = response.data.users.map(user => ({  label: `${user.nombre} ${user.apellido}`, email: user.email }));
+        const updatedOptions = response.data.users.map(user => ({ label: `${user.nombre} ${user.apellido}`, email: user.email }));
         setUserList(updatedOptions);
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -186,7 +186,7 @@ const EntrySummary = () => {
             existingProduct.serials.includes(serial)
           );
 
-         
+
 
           if (duplicateSerial) {
             // Muestra una notificación de error y detiene la creación de la entrada
@@ -198,7 +198,7 @@ const EntrySummary = () => {
             return;
           }
 
-      
+
         } else {
           console.error('product.serials o existingProduct.serials no es un array:', product.serials, existingProduct.serials);
           // Puedes decidir cómo manejar esta situación según tus necesidades
@@ -283,77 +283,77 @@ const EntrySummary = () => {
     }
   };
 
-// Función para generar el PDF
-const generatePDF = (entryData) => {
-  // Crear un documento PDF con orientación horizontal
-  const pdfDoc = new jsPDF({ orientation: 'landscape' });
+  // Función para generar el PDF
+  const generatePDF = (entryData) => {
+    // Crear un documento PDF con orientación horizontal
+    const pdfDoc = new jsPDF({ orientation: 'landscape' });
 
-  // Establecer el tamaño de letra más pequeño
-  pdfDoc.setFontSize(10);
-  pdfDoc.setTextColor(0, 0, 0); // Color de texto negro
+    // Establecer el tamaño de letra más pequeño
+    pdfDoc.setFontSize(10);
+    pdfDoc.setTextColor(0, 0, 0); // Color de texto negro
 
-  // Sección de Información de la Entrada
-  const entryInfoLines = [
-    `Entrada No: ${entryData.entradaNo}`,
-    `Fecha: ${entryData.fechaEntrada}`,
-    `Proveedor: ${entryData.proveedor.value}`,
-    `Tipo: ${entryData.tipo}`,
-    `Asignado a: ${entryData.asigned_to ? entryData.asigned_to.label : 'N/A'}`,
-    `Cliente: ${entryData.cliente.value || 'N/A'}`,
-    `Total: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(entryData.totalCost)}`
-  ];
+    // Sección de Información de la Entrada
+    const entryInfoLines = [
+      `Entrada No: ${entryData.entradaNo}`,
+      `Fecha: ${entryData.fechaEntrada}`,
+      `Proveedor: ${entryData.proveedor.value}`,
+      `Tipo: ${entryData.tipo}`,
+      `Asignado a: ${entryData.asigned_to ? entryData.asigned_to.label : 'N/A'}`,
+      `Cliente: ${entryData.cliente.value || 'N/A'}`,
+      `Total: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(entryData.totalCost)}`
+    ];
 
-  const lineHeight = 10; // Espaciado entre líneas
+    const lineHeight = 10; // Espaciado entre líneas
 
-  entryInfoLines.forEach((line, index) => {
-    const yPosition =  index * lineHeight;
-    pdfDoc.text(pdfDoc.splitTextToSize(line, 190), 10, yPosition);
-  });
-
-
-// Añadir la tabla de productos al PDF
-const productHeaders = ['Referencia', 'Serial', 'Ubicación', 'Lote', 'Costo', 'Cantidad', 'Subtotal'];
-const productData = entryData.products.map(product => {
-  const formattedSerials = formatSerials(product.serials);
-  const formattedLote = Array.isArray(product.lote) ? product.lote.join(', ') : product.lote;
-  const subtotal = calculateSubtotal(product);
-
-  return [
-    product.reference,
-    formattedSerials, // Usa la variable, no la función
-    product.ubicacion,
-    formattedLote,
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.cost),
-    product.quantity,
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(subtotal),
-  ];
-});
+    entryInfoLines.forEach((line, index) => {
+      const yPosition = index * lineHeight;
+      pdfDoc.text(pdfDoc.splitTextToSize(line, 190), 10, yPosition);
+    });
 
 
-  // Sección de Tabla de Productos
-  pdfDoc.autoTable({
-    head: [productHeaders],
-    body: productData,
-    startY: 70, // Ajustar la posición de inicio de la tabla
-    margin: { top: 10 }, // Ajustar el margen superior
-  });
+    // Añadir la tabla de productos al PDF
+    const productHeaders = ['Referencia', 'Serial', 'Ubicación', 'Lote', 'Costo', 'Cantidad', 'Subtotal'];
+    const productData = entryData.products.map(product => {
+      const formattedSerials = formatSerials(product.serials);
+      const formattedLote = Array.isArray(product.lote) ? product.lote.join(', ') : product.lote;
+      const subtotal = calculateSubtotal(product);
 
-  // Guardar el PDF con el nombre personalizado
-  const fileName = `EntradaTHC_${entryData.entradaNo}.pdf`;
-  pdfDoc.save(fileName);
-};
+      return [
+        product.reference,
+        formattedSerials, // Usa la variable, no la función
+        product.ubicacion,
+        formattedLote,
+        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.cost),
+        product.quantity,
+        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(subtotal),
+      ];
+    });
 
 
-const formatSerials = (serials) => {
-  if (!serials || !Array.isArray(serials)) {
-    return ''; // O cualquier valor predeterminado que desees mostrar
-  }
+    // Sección de Tabla de Productos
+    pdfDoc.autoTable({
+      head: [productHeaders],
+      body: productData,
+      startY: 70, // Ajustar la posición de inicio de la tabla
+      margin: { top: 10 }, // Ajustar el margen superior
+    });
 
-  return serials.map(serialObj => {
-    const { serial, status } = serialObj;
-    return `${serial} (${status})`;
-  }).join(', ');
-};
+    // Guardar el PDF con el nombre personalizado
+    const fileName = `EntradaTHC_${entryData.entradaNo}.pdf`;
+    pdfDoc.save(fileName);
+  };
+
+
+  const formatSerials = (serials) => {
+    if (!serials || !Array.isArray(serials)) {
+      return ''; // O cualquier valor predeterminado que desees mostrar
+    }
+
+    return serials.map(serialObj => {
+      const { serial, status } = serialObj;
+      return `${serial} (${status})`;
+    }).join(', ');
+  };
 
 
 
@@ -378,34 +378,34 @@ const formatSerials = (serials) => {
   }, [products]);
 
 
-const calculateSubtotal = (product) => {
-  const costo = parseFloat(product.cost) || 0;
-  const cantidad = parseInt(product.quantity, 10) || 0;
-  return isNaN(costo) || isNaN(cantidad) ? 0 : costo * cantidad;
-};
+  const calculateSubtotal = (product) => {
+    const costo = parseFloat(product.cost) || 0;
+    const cantidad = parseInt(product.quantity, 10) || 0;
+    return isNaN(costo) || isNaN(cantidad) ? 0 : costo * cantidad;
+  };
   const calculateTotalQuantity = useCallback(() => {
     const quantityTotal = products.reduce((accumulator, product) => {
       const cantidad = parseInt(product.quantity, 10) || 0;
       return accumulator + cantidad;
     }, 0);
     setTotalQuantity(quantityTotal);
-  }, [products, calculateTotal]);
-  
+  }, [products]);
+
   const calculateTotalCallback = useCallback(() => {
     calculateTotal();
-}, [calculateTotal]);
+  }, [calculateTotal]);
 
-const calculateTotalQuantityCallback = useCallback(() => {
+  const calculateTotalQuantityCallback = useCallback(() => {
     calculateTotalQuantity();
-}, [calculateTotalQuantity]);
+  }, [calculateTotalQuantity]);
 
 
-useEffect(() => {
-  calculateTotalCallback();
-  calculateTotalQuantityCallback();
-}, [products, calculateTotalCallback, calculateTotalQuantityCallback]);
+  useEffect(() => {
+    calculateTotalCallback();
+    calculateTotalQuantityCallback();
+  }, [products, calculateTotalCallback, calculateTotalQuantityCallback]);
 
-  
+
 
   const handleAddProduct = (product) => {
     const cost = parseFloat(product.cost) || 0;
@@ -446,15 +446,17 @@ useEffect(() => {
 
   return (
     <div>
-      <Card className='flex flex-wrap mt-1'>
+      <Card >
+      <h3 className="text-center mt-1">Agrega productos</h3>
+      <Button className="m-3 p-3 ext-center mt-1" size="small" label='Agregar producto' onClick={handleOpenForm}>
+      </Button>
         <EntryForm
           entryData={entryData}
           setEntryData={setEntryData}
           userList={userList}
           handleSaveEntry={handleSaveEntry}  // Pasa la función como prop
         />
-        <Button className="m-3 p-3" size="small" label='Agregar producto' onClick={handleOpenForm}>
-        </Button>
+   
         {products.length > 0 && (
           <div className='p-1'>
             <h4>Productos Agregados:</h4>
@@ -510,13 +512,13 @@ useEffect(() => {
               />
             </DataTable>
             <Dialog
-  visible={loading}
-  modal
-  onHide={() => setLoading(false)}
-  header="Procesando solicitud"
->
-  <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
-</Dialog>
+              visible={loading}
+              modal
+              onHide={() => setLoading(false)}
+              header="Procesando solicitud"
+            >
+              <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
+            </Dialog>
           </div>
         )}
       </Card>

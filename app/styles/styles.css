@@ -102,5 +102,12 @@
   gap: 20px; /* Espacio entre SummaryItems y BestProduct */
   padding: 20px; /* Ajusta el relleno según sea necesario */
 }
+.custom-card {
+  height: 600px; /* Ajusta la altura según tus necesidades */
+  width: 200px; /* Ajusta el ancho según tus necesidades */
+}
+.rounded-image {
+  border-radius: 30%; /* Hace que la imagen sea redondeada */
+}
 
 /* Agrega estilos adicionales según sea necesario */
