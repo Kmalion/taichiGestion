@@ -8,7 +8,7 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const savedTheme = Cookies.get('theme');
-    return savedTheme || 'lara-dark-teal';
+    return savedTheme || 'lara-light-teal';
   });
 
   const toggleTheme = () => {

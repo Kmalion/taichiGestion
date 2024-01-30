@@ -7,7 +7,7 @@ export default function BestProduct() {
   const header = (
     <Image
       alt="Card"
-      src="https://diagnosticomedico.pe/wp-content/uploads/2022/05/ecografo_chison_sonoeye_P2_01.jpg"
+      src="https://taichi-holdings-colombia.com/wp-content/uploads/2020/09/SonoeyeVet.jpeg"
       width={500} // Ajusta el ancho según sea necesario
       height={300} // Ajusta la altura según sea necesario
     />
@@ -23,7 +23,6 @@ export default function BestProduct() {
         className="md:w-21rem mr-2"
         style={{ flex: 1 }}
       >
-        <p className="m-2">Vendidos 45</p>
       </Card>
     </div>
   );
