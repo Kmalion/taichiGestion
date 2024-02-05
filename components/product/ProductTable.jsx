@@ -24,7 +24,7 @@ import autoTable from 'jspdf-autotable';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import exportToExcel from '@/utils/exports/excelExport';
 import { format } from 'date-fns';
-
+import Image from 'next/image';
 
 
 export default function ProductTable() {
@@ -219,7 +219,7 @@ export default function ProductTable() {
         try {
             const response = await axios.get('/api/products/getProducts');
 
-           
+
             // Actualiza el estado inventoryStatus antes de establecer los productos
             const updatedProducts = response.data.map(product => ({
                 ...product,
@@ -532,7 +532,13 @@ export default function ProductTable() {
     const imageBodyTemplate = (rowData) => {
         return (
             <div className="zoomable-image" onClick={() => openImageDialog(rowData.image)}>
-                <img src={`${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />
+                <Image
+                    src={rowData.image}
+                    alt={rowData.image}
+                    className="shadow-2 border-round"
+                    width={84}
+                    height={64}
+                />
             </div>
         );
     };
@@ -679,16 +685,16 @@ export default function ProductTable() {
     const onPageChange = (event) => {
         setFirst(event.first);
         setRows(event.rows);
-      };
-      
+    };
+
 
     const ubicacionBodyTemplate = (rowData) => {
         return (
-           
-                    <React.Fragment>
-                        <Button icon="pi pi-map-marker" onClick={() => showUbicacionDialog(rowData)} className="p-button-rounded p-button-text" />
-                    </React.Fragment>
-            
+
+            <React.Fragment>
+                <Button icon="pi pi-map-marker" onClick={() => showUbicacionDialog(rowData)} className="p-button-rounded p-button-text" />
+            </React.Fragment>
+
         );
     };
 
@@ -743,13 +749,21 @@ export default function ProductTable() {
 
                 <Dialog
                     visible={showImageDialog}
-                    style={{ width: 'auto' }}
+                    style={{ width: '800px' }}
                     header={`${product.reference}`}
                     modal
                     onHide={closeImageDialog}
                     footer={<Button label="Cerrar" icon="pi pi-times" onClick={closeImageDialog} />}
                 >
-                    {selectedImage && <img src={selectedImage} alt="Imagen más grande" style={{ width: '100%' }} />}
+                    {selectedImage && (
+                        <Image
+                            src={selectedImage}
+                            alt="Imagen más grande"
+                            layout="responsive"
+                            width={1200}
+                            height={1200}
+                        />
+                    )}
                 </Dialog>
                 <Dialog
                     visible={serialsDialog}
@@ -825,7 +839,18 @@ export default function ProductTable() {
                 footer={productDialogFooter}
                 onHide={hideDialog}
             >
-                {product.image && <img src={`${product.image}`} alt={product.image} className="product-image block m-auto pb-3" />}
+                {product.image && (
+                    <div className="product-image block m-auto pb-3">
+                        <Image
+                            src={product.image}
+                            alt={product.image}
+                            layout="responsive"
+                            width={800}
+                            height={600}
+                            style={{ width: '100%' }}
+                        />
+                    </div>
+                )}
 
                 <div className="field">
                     <label htmlFor="reference" className="font-bold">
