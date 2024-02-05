@@ -8,7 +8,7 @@ const { MONGODB_URL } = process.env;
 if (!MONGODB_URL) {
     throw new Error("Se debe definir MONGODB_URL");
 }
-
+const port = process.env.PORT || 3000
 const connectDB = async () => {
     try {
         const connection = await mongoose.connect(MONGODB_URL);
