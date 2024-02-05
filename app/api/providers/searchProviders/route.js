@@ -19,7 +19,7 @@ export const GET = async (params) => {
     const providers = await Provider.find({
       nombre: { $regex: new RegExp(queryValue, 'i') }, // Filtra insensible a mayúsculas y minúsculas
     });
-    console.log("Proveedores busqueda", providers)
+  
     return new NextResponse(JSON.stringify(providers), {
       status: 200,
       headers: {

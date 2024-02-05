@@ -421,6 +421,7 @@
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
   }
   .p-autocomplete-panel .p-autocomplete-items {
+    color: #ffffff;
     padding: 0;
   }
   .p-autocomplete-panel .p-autocomplete-items .p-autocomplete-item {
@@ -746,12 +747,15 @@
   }
 
   .p-input-filled .p-cascadeselect {
+    color: #ffffff;
     background: rgba(255, 255, 255, 0.06);
   }
   .p-input-filled .p-cascadeselect:not(.p-disabled):hover {
+    color: #ffffff;
     background-color: rgba(255, 255, 255, 0.08);
   }
   .p-input-filled .p-cascadeselect:not(.p-disabled).p-focus {
+    color: #ffffff;
     background-color: rgba(255, 255, 255, 0.1);
   }
 
@@ -996,7 +1000,7 @@
 
   .p-inputgroup-addon {
     background: #1e1e1e;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgb(255, 255, 255);
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     border-left: 1px solid rgba(255, 255, 255, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
@@ -1196,12 +1200,15 @@
   }
 
   .p-input-filled .p-inputtext {
+    color: #ffffff;
     background-color: rgba(255, 255, 255, 0.06);
   }
   .p-input-filled .p-inputtext:enabled:hover {
+    color: #ffffff;
     background-color: rgba(255, 255, 255, 0.08);
   }
   .p-input-filled .p-inputtext:enabled:focus {
+    color: #ffffff;
     background-color: rgba(255, 255, 255, 0.1);
   }
 
@@ -1217,7 +1224,7 @@
 
   .p-listbox {
     background: #1e1e1e;
-    color: rgba(255, 255, 255, 0.87);
+    color: rgb(255, 255, 255);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
   }
@@ -1235,9 +1242,10 @@
   }
   .p-listbox .p-listbox-header .p-listbox-filter-icon {
     right: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.76);
   }
   .p-listbox .p-listbox-list {
+    color: #ffffff;
     padding: 0;
   }
   .p-listbox .p-listbox-list .p-listbox-item {
@@ -1260,7 +1268,7 @@
   .p-listbox .p-listbox-list .p-listbox-item-group {
     margin: 0;
     padding: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.842);
     background: transparent;
     font-weight: 400;
   }
@@ -1310,6 +1318,8 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
     transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, background-size 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
     border-radius: 4px;
+    
+    color: #ffffff;
   }
   .p-multiselect:not(.p-disabled):hover {
     border-color: rgba(255, 255, 255, 0.6);
@@ -3168,7 +3178,7 @@
   }
   .p-orderlist .p-orderlist-header {
     background: #1e1e1e;
-    color: rgba(255, 255, 255, 0.87);
+    color: #ffffff;
     border: 1px solid rgba(255, 255, 255, 0.12);
     padding: 0.75rem;
     font-weight: 500;
@@ -6082,13 +6092,16 @@
   }
 
   .p-input-filled .p-float-label .p-autocomplete .p-autocomplete-multiple-container .p-autocomplete-token {
+    color: #ffffff;
     padding-top: 0;
     padding-bottom: 0;
   }
   .p-input-filled .p-float-label .p-autocomplete .p-autocomplete-multiple-container .p-autocomplete-token .p-autocomplete-token-icon {
+    color: #ffffff;
     font-size: 75%;
   }
   .p-input-filled .p-float-label .p-autocomplete .p-autocomplete-multiple-container .p-autocomplete-input-token {
+    color: #ffffff;
     padding: 0;
   }
   .p-input-filled .p-autocomplete.p-invalid > .p-inputtext {
@@ -6418,7 +6431,7 @@
 
   .p-carousel .p-carousel-indicators .p-carousel-indicator.p-highlight button {
     background: #F48FB1;
-    color: #121212;
+    color: #ffffff;
   }
 
   .p-cascadeselect .p-cascadeselect-label, .p-cascadeselect .p-dropdown-trigger {
@@ -6434,6 +6447,7 @@
 
   .p-cascadeselect-item-content .p-ink {
     background-color: rgba(159, 168, 218, 0.16);
+    color: #ffffff;
   }
 
   .p-input-filled .p-cascadeselect {
@@ -6470,6 +6484,7 @@
     background: transparent;
   }
   .p-input-filled .p-float-label .p-cascadeselect .p-cascadeselect-label {
+    color: #ffffff;
     padding-top: 1.25rem;
     padding-bottom: 0.25rem;
   }
@@ -6658,6 +6673,7 @@
 
   .p-dropdown-item .p-ink {
     background-color: rgba(159, 168, 218, 0.16);
+    color: #ffffff;
   }
 
   .p-input-filled .p-dropdown {
@@ -6847,6 +6863,7 @@
     padding: 2px 4px;
     margin-left: -4px;
     margin-top: 0;
+    color: #ffffff;
   }
 
   .p-float-label textarea ~ label {
@@ -6875,11 +6892,13 @@
 
   .p-listbox .p-listbox-list .p-listbox-item .p-ink {
     background-color: rgba(159, 168, 218, 0.16);
+    color: #ffffff;
   }
   .p-listbox .p-listbox-list .p-listbox-item:focus {
     background: rgba(255, 255, 255, 0.12);
   }
   .p-listbox .p-listbox-list .p-listbox-item:focus.p-highlight {
+    color: #ffffff;
     background: rgba(159, 168, 218, 0.24);
   }
 
@@ -6907,6 +6926,7 @@
   }
 
   .p-multiselect-panel .p-multiselect-items .p-multiselect-item .p-ink {
+    color: #ffffff;
     background-color: rgba(159, 168, 218, 0.16);
   }
   .p-multiselect-panel .p-multiselect-items .p-multiselect-item:focus {
@@ -6957,6 +6977,7 @@
     padding: 0.25rem 1rem;
     margin-top: 0.25rem;
     margin-bottom: 0.25rem;
+    color: #ffffff;
   }
 
   .p-input-filled .p-float-label .p-multiselect .p-multiselect-label {
@@ -7311,6 +7332,7 @@
   }
   .p-tabview .p-tabview-nav li .p-tabview-nav-link > .p-ink {
     background-color: rgba(159, 168, 218, 0.16);
+    color: #ffffff;
   }
   .p-tabview .p-tabview-nav li .p-tabview-nav-link:focus {
     background-color: rgba(159, 168, 218, 0.12);
@@ -7360,6 +7382,7 @@
   }
 
   .p-treeselect-item .p-ink {
+    color: #ffffff;
     background-color: rgba(159, 168, 218, 0.16);
   }
 
@@ -7457,6 +7480,7 @@
     border-radius: 0;
   }
   .p-tabmenu .p-tabmenu-nav li .p-menuitem-link > .p-ink {
+    color: #ffffff;
     background-color: rgba(159, 168, 218, 0.16);
   }
   .p-tabmenu .p-tabmenu-nav li .p-menuitem-link:focus {

@@ -42,9 +42,7 @@
   color: #62e4dd; /* Puedes cambiar este color según tus preferencias */
   /* Agrega cualquier otra propiedad de estilo que desees */
 }
-.p-autocomplete-item {
-  color: black !important;
-}
+
 .p-autocomplete-panel {
   z-index: 1000;
 }
