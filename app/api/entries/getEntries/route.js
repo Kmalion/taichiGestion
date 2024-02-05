@@ -26,8 +26,6 @@ export const GET = async (request) => {
             comment: entry.comment
         }));
 
-        
-        console.log("Entradas FORMATEADAS en el server: ", formattedEntries)
         // Responde con las entradas en formato JSON
         return new NextResponse(JSON.stringify(formattedEntries), {
             status: 200,

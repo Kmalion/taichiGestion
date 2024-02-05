@@ -1,7 +1,7 @@
 import connectDB from '../../../../utils/db';
 import Entry from '../../../../models/Entry';
 import { NextResponse } from 'next/server';
-
+export const dynamic = 'force-dynamic'
 
 export const GET = async (request) => {
   try {

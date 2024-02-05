@@ -25,7 +25,6 @@ export const generateEntryNo = async () => {
     // Puedes ajustar el formato del ID según tus necesidades
 
     const newEntry = `${currentYear}-${newEntryNumber}`;
-    console.log('Nuevo número de entrada:', newEntry);
     return newEntry;
   } catch (error) {
     // Maneja errores si la solicitud al backend falla o hay problemas en la lógica
@@ -48,8 +47,14 @@ export const EntryService = {
 
   getLastEntry: async () => {
     try {
-      const response = await axios.get('/api/entries/getLastEntry');
-      return response.data;
+      const response = await fetch('/api/entries/getLastEntry');
+      
+      if (!response.ok) {
+        throw new Error(`Error al obtener la última entrada: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error al obtener la última entrada:', error);
       throw error;
