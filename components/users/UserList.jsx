@@ -96,22 +96,20 @@ const UsersList = () => {
     }
   };
 
-  const itemTemplate = (user) => (
-    <div key={user._id} className="p-col-12 p-md-4 p-lg-3">
-      
-      <div className="border-1 surface-border border-round m-2 text-center py-5 px-3">
-        
+const itemTemplate = (user) => (
+<div key={user._id} >
+    <div className="flex flex-column p-3 p-shadow-2">
         <div className="mb-3">
           <Image
             src={user.foto ? user.foto : '/img/generic-avatar.png'}
             alt={`${user.nombre} ${user.apellido}`}
             width={220}
             height={250}
-            className="w-6 shadow-2 rounded-image"
+            className="w-15 shadow-2 rounded-image"
           />
         </div>
         <div>
-          <h4 className="mb-1">{`${user.nombre} ${user.apellido}`}</h4>
+          <h2 className="mb-1 highlight-label">{`${user.nombre} ${user.apellido}`}</h2>
           <div className="user-info">
             <div className="info-label">Email:</div>
             <div className="info-value">{user.email}</div>
@@ -148,26 +146,36 @@ const UsersList = () => {
     setLayout(event.value);
   };
   return (
-    <div>
-        <h2 className='text-center pagetitle'>Usuarios</h2>
-      <div className='container'>
-        <Carousel value={users} numScroll={1} numVisible={3} responsiveOptions={[
-          {
-            breakpoint: '1024px',
-            numVisible: 3,
-            numScroll: 1
+    <div >
+      <h2 className='text-center pagetitle'>Usuarios</h2>
+      <div className="border-1 surface-border border-round m-2 text-center py-5 px-3">
+      <Carousel
+          value={users}
+          responsiveOptions={[
+            {
+              breakpoint: '1400px',
+              numVisible: 4,
+              numScroll: 1
           },
-          {
-            breakpoint: '768px',
-            numVisible: 2,
-            numScroll: 1
-          },
-          {
-            breakpoint: '560px',
-            numVisible: 1,
-            numScroll: 1
-          }
-        ]} itemTemplate={itemTemplate} className="custom-carousel" />
+            {
+              breakpoint: '1199px',
+              numVisible: 3,
+              numScroll: 1,
+            },
+            {
+              breakpoint: '768px',
+              numVisible: 2,
+              numScroll: 1,
+            },
+            {
+              breakpoint: '575px',
+              numVisible: 1,
+              numScroll: 1,
+            },
+          ]}
+          itemTemplate={itemTemplate}
+          
+        />
       </div>
       <Dialog
         visible={deleteConfirmation}
@@ -178,7 +186,7 @@ const UsersList = () => {
         footer={(
           <div>
             <Button label="Cancelar" icon="pi pi-times" onClick={() => setDeleteConfirmation(false)} className="p-button-text" />
-            <Button label="Eliminar" icon="pi pi-trash" onClick={confirmDeleteUser} autoFocus />
+            <Button label="Eliminar" icon="pi pi-trash"  onClick={confirmDeleteUser} autoFocus className="p-button-danger" />
           </div>
         )}
       >

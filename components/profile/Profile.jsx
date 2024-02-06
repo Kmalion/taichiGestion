@@ -27,8 +27,8 @@ const Profile = () => {
     setShowPasswordForm(false);
   };
   return (
-    <Card  style={{ width: "150%", padding: "5px", height: "80vh" }}>
-      <div className="p-grid p-fluid mt-0 mb-5">
+    <Card  style={{ width: "300px", padding: "5px", height: "80vh" }}>
+      <div className="flexp-grid p-fluid mt-0 mb-5">
         <div className="p-col-12">
           <h2 className="text-center mt-0 highlight-label ">Perfil de usuario</h2>
         </div>
@@ -38,38 +38,37 @@ const Profile = () => {
           </div>
         </div>
         <div className="p-col-12 p-md-6">
-          <div className="p-field mt-2">
+          <div className="p-1 mt-1">
             <label htmlFor="nombre" className="highlight-label">Nombre:</label>
             <div>{nombre}</div>
           </div>
         </div>
         <div className="p-col-12 p-md-6">
-          <div className="p-field mt-2">
+          <div className="p-1 mt-1">
             <label htmlFor="apellido" className="highlight-label">Apellido:</label>
             <div>{apellido}</div>
           </div>
         </div>
         <div className="p-col-12 p-md-6">
-          <div className="p-field mt-2">
+          <div className="p-1  mt-1">
             <label htmlFor="email" className="highlight-label">Email:</label>
             <div>{email}</div>
           </div>
         </div>
      
         <div className="p-col-12 p-md-6">
-          <div className="p-field mt-2">
+          <div className="p-1  mt-1">
             <label htmlFor="cargo" className="highlight-label">Cargo:</label>
             <div>{cargo}</div>
           </div>
         </div>
-        <div className="p-col-12 p-md-6">
-          <div className="p-field mt-2">
-          <Link href="/forget-password">
-        <p>Cambiar Contraseña</p>
-         </Link>
-          </div>
-        </div>
+
+      <div className="p-1 mt-3">
+        <Link href="/forget-password">
+          <Button  label="Cambiar Contraseña" severity='help' />
+        </Link>
       </div>
+    </div>
     </Card>
   );
 };

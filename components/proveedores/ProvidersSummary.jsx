@@ -63,7 +63,7 @@ const ProvidersSummary = () => {
         <Toast ref={toast} />
         <Dialog
           visible={processing}
-          style={{ width: '30vw' }}
+          style={{ width: '50%' }}
           header="Guardando"
           onHide={() => {}}
           modal

@@ -177,7 +177,7 @@ const ClientTable = () => {
  <Dialog
         header={processing ? 'Eliminando...' : 'Confirmar Eliminación'}
         visible={deleteConfirmationVisible}
-        style={{ width: '30vw' }}
+        style={{ width: '30' }}
         onHide={cancelDelete}
       >
         {processing && <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>}
@@ -215,7 +215,7 @@ const ClientTable = () => {
       <Dialog
         header={'Editar Cliente'}
         visible={editFormVisible}
-        style={{ width: '30vw' }}
+        style={{ width: '50%' }}
         onHide={closeEditForm}
       >
         <EditClientForm

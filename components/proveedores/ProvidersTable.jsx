@@ -169,7 +169,7 @@ const ProvidersTable = () => {
   <Dialog
         header={processing ? 'Eliminando...' : 'Confirmar Eliminación'}
         visible={deleteConfirmationVisible}
-        style={{ width: '30vw' }}
+        style={{ width: '30' }}
         onHide={cancelDelete}
         modal
       >
@@ -244,7 +244,7 @@ const ProvidersTable = () => {
       <Toast ref={toast} />
       
     
-      <Dialog visible={editFormVisible} style={{ width: '30vw' }} onHide={handleEditFormClose} modal header="Guardando">
+      <Dialog visible={editFormVisible} style={{ width: '50%' }} onHide={handleEditFormClose} modal header="Editando">
         {processing ? (
           // Muestra el ProgressBar mientras se está procesando
           <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>

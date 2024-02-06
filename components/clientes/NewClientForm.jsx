@@ -118,13 +118,13 @@ console.log('Lista de usuarios ', userList)
   return (
     <Dialog
       visible={visible}
-      style={{ width: '30vw' }}
+      style={{ width: '50%' }}
       header="Nuevo Cliente"
       onHide={handleCancel}
     >
 
       <form onSubmit={formik.handleSubmit}>
-        <div className="p-fluid p-formgrid p-grid">
+        <div className="p-fluid p-formgrid p-grid ">
           <div className="p-field p-col-12">
             <span className="p-float-label mt-4">
               <InputText

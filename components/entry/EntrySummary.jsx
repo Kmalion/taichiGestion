@@ -445,11 +445,15 @@ const EntrySummary = () => {
   };
 
   return (
-    <div>
+    <div className='flex align-items-center justify-content-center'>
       <Card >
       <h3 className="text-center mt-1">Agrega productos</h3>
-      <Button className="m-3 p-3 ext-center mt-1" size="small" label='Agregar producto' onClick={handleOpenForm}>
+
+      <div className='flex align-items-center justify-content-center '>
+      <i className="pi pi-arrow-right font-size: 24px"></i>
+      <Button  className='flex m-3 p-3 text-center mt-1 ' size="small" label='Agregar producto' severity="help" onClick={handleOpenForm}>
       </Button>
+      </div>
         <EntryForm
           entryData={entryData}
           setEntryData={setEntryData}

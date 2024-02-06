@@ -343,7 +343,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   onBlur={formik.handleBlur}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('comment') })}
                   rows={5}
-                  cols={40}
+                  cols={30}
                   autoResize
                 />
                 <label htmlFor="comment">Comentarios</label>

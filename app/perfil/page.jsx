@@ -7,12 +7,12 @@ function ProfilePage() {
 
   return (
     <Layout>
-   <div className={`app-container`}>
-   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%', marginTop: '20px', marginBottom: '20px' }}>
-   <div className="register-page ">
-      <Profile/>
-    </div>
-    </div>
+   <div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', marginBottom: '20px' }}>
+        <div className="flex justifify-context-center width: 100%">
+          <Profile/>
+        </div>
+      </div>
     </div>
     </Layout>
   );
