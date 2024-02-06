@@ -11,7 +11,7 @@ import { Row } from 'primereact/row';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import moment from 'moment';
-import OutflowForm from '@/components/outflows/outflowForm';
+import OutflowForm from '../../components/outflows/OutflowForm';
 import { Toast } from 'primereact/toast';
 import { generateOutflowNo } from '../../service/outflowService';
 import { useRouter } from 'next/navigation';

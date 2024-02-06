@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import OutflowTable from '@/components/outflows/outflowTable.jsx';
+import OutflowTable from '../../components/outflows/OutflowTable';
 import Layout from '../../components/Layout.jsx';
 import { ThemeProvider } from '../../context/ThemeContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
