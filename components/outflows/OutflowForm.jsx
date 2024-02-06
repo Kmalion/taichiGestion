@@ -13,9 +13,10 @@ import uploadFile from '../../service/fileUploadService'
 import providersService from '@/service/providerService'
 import clientService from '@/service/clientService';
 import { Dropdown } from 'primereact/dropdown';
+import axios from 'axios';
 
 
-const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
+const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow }) => {
   const toast = useRef(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
@@ -66,7 +67,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   const loadAsignedToOptions = async () => {
     try {
       // Lógica para obtener los datos desde el servidor, por ejemplo, mediante una solicitud HTTP
-      const response = await axios.get('/api/asignedTo/getAsignedToOptions');
+      const response = await axios.get('/api/users/getUsers');
       const data = response.data;
 
       // Actualiza el estado con los datos obtenidos
@@ -81,28 +82,28 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
 
   const formik = useFormik({
     initialValues: {
-      entradaNo: entryData.entradaNo || '',
-      fechaEntrada: entryData.fechaEntrada || '',
-      proveedor: entryData.proveedor || '',
-      cliente: entryData.cliente || '',
-      asigned_to: entryData.asigned_to || null,
-      tipo: entryData.tipo || null,
-      document: entryData.document || '',
-      comment: entryData.comment || '',
+      salidaNo: outflowData.salidaNo || '',
+      fechaSalida: outflowData.fechaSalida || '',
+      proveedor: outflowData.proveedor || '',
+      cliente: outflowData.cliente || '',
+      asigned_to: outflowData.asigned_to || null,
+      tipo: outflowData.tipo || null,
+      document: outflowData.document || '',
+      comment: outflowData.comment || '',
     },
     validate: (data) => {
       const errors = {};
 
-      if (!data.entradaNo.trim()) {
-        errors.entradaNo = 'Entrada No. es requerido';
+      if (!data.salidaNo.trim()) {
+        errors.salidaNo = 'Salida No. es requerido';
       }
 
-      if (!data.fechaEntrada.trim()) {
-        errors.fechaEntrada = 'Fecha de Entrada es requerido';
+      if (!data.fechaSalida.trim()) {
+        errors.fechaSalida = 'Fecha de Salida es requerido';
       }
 
 
-      if (data.tipo === 'devoluciones' && !data.cliente.trim()) {
+      if (data.tipo === 'demostracion' && !data.cliente.trim()) {
         errors.cliente = 'Cliente es requerido para devoluciones';
       }
 
@@ -117,9 +118,9 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
       return errors;
     },
     onSubmit: (data) => {
-      // Agrega la propiedad 'comment' a data antes de llamar a handleSaveEntry
+      // Agrega la propiedad 'comment' a data antes de llamar a handleSaveOutflow
       const dataWithComment = { ...data, comment: formik.values.comentario };
-      handleSaveEntry(dataWithComment);
+      handleSaveOutflow(dataWithComment);
       formik.resetForm();
     },
   });
@@ -149,7 +150,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
         });
 
         // Actualiza la URL del archivo en el estado
-        setEntryData({ ...entryData, document: fileUrl });
+        setOutflowData({ ...outflowData, document: fileUrl });
 
       } catch (error) {
         // Manejar errores al subir el archivo
@@ -166,15 +167,15 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   };
 
   useEffect(() => {
-    // Actualiza el valor de entradaNo cuando cambia entryData
-    if (entryData.entradaNo instanceof Promise) {
-      entryData.entradaNo.then((resolvedValue) => {
-        formik.setFieldValue('entradaNo', resolvedValue);
+    // Actualiza el valor de salidaNo cuando cambia outflowData
+    if (outflowData.salidaNo instanceof Promise) {
+      outflowData.salidaNo.then((resolvedValue) => {
+        formik.setFieldValue('salidaNo', resolvedValue);
       });
     } else {
-      formik.setFieldValue('entradaNo', entryData.entradaNo || '');
+      formik.setFieldValue('salidaNo', outflowData.salidaNo || '');
     }
-  }, [entryData]);
+  }, [outflowData]);
 
   const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
 
@@ -187,13 +188,13 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   };
 
   const tipoOptions = [
-    { label: 'Compras', value: 'compras' },
-    { label: 'Devoluciones', value: 'devoluciones' },
+    { label: 'Facturado', value: 'facturado' },
+    { label: 'Demostracion', value: 'demostracion' },
     { label: 'Ajuste', value: 'ajuste' },
   ];
   return (
     <div>
-      <h3 className="text-center mt-1">Datos de entrada</h3>
+      <h3 className="text-center mt-1">Datos de salida</h3>
       <Card>
           <form onSubmit={(e) => e.preventDefault()}  >
             <div className='grid flex flex justify-content-start flex-wrap'>
@@ -201,33 +202,33 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
               <span className="p-float-label">
                 <Toast ref={toast} />
                 <InputText
-                  id="entradaNo"
-                  name="entradaNo"
-                  value={formik.values.entradaNo}
+                  id="salidaNo"
+                  name="salidaNo"
+                  value={formik.values.salidaNo}
                   readOnly
                   onChange={(e) => formik.handleChange(e)}
                   onBlur={formik.handleBlur}
-                  className={classNames({ 'p-invalid': isFormFieldInvalid('entradaNo') })}
+                  className={classNames({ 'p-invalid': isFormFieldInvalid('salidaNo') })}
                 />
-                <label htmlFor="entradaNo">Entrada No.</label>
+                <label htmlFor="salidaNo">Salida No.</label>
               </span>
-              {getFormErrorMessage('entradaNo')}
+              {getFormErrorMessage('salidaNo')}
             </div>
 
             <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mt-2 mx-auto">
               <span className="p-float-label">
                 <InputText
-                  id="fechaEntrada"
-                  name="fechaEntrada"
-                  value={formik.values.fechaEntrada}
+                  id="fechaSalida"
+                  name="fechaSalida"
+                  value={formik.values.fechaSalida}
                   readOnly
                   onChange={(e) => formik.handleChange(e)}
                   onBlur={formik.handleBlur}
-                  className={classNames({ 'p-invalid': isFormFieldInvalid('fechaEntrada') })}
+                  className={classNames({ 'p-invalid': isFormFieldInvalid('fechaSalida') })}
                 />
-                <label htmlFor="fechaEntrada">Fecha de Entrada</label>
+                <label htmlFor="fechaSalida">Fecha de Salida</label>
               </span>
-              {getFormErrorMessage('fechaEntrada')}
+              {getFormErrorMessage('fechaSalida')}
             </div>
 
             <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mt-2 mx-auto">
@@ -240,7 +241,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   completeMethod={searchProviders}
                   field="label"
                   onChange={(e) => {
-                    setEntryData({ ...entryData, proveedor: e.value });
+                    setOutflowData({ ...outflowData, proveedor: e.value });
                     formik.handleChange({ target: { name: 'proveedor', value: e.value } });
                   }}
                   onBlur={formik.handleBlur}
@@ -263,7 +264,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   completeMethod={searchClients}
                   field="label"
                   onChange={(e) => {
-                    setEntryData({ ...entryData, cliente: e.value });
+                    setOutflowData({ ...outflowData, cliente: e.value });
                     formik.handleChange({ target: { name: 'cliente', value: e.value } });
                   }}
                   onBlur={formik.handleBlur}
@@ -285,7 +286,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   value={formik.values.asigned_to}
                   options={userList}
                   onChange={(e) => {
-                    setEntryData({ ...entryData, asigned_to: e.value });
+                    setOutflowData({ ...outflowData, asigned_to: e.value });
                     formik.handleChange(e);
                   }}
                   onBlur={formik.handleBlur}
@@ -306,7 +307,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   options={tipoOptions}
                   value={formik.values.tipo}
                   onChange={(e) => {
-                    setEntryData({ ...entryData, tipo: e.value });
+                    setOutflowData({ ...outflowData, tipo: e.value });
                     formik.handleChange(e);
                   }}
                   onBlur={formik.handleBlur}
@@ -337,13 +338,13 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   value={formik.values.comment}
                   onChange={(e) => {
                     formik.handleChange(e);
-                    // Actualiza el estado usando setEntryData
-                    setEntryData({ ...entryData, comment: e.target.value });
+                    // Actualiza el estado usando setOutflowData
+                    setOutflowData({ ...outflowData, comment: e.target.value });
                   }}
                   onBlur={formik.handleBlur}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('comment') })}
                   rows={5}
-                  cols={40}
+                  cols={30}
                   autoResize
                 />
                 <label htmlFor="comment">Comentarios</label>
@@ -355,12 +356,12 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                 type="button"
                 className="p-button-success"
                 size="small"
-                label="Registrar entrada"
+                label="Registrar salida"
                 onClick={() => {
                   // Marcar todos los campos como tocados
                   formik.setTouched({
-                    entradaNo: true,
-                    fechaEntrada: true,
+                    salidaNo: true,
+                    fechaSalida: true,
                     proveedor: true,
                     cliente: true,
                     asigned_to: true,
@@ -384,4 +385,4 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
   );
 };
 
-export default EntryForm;
+export default OutflowForm;

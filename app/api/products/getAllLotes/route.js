@@ -1,10 +1,12 @@
+// api/products/getAllLotes.js
 
 import connectDB from '../../../../utils/db';
 import Product from '../../../../models/Product';
 import { NextResponse } from 'next/server';
-export const dynamic = 'force-dynamic'
 
-export  const GET = async (request) =>{
+export const dynamic = 'force-dynamic';
+
+export const GET = async (request) => {
     let client;
 
     try {
@@ -13,9 +15,18 @@ export  const GET = async (request) =>{
 
         // Realiza la operación para obtener todos los productos
         const products = await Product.find();
+       
 
+        // Obtén todos los lotes de los productos
+        const allLotes = products.reduce((lotes, product) => {
+            if (product.lote) {
+                lotes.push(product.lote);
+            }
 
-        return new NextResponse(JSON.stringify(products), {
+            return lotes;
+        }, []);
+
+        return new NextResponse(JSON.stringify(allLotes), {
             status: 200,
             headers: {
                 'Content-Type': 'application/json',
@@ -32,4 +43,4 @@ export  const GET = async (request) =>{
             await client.connection.close();
         }
     }
-}
+};

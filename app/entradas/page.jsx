@@ -6,7 +6,7 @@ import { ThemeProvider } from '../../context/ThemeContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
 import '../styles/styles.css'
 
-function EntradasPage() {
+function EntradasRegistroPage() {
 
   const { theme, toggleTheme } = useTheme();
   import(`primereact/resources/themes/${theme}/theme.css`).then(() => {
@@ -27,4 +27,4 @@ function EntradasPage() {
   );
 }
 
-export default EntradasPage;
+export default EntradasRegistroPage;

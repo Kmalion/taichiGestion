@@ -8,17 +8,16 @@ import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
-import { searchProducts } from '@/service/entryService';
+import { getAllSerials, searchProducts, getAllLotes } from '@/service/outflowService';
 import { InputNumber } from 'primereact/inputnumber';
 
 
 
-
-const EntryProductForm = ({ onHide, onAddProduct }) => {
+const OutflowProductForm = ({ onHide, onAddProduct }) => {
   const [form, setForm] = useState({
     reference: '',
     quantity: '',
-    cost: '',
+    price: '',
     serials: '',
     lote: '',
     ubicacion: '',
@@ -26,6 +25,8 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
   });
 
   const [filteredReferences, setFilteredReferences] = useState([]);
+  const [filteredSerials, setFilteredSerials] = useState([]);
+  const [filteredLotes, setFilteredLotes] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
@@ -45,7 +46,7 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
       serials: [
         {
           serial: value,
-          status: 'disponible',
+          status: 'noDisponible',
         },
       ],
     }));
@@ -69,7 +70,48 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
     }
   };
 
+  const searchSerials = async (event) => {
+    try {
+      setLoading(true);
+      const query = event.query || ''; // Obtener la consulta del evento
+      const serials = await getAllSerials();
 
+      // Filtrar los serials basados en la consulta
+      const filteredSerials = serials.filter((serial) =>
+        serial.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredSerials(filteredSerials);
+    } catch (error) {
+      console.error('Error al buscar serials:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const searchLotes = async (event) => {
+    try {
+      setLoading(true);
+      const query = event.query || ''; // Obtener la consulta del evento
+      const lotes = await getAllLotes();
+      console.log("Lotes FRONT: ", lotes);
+
+      // Filtrar los lotes basados en la consulta
+      setFilteredLotes(lotes);
+    } catch (error) {
+      console.error('Error al buscar lotes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // Función para manejar el cambio en el input de lotes
+  const handleLoteChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: value,
+    }));
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     onAddProduct(form);
@@ -84,6 +126,12 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
     return `${year}-${month}-${day}`;
   };
 
+  const formatCurrency = (value) => {
+    return value.toLocaleString('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+    });
+  };
   return (
     <Card style={{ width: '100%', padding: '20px' }} onHide={onHide}>
       <h2 className="text-center mt-0">Agregar producto</h2>
@@ -115,6 +163,7 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
     name="quantity"
     value={form.quantity}
     onValueChange={(e) => setForm({ ...form, quantity: e.value })}
+    mode="decimal"
     placeholder="Ingrese la cantidad"
     showButtons={false} 
     required
@@ -122,65 +171,59 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
 </div>
 
           <div className="p-field p-col-12 p-md-6 mt-2">
-            <label htmlFor="cost">Costo:</label>
+            <label htmlFor="price">Precio de venta:</label>
             <InputNumber
-              id="cost"
-              name="cost"
-              value={form.cost}
-              onValueChange={(e) => setForm({ ...form, cost: e.value })}
-              placeholder="Ingrese el costo"
-              mode="decimal"
-              locale="en-US"
-              suffix=" USD"
-              showButtons={false}
-              required
+              id="price"
+              name="price"
+              value={form.price}
+              onValueChange={(e) => setForm({ ...form, price: e.value })}
+              format={true}
+              showButtons={false} 
+              placeholder="Ingrese el precio"
+              mode="currency"
+              currency="COP"
             />
           </div>
 
-
-
           <div className="p-field p-col-12 p-md-6 mt-2">
             <label htmlFor="serials">Serial:</label>
-            <InputText
+            <AutoComplete
               id="serials"
               name="serials"
               value={form.serials.length > 0 ? form.serials[0].serial : ''}
+              suggestions={filteredSerials}
+              completeMethod={searchSerials}
               onChange={handleSerialsChange}
+              placeholder="Buscar serial"
+              minLength={1}
+              loading={loading}
+              className="p-autocomplete-item"
+              dropdownClassName="p-autocomplete-panel"
               required
             />
+
           </div>
 
           <div className="p-field p-col-12 mt-2">
             <label htmlFor="lote">Lote:</label>
-            <InputText
+            <AutoComplete
               id="lote"
               name="lote"
               value={form.lote}
-              onChange={handleInputChange}
+              suggestions={filteredLotes}
+              completeMethod={searchLotes}
+              onChange={handleLoteChange}
+              placeholder="Buscar lote"
+              minLength={1}
+              loading={loading}
+              className="p-autocomplete-item"
+              dropdownClassName="p-autocomplete-panel"
             />
           </div>
 
-          <div className="p-field p-col-12 mt-2">
-            <label htmlFor="exp_date">Fecha de vencimiento:</label>
-            <Calendar
-              id="exp_date"
-              name="exp_date"
-              value={form.exp_date}
-              onChange={(e) => setForm({ ...form, exp_date: e.value })}
-              minDate={new Date(getCurrentDate())}
-            />
-          </div>
 
-          <div className="p-field p-col-12 p-md-6 mt-2">
-            <label htmlFor="ubicacion">Ubicación:</label>
-            <InputText
-              id="ubicacion"
-              name="ubicacion"
-              value={form.ubicacion}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
+
+
         </div>
         <div className="p-field p-col-12 mt-3">
           <Button label="Agregar" type="submit" />
@@ -190,4 +233,4 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
   );
 };
 
-export default EntryProductForm;
+export default OutflowProductForm;
