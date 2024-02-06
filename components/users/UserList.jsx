@@ -103,8 +103,8 @@ const itemTemplate = (user) => (
           <Image
             src={user.foto ? user.foto : '/img/generic-avatar.png'}
             alt={`${user.nombre} ${user.apellido}`}
-            width={220}
-            height={250}
+            width={200}
+            height={230}
             className="w-15 shadow-2 rounded-image"
           />
         </div>
@@ -168,7 +168,7 @@ const itemTemplate = (user) => (
               numScroll: 1,
             },
             {
-              breakpoint: '575px',
+              breakpoint: '720px',
               numVisible: 1,
               numScroll: 1,
             },

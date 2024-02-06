@@ -118,7 +118,7 @@ console.log('Lista de usuarios ', userList)
   return (
     <Dialog
       visible={visible}
-      style={{ width: '50%' }}
+      style={{ width: '70%' }}
       header="Nuevo Cliente"
       onHide={handleCancel}
     >

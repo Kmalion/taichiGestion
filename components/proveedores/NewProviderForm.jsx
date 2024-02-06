@@ -33,7 +33,7 @@ const NewProviderForm = ({ visible, onSave, onCancel }) => {
   return (
     <Dialog
       visible={visible}
-      style={{ width: '50%' }}
+      style={{ width: '70%' }}
       header="Nuevo Proveedor"
       onHide={handleCancel}
     >
