@@ -184,42 +184,19 @@ const OutflowSummary = () => {
     // Verificar duplicados en serials antes de enviar la salida
    
 
-    try {
-      for (const product of products) {
-        await updateProductInfo(product.reference, {
-          price: product.price,
-          serials: product.serials,
-          lote: product.lote,
-        });
-      }
-  
-      for (const product of products) {
-        await handleUpdateProductQuantity(product.reference, product.quantity);
-      }
-  
-      // Resto del código...
-  
-      // Envía los datos al backend usando Axios
-      const response = await axios.post('/api/outflows/createOutflow', {
-        ...updatedOutflowData,
-        salidaNo: salidaNo, // Usa el número de salida obtenido
+    for (const product of products) {
+      await updateProductInfo(product.reference, {
+        cost: product.cost,
+        ubicacion: product.ubicacion,
+        exp_date: product.exp_date,
+        serials: product.serials,
+        lote: product.lote,
       });
-  
-      // Resto del código...
-    } catch (error) {
-      // Manejar errores en la actualización de productos
-      setLoading(false);
-      console.error('Error al actualizar productos:', error);
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error al actualizar productos',
-        detail: 'Por favor, inténtalo de nuevo.',
-      });
-  
-      return; // Detener la ejecución en caso de error
     }
-  
 
+    for (const product of products) {
+      await handleUpdateProductQuantity(product.reference, product.quantity);
+    }
     try {
       const salidaNo = await generateOutflowNo();
 

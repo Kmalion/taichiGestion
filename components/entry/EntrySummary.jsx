@@ -127,6 +127,8 @@ const EntrySummary = () => {
       return;
     }
 
+
+
     const subtotalArray = products.map((product) => calculateSubtotal(product));
     const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
     const updatedEntryData = {
@@ -162,7 +164,7 @@ const EntrySummary = () => {
             existingProduct.serials.includes(serial)
           );
 
-
+         
 
           if (duplicateSerial) {
             // Muestra una notificación de error y detiene la creación de la entrada
@@ -174,7 +176,7 @@ const EntrySummary = () => {
             return;
           }
 
-
+      
         } else {
           console.error('product.serials o existingProduct.serials no es un array:', product.serials, existingProduct.serials);
           // Puedes decidir cómo manejar esta situación según tus necesidades
@@ -193,35 +195,21 @@ const EntrySummary = () => {
     }
 
 
-    try {
-      for (const product of products) {
-        await updateProductInfo(product.reference, {
-          cost: product.cost,
-          ubicacion: product.ubicacion,
-          exp_date: product.exp_date,
-          serials: product.serials,
-          lote: product.lote,
-        });
-      }
-    
-      for (const product of products) {
-        await handleUpdateProductQuantity(product.reference, product.quantity);
-      }
-    
-      // Resto del código...
-    } catch (error) {
-      // Manejar errores en la actualización de productos
-      setLoading(false);
-      console.error('Error al actualizar productos:', error);
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error al actualizar productos',
-        detail: 'Por favor, inténtalo de nuevo.',
+
+    for (const product of products) {
+      await updateProductInfo(product.reference, {
+        cost: product.cost,
+        ubicacion: product.ubicacion,
+        exp_date: product.exp_date,
+        serials: product.serials,
+        lote: product.lote,
       });
-    
-      return; // Detener la ejecución en caso de error
     }
-    
+
+    for (const product of products) {
+      await handleUpdateProductQuantity(product.reference, product.quantity);
+    }
+
     try {
       const entradaNo = await generateEntryNo();
 
