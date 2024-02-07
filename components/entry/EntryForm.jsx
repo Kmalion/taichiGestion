@@ -174,7 +174,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     } else {
       formik.setFieldValue('entradaNo', entryData.entradaNo || '');
     }
-  }, [entryData]);
+  }, []);
 
   const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
 
