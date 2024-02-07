@@ -13,15 +13,17 @@ import uploadFile from '../../service/fileUploadService'
 import providersService from '@/service/providerService'
 import clientService from '@/service/clientService';
 import { Dropdown } from 'primereact/dropdown';
-import axios from 'axios';
+import { generateOutflowNo } from '@/service/outflowService';
+import userService from '@/service/userService'
 
 
-const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow }) => {
+const OutflowForm = ({ outflowData, setOutflowData, handleSaveOutflow }) => {
   const toast = useRef(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [outflowNo, setOutflowNo] = useState('');
+  const [userList, setUserList] = useState([]);
 
 
   const searchProviders = async (event) => {
@@ -62,22 +64,6 @@ const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow 
       setLoading(false);
     }
   };
-
-
-  const loadAsignedToOptions = async () => {
-    try {
-      // Lógica para obtener los datos desde el servidor, por ejemplo, mediante una solicitud HTTP
-      const response = await axios.get('/api/users/getUsers');
-      const data = response.data;
-
-      // Actualiza el estado con los datos obtenidos
-      setTipoOptions(data);
-    } catch (error) {
-      console.error('Error al obtener opciones de "Asignado a":', error);
-      // Manejar el error según tus necesidades
-    }
-  };
-
 
 
   const formik = useFormik({
@@ -125,11 +111,34 @@ const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow 
     },
   });
 
-  useEffect(() => {
-    // Cargar los datos de "Asignado a" al montar el componente
-    loadAsignedToOptions();
-  }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const newOutflow = await generateOutflowNo();
+
+        setOutflowNo(newOutflow);
+
+        const response = await userService.getUsers();
+
+
+        if (!response || !Array.isArray(response.users)) {
+          throw new Error('La respuesta del servidor no contiene un array de usuarios.');
+        }
+
+        const updatedOptions = response.users.map((user) => ({
+          label: `${user.nombre} ${user.apellido}`,
+          email: user.email,
+        }));
+
+        setUserList(updatedOptions);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchData();
+
+  }, []);
 
   const onUpload = async (event) => {
     // Manejar la lógica de la carga de archivos aquí
@@ -166,16 +175,7 @@ const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow 
     }
   };
 
-  useEffect(() => {
-    // Actualiza el valor de salidaNo cuando cambia outflowData
-    if (outflowData.salidaNo instanceof Promise) {
-      outflowData.salidaNo.then((resolvedValue) => {
-        formik.setFieldValue('salidaNo', resolvedValue);
-      });
-    } else {
-      formik.setFieldValue('salidaNo', outflowData.salidaNo || '');
-    }
-  }, [outflowData]);
+
 
   const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
 
@@ -204,11 +204,12 @@ const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow 
                 <InputText
                   id="salidaNo"
                   name="salidaNo"
-                  value={formik.values.salidaNo}
+                  value={outflowNo}
                   readOnly
                   onChange={(e) => formik.handleChange(e)}
                   onBlur={formik.handleBlur}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('salidaNo') })}
+                  filter={true.toString()}
                 />
                 <label htmlFor="salidaNo">Salida No.</label>
               </span>
@@ -246,7 +247,7 @@ const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow 
                   }}
                   onBlur={formik.handleBlur}
                   placeholder="Seleccionar proveedor"
-                  filter
+                  filter={formik.values.proveedor ? "true" : "false"}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('proveedor') })}
                 />
                 <label htmlFor="proveedor">Proveedor</label>
@@ -269,7 +270,7 @@ const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow 
                   }}
                   onBlur={formik.handleBlur}
                   placeholder="Seleccionar cliente"
-                  filter
+                  filter={formik.values.cliente ? "true" : "false"}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('cliente') })}
                 />
                 <label htmlFor="cliente">Cliente</label>
@@ -291,7 +292,6 @@ const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow 
                   }}
                   onBlur={formik.handleBlur}
                   placeholder="Seleccionar usuario"
-                  onShow={loadAsignedToOptions}  // Llama a la función solo para el Dropdown de "Asignado a"
                   className={classNames({ 'p-invalid': isFormFieldInvalid('asigned_to') })}
                 />
                 <label htmlFor="asigned_to">Asignado a</label>

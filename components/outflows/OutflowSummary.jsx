@@ -30,16 +30,7 @@ import { ProgressBar } from 'primereact/progressbar';
 const getCurrentDate = () => {
   return moment().format('YYYY-MM-DD HH:mm:ss');
 };
-const getNewOutflow = async () => {
-  try {
-    const newOutflow = await generateOutflowNo();
-    return newOutflow;
-  } catch (error) {
-    console.error('Error al obtener la nueva salida:', error);
-    throw error;
-  }
-};
-const salidaNo = getNewOutflow()
+
 
 const OutflowSummary = () => {
 
@@ -48,7 +39,7 @@ const OutflowSummary = () => {
   const [showProgressBar, setShowProgressBar] = useState(false);
   const [loading, setLoading] = useState(false);
   const [outflowData, setOutflowData] = useState({
-    salidaNo: salidaNo,
+    salidaNo: '',
     fechaSalida: getCurrentDate(),
     proveedor: '',
     tipo: '',
@@ -71,21 +62,6 @@ const OutflowSummary = () => {
   }, [session, created_by]);
 
 
-
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('/api/users/getUsers');
-        const updatedOptions = response.data.users.map(user => ({ label: `${user.nombre} ${user.apellido}`, email: user.email }));
-        setUserList(updatedOptions);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-
-    fetchUsers();
-  }, []);
 
 
   const handleOpenForm = () => {
@@ -188,9 +164,6 @@ const OutflowSummary = () => {
       });
       return;
     }
-
-
-
     const subtotalArray = products.map((product) => calculateSubtotal(product));
     const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
     const updatedOutflowData = {
@@ -497,7 +470,6 @@ const OutflowSummary = () => {
         <OutflowForm
           outflowData={outflowData}
           setOutflowData={setOutflowData}
-          userList={userList}
           handleSaveOutflow={handleSaveOutflow}  // Pasa la función como prop
         />
    

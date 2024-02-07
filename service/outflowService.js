@@ -3,28 +3,28 @@ import axios from 'axios';
 export const generateOutflowNo = async () => {
     try {
       // Realiza una petición al backend para obtener el último número de salida
-      const respuesta = await axios.get('/api/outflows/getLastOutflow');
+      const response = await axios.get('/api/outflows/getLastOutflow');
   
-      const ultimoNumeroSalida = respuesta.data;
+      const lastOutflowNo= response.data;
   
       // Verifica si el último número de salida es válido
-      if (!ultimoNumeroSalida) {
+      if (!lastOutflowNo) {
         throw new Error('El último número de salida no es válido.');
       }
   
       // Calcula el nuevo número de salida
-      const añoActual = new Date().getFullYear();
-      const consecutivoInicial = 1;
-      const nuevoNumeroSalida = parseInt(ultimoNumeroSalida.split('-')[1], 10) + 1;
+      const currentYear = new Date().getFullYear();
+      const initialConsecutivel = 1;
+      const newOutflowNumber = parseInt(lastOutflowNo.split('-')[1], 10) + 1;
   
       // Verifica si el cálculo del nuevo número es válido
-      if (isNaN(nuevoNumeroSalida) || nuevoNumeroSalida < consecutivoInicial) {
+      if (isNaN(newOutflowNumber) || newOutflowNumber < initialConsecutivel) {
         throw new Error('Error en el cálculo del nuevo número de salida.');
       }
   
       // Puedes ajustar el formato del ID según tus necesidades
-      const nuevaSalida = `${añoActual}-${nuevoNumeroSalida}`;
-      return nuevaSalida;
+      const newOutflow = `${currentYear}-${newOutflowNumber}`;
+      return newOutflow ;
     } catch (error) {
       // Maneja errores si la solicitud al backend falla o hay problemas en la lógica
       console.error('Error al generar el número de salida:', error);
@@ -35,29 +35,15 @@ export const generateOutflowNo = async () => {
   export const OutflowService = {
     getOutflows: async () => {
       try {
-        const respuesta = await axios.get('/api/outflows/getOutflows');
-        return respuesta.data;
+        const response = await axios.get('/api/outflows/getOutflows');
+        return response.data;
       } catch (error) {
         console.error('Error al obtener las salidas:', error);
         throw error;
       }
     },
   
-    getLastOutflow: async () => {
-      try {
-        const respuesta = await fetch('/api/outflows/getLastOutflow');
-        
-        if (!respuesta.ok) {
-          throw new Error(`Error al obtener la última salida: ${respuesta.statusText}`);
-        }
-  
-        const datos = await respuesta.json();
-        return datos;
-      } catch (error) {
-        console.error('Error al obtener la última salida:', error);
-        throw error;
-      }
-    },
+
   
     deleteOutflow: async (outflowNo) => {
       try {

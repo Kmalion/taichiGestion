@@ -1,5 +1,5 @@
 import connectDB from '../../../../utils/db';
-import Outflow from '@/models/Outflow';
+import Outflow from '../../../../models/Outflow';
 import { NextResponse } from 'next/server';
 
 export const GET = async (request) => {
@@ -21,6 +21,7 @@ export const GET = async (request) => {
       const currentYear = new Date().getFullYear();
       salidaNo = `${currentYear}-0`;
     }
+
 
     // Responde solo con la propiedad salidaNo de la última salida de inventario en formato JSON
     return new NextResponse(JSON.stringify(salidaNo), {

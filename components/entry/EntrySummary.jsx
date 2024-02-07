@@ -31,16 +31,7 @@ const getCurrentDate = () => {
   return moment().format('YYYY-MM-DD HH:mm:ss');
 };
 
-const getNewEntry = async () => {
-  try {
-    const newEntry = await generateEntryNo();
-    return newEntry;
-  } catch (error) {
-    console.error('Error al obtener la nueva entrada:', error);
-    throw error;
-  }
-};
-const entradaNo = getNewEntry()
+
 
 const EntrySummary = () => {
 
@@ -49,7 +40,7 @@ const EntrySummary = () => {
   const [showProgressBar, setShowProgressBar] = useState(false);
   const [loading, setLoading] = useState(false);
   const [entryData, setEntryData] = useState({
-    entradaNo: entradaNo,
+    entradaNo: '',
     fechaEntrada: getCurrentDate(),
     proveedor: '',
     tipo: '',
@@ -63,7 +54,6 @@ const EntrySummary = () => {
   const [totalCost, setTotalCost] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const { data: session } = useSession();
-  const [userList, setUserList] = useState([]);
   const created_by = session ? session.user.email : null;
 
 
@@ -74,19 +64,7 @@ const EntrySummary = () => {
 
 
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('/api/users/getUsers');
-        const updatedOptions = response.data.users.map(user => ({ label: `${user.nombre} ${user.apellido}`, email: user.email }));
-        setUserList(updatedOptions);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
 
-    fetchUsers();
-  }, []);
 
 
   const handleOpenForm = () => {
@@ -148,8 +126,6 @@ const EntrySummary = () => {
       });
       return;
     }
-
-
 
     const subtotalArray = products.map((product) => calculateSubtotal(product));
     const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
@@ -457,7 +433,6 @@ const EntrySummary = () => {
         <EntryForm
           entryData={entryData}
           setEntryData={setEntryData}
-          userList={userList}
           handleSaveEntry={handleSaveEntry}  // Pasa la función como prop
         />
    

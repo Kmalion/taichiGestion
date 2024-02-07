@@ -20,6 +20,7 @@ const userService = {
     try {
       const response = await axios.get(`/api/users/getUsers`);
 
+
       if (response.status === 200) {
         return response.data;
       } else {

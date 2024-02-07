@@ -4,8 +4,9 @@ export const generateEntryNo = async () => {
   try {
     // Realiza una petición al backend para obtener el último número de entrada
     const response = await axios.get('/api/entries/getLastEntry');
-
+    console.log("Respuesta servicio E", response.data)
     const lastEntryNo = response.data;
+
 
     // Verifica si el último número de entrada es válido
     if (!lastEntryNo) {
@@ -45,22 +46,7 @@ export const EntryService = {
     }
   },
 
-  getLastEntry: async () => {
-    try {
-      const response = await fetch('/api/entries/getLastEntry');
-      
-      if (!response.ok) {
-        throw new Error(`Error al obtener la última entrada: ${response.statusText}`);
-      }
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error al obtener la última entrada:', error);
-      throw error;
-    }
-  },
-  ///// Funcion de borrar 
   deleteEntry: async (entryNo) => {
     try {
       // Realiza una petición al backend para eliminar la entrada

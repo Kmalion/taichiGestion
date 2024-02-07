@@ -13,14 +13,16 @@ import uploadFile from '../../service/fileUploadService'
 import providersService from '@/service/providerService'
 import clientService from '@/service/clientService';
 import { Dropdown } from 'primereact/dropdown';
+import { generateEntryNo } from '@/service/entryService';
+import userService from '@/service/userService'
 
-
-const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
+const EntryForm = ({ entryData, setEntryData, handleSaveEntry }) => {
   const toast = useRef(null);
   const [filteredProviders, setFilteredProviders] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [entryNo, setEntryNo] = useState('');
+  const [userList, setUserList] = useState([]);
 
 
   const searchProviders = async (event) => {
@@ -61,22 +63,6 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
       setLoading(false);
     }
   };
-
-
-  const loadAsignedToOptions = async () => {
-    try {
-      // Lógica para obtener los datos desde el servidor, por ejemplo, mediante una solicitud HTTP
-      const response = await axios.get('/api/asignedTo/getAsignedToOptions');
-      const data = response.data;
-
-      // Actualiza el estado con los datos obtenidos
-      setTipoOptions(data);
-    } catch (error) {
-      console.error('Error al obtener opciones de "Asignado a":', error);
-      // Manejar el error según tus necesidades
-    }
-  };
-
 
 
   const formik = useFormik({
@@ -124,9 +110,33 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     },
   });
 
+
   useEffect(() => {
-    // Cargar los datos de "Asignado a" al montar el componente
-    loadAsignedToOptions();
+    const fetchData = async () => {
+      try {
+        const newEntry = await generateEntryNo();
+
+        setEntryNo(newEntry);
+
+        const response = await userService.getUsers();
+
+
+        if (!response || !Array.isArray(response.users)) {
+          throw new Error('La respuesta del servidor no contiene un array de usuarios.');
+        }
+
+        const updatedOptions = response.users.map((user) => ({
+          label: `${user.nombre} ${user.apellido}`,
+          email: user.email,
+        }));
+
+        setUserList(updatedOptions);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchData();
+
   }, []);
 
 
@@ -165,16 +175,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     }
   };
 
-  useEffect(() => {
-    // Actualiza el valor de entradaNo cuando cambia entryData
-    if (entryData.entradaNo instanceof Promise) {
-      entryData.entradaNo.then((resolvedValue) => {
-        formik.setFieldValue('entradaNo', resolvedValue);
-      });
-    } else {
-      formik.setFieldValue('entradaNo', entryData.entradaNo || '');
-    }
-  }, []);
+
 
   const isFormFieldInvalid = (name) => !!(formik.touched[name] && formik.errors[name]);
 
@@ -195,19 +196,20 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
     <div>
       <h3 className="text-center mt-1">Datos de entrada</h3>
       <Card>
-          <form onSubmit={(e) => e.preventDefault()}  >
-            <div className='grid flex flex justify-content-start flex-wrap'>
+        <form onSubmit={(e) => e.preventDefault()}  >
+          <div className='grid flex flex justify-content-start flex-wrap'>
             <div className="col-12 md:col-6 lg:col-2  flex align-items-center justify-content-center mt-2 mx-auto">
               <span className="p-float-label">
                 <Toast ref={toast} />
                 <InputText
                   id="entradaNo"
                   name="entradaNo"
-                  value={formik.values.entradaNo}
+                  value={entryNo}
                   readOnly
                   onChange={(e) => formik.handleChange(e)}
                   onBlur={formik.handleBlur}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('entradaNo') })}
+                  filter={true.toString()}
                 />
                 <label htmlFor="entradaNo">Entrada No.</label>
               </span>
@@ -245,7 +247,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   }}
                   onBlur={formik.handleBlur}
                   placeholder="Seleccionar proveedor"
-                  filter
+                  filter={formik.values.proveedor ? "true" : "false"}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('proveedor') })}
                 />
                 <label htmlFor="proveedor">Proveedor</label>
@@ -268,7 +270,7 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   }}
                   onBlur={formik.handleBlur}
                   placeholder="Seleccionar cliente"
-                  filter
+                  filter={formik.values.cliente ? "true" : "false"}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('cliente') })}
                 />
                 <label htmlFor="cliente">Cliente</label>
@@ -290,7 +292,6 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                   }}
                   onBlur={formik.handleBlur}
                   placeholder="Seleccionar usuario"
-                  onShow={loadAsignedToOptions}  // Llama a la función solo para el Dropdown de "Asignado a"
                   className={classNames({ 'p-invalid': isFormFieldInvalid('asigned_to') })}
                 />
                 <label htmlFor="asigned_to">Asignado a</label>
@@ -377,10 +378,10 @@ const EntryForm = ({ entryData, setEntryData, userList, handleSaveEntry }) => {
                 }}
               />
             </div>
-            </div>
-          </form>
-          </Card>
           </div>
+        </form>
+      </Card>
+    </div>
   );
 };
 
