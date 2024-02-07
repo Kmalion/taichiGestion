@@ -196,19 +196,37 @@ const EntrySummary = () => {
 
 
 
-    for (const product of products) {
-      await updateProductInfo(product.reference, {
-        cost: product.cost,
-        ubicacion: product.ubicacion,
-        exp_date: product.exp_date,
-        serials: product.serials,
-        lote: product.lote,
+    try {
+      // Actualizar información de productos
+      for (const product of products) {
+        await updateProductInfo(product.reference, {
+          cost: product.cost,
+          ubicacion: product.ubicacion,
+          exp_date: product.exp_date,
+          serials: product.serials,
+          lote: product.lote,
+        });
+      }
+    
+      // Actualizar cantidades de productos
+      for (const product of products) {
+        await handleUpdateProductQuantity(product.reference, product.quantity);
+      }
+    
+      // Resto del código aquí...
+    
+    } catch (error) {
+      // Maneja errores si alguna de las operaciones anteriores falla
+      console.error('Error al actualizar productos:', error);
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error al actualizar productos',
+        detail: 'Por favor, inténtalo de nuevo.',
       });
+      setLoading(false); // Asegúrate de ajustar el estado según tus necesidades
+      return; // Detiene la ejecución del resto del código
     }
-
-    for (const product of products) {
-      await handleUpdateProductQuantity(product.reference, product.quantity);
-    }
+    
 
     try {
       const entradaNo = await generateEntryNo();
