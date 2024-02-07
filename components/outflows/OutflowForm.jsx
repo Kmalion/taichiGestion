@@ -25,6 +25,35 @@ const OutflowForm = ({ outflowData, setOutflowData, handleSaveOutflow }) => {
   const [outflowNo, setOutflowNo] = useState('');
   const [userList, setUserList] = useState([]);
 
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const newOutflow = await generateOutflowNo();
+
+        setOutflowNo(newOutflow);
+        formik.setFieldValue('salidaNo', newOutflow);
+        const response = await userService.getUsers();
+
+
+        if (!response || !Array.isArray(response.users)) {
+          throw new Error('La respuesta del servidor no contiene un array de usuarios.');
+        }
+
+        const updatedOptions = response.users.map((user) => ({
+          label: `${user.nombre} ${user.apellido}`,
+          email: user.email,
+        }));
+
+        setUserList(updatedOptions);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchData();
+
+  }, []);
+
 
   const searchProviders = async (event) => {
     try {
@@ -112,33 +141,6 @@ const OutflowForm = ({ outflowData, setOutflowData, handleSaveOutflow }) => {
   });
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const newOutflow = await generateOutflowNo();
-
-        setOutflowNo(newOutflow);
-
-        const response = await userService.getUsers();
-
-
-        if (!response || !Array.isArray(response.users)) {
-          throw new Error('La respuesta del servidor no contiene un array de usuarios.');
-        }
-
-        const updatedOptions = response.users.map((user) => ({
-          label: `${user.nombre} ${user.apellido}`,
-          email: user.email,
-        }));
-
-        setUserList(updatedOptions);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-    fetchData();
-
-  }, []);
 
   const onUpload = async (event) => {
     // Manejar la lógica de la carga de archivos aquí
@@ -204,7 +206,7 @@ const OutflowForm = ({ outflowData, setOutflowData, handleSaveOutflow }) => {
                 <InputText
                   id="salidaNo"
                   name="salidaNo"
-                  value={outflowNo}
+                  value={formik.values.salidaNo}
                   readOnly
                   onChange={(e) => formik.handleChange(e)}
                   onBlur={formik.handleBlur}

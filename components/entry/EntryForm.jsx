@@ -24,6 +24,34 @@ const EntryForm = ({ entryData, setEntryData, handleSaveEntry }) => {
   const [entryNo, setEntryNo] = useState('');
   const [userList, setUserList] = useState([]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const newEntry = await generateEntryNo();
+
+        setEntryNo(newEntry);
+        formik.setFieldValue('entradaNo', newEntry);
+        const response = await userService.getUsers();
+
+
+        if (!response || !Array.isArray(response.users)) {
+          throw new Error('La respuesta del servidor no contiene un array de usuarios.');
+        }
+
+        const updatedOptions = response.users.map((user) => ({
+          label: `${user.nombre} ${user.apellido}`,
+          email: user.email,
+        }));
+
+        setUserList(updatedOptions);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchData();
+
+  }, []);
+
 
   const searchProviders = async (event) => {
     try {
@@ -67,7 +95,7 @@ const EntryForm = ({ entryData, setEntryData, handleSaveEntry }) => {
 
   const formik = useFormik({
     initialValues: {
-      entradaNo: entryData.entradaNo || '',
+      entradaNo: entryNo || '',
       fechaEntrada: entryData.fechaEntrada || '',
       proveedor: entryData.proveedor || '',
       cliente: entryData.cliente || '',
@@ -111,33 +139,6 @@ const EntryForm = ({ entryData, setEntryData, handleSaveEntry }) => {
   });
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const newEntry = await generateEntryNo();
-
-        setEntryNo(newEntry);
-
-        const response = await userService.getUsers();
-
-
-        if (!response || !Array.isArray(response.users)) {
-          throw new Error('La respuesta del servidor no contiene un array de usuarios.');
-        }
-
-        const updatedOptions = response.users.map((user) => ({
-          label: `${user.nombre} ${user.apellido}`,
-          email: user.email,
-        }));
-
-        setUserList(updatedOptions);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-    fetchData();
-
-  }, []);
 
 
   const onUpload = async (event) => {
@@ -204,12 +205,11 @@ const EntryForm = ({ entryData, setEntryData, handleSaveEntry }) => {
                 <InputText
                   id="entradaNo"
                   name="entradaNo"
-                  value={entryNo}
+                  value={formik.values.entradaNo}
                   readOnly
                   onChange={(e) => formik.handleChange(e)}
                   onBlur={formik.handleBlur}
                   className={classNames({ 'p-invalid': isFormFieldInvalid('entradaNo') })}
-                  filter={true.toString()}
                 />
                 <label htmlFor="entradaNo">Entrada No.</label>
               </span>

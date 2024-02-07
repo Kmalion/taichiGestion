@@ -44,7 +44,7 @@ const OutflowTable = () => {
 
   useEffect(() => {
     try {
-      OutflowService.getEntries().then((data) => {
+      OutflowService.getOutflows().then((data) => {
 
         setOutflows(data);
       });
