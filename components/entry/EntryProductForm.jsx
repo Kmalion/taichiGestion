@@ -55,7 +55,8 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
   const searchReferences = async (event) => {
     try {
       setLoading(true);
-      const query = event.query || ''; // Obtener la consulta del evento
+      const query = event.query || ''; 
+      console.log("Query: ", query)// Obtener la consulta del evento
       const products = await searchProducts(query);
       console.log("Products FRONT: ", products);
 

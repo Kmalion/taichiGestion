@@ -64,35 +64,32 @@ export const generateOutflowNo = async () => {
     },
   };
   // Función para buscar productos por referencia
-export const searchProducts = async (query) => {
-  try {
-    const url = new URL('/api/products/getProductsSearch', window.location.origin);
-    url.searchParams.set('q', query);
-
-    // Realiza la búsqueda solo en el lado del cliente
-    if (typeof window !== 'undefined') {
-      const response = await axios.get(url.toString(), {
-        headers: {
-          'Cache-Control': 'no-cache', // Para evitar el almacenamiento en caché del navegador
-        },
-      });
-
+  export const searchProducts = async (query) => {
+    try {
+      console.log('query Servicio: ', query )
+  
+      // Realiza la búsqueda en el lado del servidor (backend)
+      const response = await axios.get('/api/products/getProducts');
+  
       if (response.status === 200) {
-        const products = response.data;
-        return products;
+        const allProducts = response.data;
+  
+        // Filtra los productos según la coincidencia con la consulta
+        const filteredProducts = allProducts.filter(product =>
+          product.reference.toLowerCase().includes(query.toLowerCase())
+        );
+  
+        console.log("Productos filtrados", filteredProducts);
+        return filteredProducts;
       } else {
-        console.error('Error al obtener productos:', response.statusText);
-        throw new Error('Error al obtener productos');
+        console.error('Error al obtener productos desde el backend:', response.statusText);
+        throw new Error('Error al obtener productos desde el backend');
       }
-    } else {
-      // Si se está generando estáticamente, devuelve una respuesta vacía o maneja de otra manera
-      return [];
+    } catch (error) {
+      console.error('Error al buscar productos:', error);
+      throw error;
     }
-  } catch (error) {
-    console.error('Error al buscar productos:', error);
-    throw error;
   }
-}
 
 
 
