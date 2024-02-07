@@ -5,9 +5,9 @@
 import React, { useState } from 'react';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Card } from 'primereact/card';
-import { InputText } from 'primereact/inputtext';
+
 import { Button } from 'primereact/button';
-import { Calendar } from 'primereact/calendar';
+
 import { getAllSerials, searchProducts, getAllLotes } from '@/service/outflowService';
 import { InputNumber } from 'primereact/inputnumber';
 

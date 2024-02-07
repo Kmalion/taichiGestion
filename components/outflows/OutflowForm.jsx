@@ -252,7 +252,7 @@ const OutflowForm = ({ outflowData, setOutflowData, userList, handleSaveOutflow 
                 <label htmlFor="proveedor">Proveedor</label>
               </span>
               {getFormErrorMessage('proveedor')}
-            </div>`
+            </div>
 
             <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mt-2 mx-auto">
               <span className="p-float-label">

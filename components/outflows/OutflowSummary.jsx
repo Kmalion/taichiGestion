@@ -102,8 +102,9 @@ const OutflowSummary = () => {
       const currentQuantity = Number(currentProduct.quantity) || 0;
       const enteredQuantity = Number(userEnteredQuantity) || 0;
       const updatedQuantity = currentQuantity - enteredQuantity;
-
+  
       await productService.updateProductQuantity(reference, updatedQuantity);
+  
       // Actualiza la cantidad en el estado solo para el producto específico
       setProducts((prevProducts) => {
         return prevProducts.map((product) => {
@@ -113,11 +114,27 @@ const OutflowSummary = () => {
           return product;
         });
       });
-
+  
+      // Muestra un Toast de éxito usando toast.current.show
+      toast.current.show({
+        severity: 'success',
+        summary: 'Cantidad del producto actualizada con éxito',
+        detail: '', // Puedes personalizar el detalle según sea necesario
+      });
     } catch (error) {
       console.error('Error al obtener o actualizar la cantidad del producto:', error);
+  
+      // Muestra un Toast de error usando toast.current.show
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error al actualizar la cantidad del producto',
+        detail: error.response && error.response.status === 400
+          ? error.response.data  // Muestra el mensaje personalizado del backend
+          : `Error: ${error.message}`,  // Muestra el mensaje genérico si no hay mensaje personalizado
+      });
     }
   };
+  
 
   const updateProductInfo = async (reference, updatedInfo) => {
     try {

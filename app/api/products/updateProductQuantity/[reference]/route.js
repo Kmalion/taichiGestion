@@ -1,4 +1,3 @@
-// updateProductQuantity.js
 import Product from '@/models/Product';
 import connectDB from '@/utils/db';
 import { NextResponse } from 'next/server';
@@ -33,7 +32,12 @@ export const PUT = async (request, { params }) => {
     const bodyText = Buffer.concat(chunks).toString('utf-8');
 
     // Intenta parsear el cuerpo de la solicitud como JSON
-    let { quantity } = JSON.parse(bodyText);
+    const { quantity } = JSON.parse(bodyText);
+
+    // Verifica si la cantidad es cero
+    if (existingProduct.quantity=== 0) {
+      return new NextResponse(`El producto ${existingProduct.reference} no tiene existencias`, { status: 400 });
+    }
 
     // Actualiza la cantidad del producto
     existingProduct.quantity = quantity;
