@@ -32,12 +32,7 @@ export const PUT = async (request, { params }) => {
     const bodyText = Buffer.concat(chunks).toString('utf-8');
 
     // Intenta parsear el cuerpo de la solicitud como JSON
-    const { quantity } = JSON.parse(bodyText);
-
-    // Verifica si la cantidad es cero
-    if (existingProduct.quantity=== 0) {
-      return new NextResponse(`El producto ${existingProduct.reference} no tiene existencias`, { status: 400 });
-    }
+    let { quantity } = JSON.parse(bodyText);
 
     // Actualiza la cantidad del producto
     existingProduct.quantity = quantity;
