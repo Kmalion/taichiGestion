@@ -50,7 +50,7 @@ const OutflowSummary = () => {
   });
 
   const [products, setProducts] = useState([]);
-  const [totalCost, setTotalCost] = useState(0);
+  const [TotalPrice, setTotalPrice] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const { data: session } = useSession();
   const [userList, setUserList] = useState([]);
@@ -78,6 +78,8 @@ const OutflowSummary = () => {
       const currentQuantity = Number(currentProduct.quantity) || 0;
       const enteredQuantity = Number(userEnteredQuantity) || 0;
       const updatedQuantity = currentQuantity - enteredQuantity;
+
+      console.log("Cantidad actualizada: " , updatedQuantity)
   
       await productService.updateProductQuantity(reference, updatedQuantity);
   
@@ -171,7 +173,7 @@ const OutflowSummary = () => {
       salidaNo: salidaNo, // Usa el número de salida calculado
       products: products.map(({ subtotal, ...product }) => product),
       subtotal: subtotal,
-      totalCost: totalCost,
+      TotalPrice: TotalPrice,
       totalQuantity: totalQuantity,
       created_by: created_by,
       cliente: outflowData.cliente, // Mantén el valor de cliente
@@ -180,82 +182,55 @@ const OutflowSummary = () => {
       serials: outflowData.serials
     };
     // Verificar duplicados en serials antes de enviar la salida
-    for (const product of products) {
-      try {
-        const existingProduct = await getProductByReference(product.reference);
+   
 
-        if (
-          existingProduct &&
-          (Array.isArray(product.serials) || typeof product.serials === 'string') && // Verifica si es un array o una cadena
-          Array.isArray(existingProduct.serials)
-        ) {
-          const productSerials = Array.isArray(product.serials)
-            ? product.serials
-            : [product.serials]; // Convierte a array si no lo es
-
-
-          // Verifica si algún serial ya existe en la base de datos
-          const duplicateSerial = productSerials.find((serial) =>
-            existingProduct.serials.includes(serial)
-          );
-
-
-
-          if (duplicateSerial) {
-            // Muestra una notificación de error y detiene la creación de la salida
-            toast.current.show({
-              severity: 'error',
-              summary: 'Error al guardar la salida',
-              detail: `El serial '${duplicateSerial}' ya está registrado. Verifica la lista de productos.`,
-            });
-            return;
-          }
-
-
-        } else {
-          console.error('product.serials o existingProduct.serials no es un array:', product.serials, existingProduct.serials);
-          // Puedes decidir cómo manejar esta situación según tus necesidades
-          return;
-        }
-      } catch (error) {
-        // Manejar errores al obtener el producto
-        console.error('Error al obtener el producto por referencia:', error);
-        toast.current.show({
-          severity: 'error',
-          summary: 'Error al obtener el producto',
-          detail: 'Por favor, inténtalo de nuevo.',
+    try {
+      for (const product of products) {
+        await updateProductInfo(product.reference, {
+          price: product.price,
+          serials: product.serials,
+          lote: product.lote,
         });
-        return;
       }
-    }
-
-
-
-    for (const product of products) {
-      await updateProductInfo(product.reference, {
-        price: product.price,
-        ubicacion: product.ubicacion,
-        exp_date: product.exp_date,
-        serials: product.serials,
-        lote: product.lote,
+  
+      for (const product of products) {
+        await handleUpdateProductQuantity(product.reference, product.quantity);
+      }
+  
+      // Resto del código...
+  
+      // Envía los datos al backend usando Axios
+      const response = await axios.post('/api/outflows/createOutflow', {
+        ...updatedOutflowData,
+        salidaNo: salidaNo, // Usa el número de salida obtenido
       });
+  
+      // Resto del código...
+    } catch (error) {
+      // Manejar errores en la actualización de productos
+      setLoading(false);
+      console.error('Error al actualizar productos:', error);
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error al actualizar productos',
+        detail: 'Por favor, inténtalo de nuevo.',
+      });
+  
+      return; // Detener la ejecución en caso de error
     }
-
-    for (const product of products) {
-      await handleUpdateProductQuantity(product.reference, product.quantity);
-    }
+  
 
     try {
       const salidaNo = await generateOutflowNo();
 
       console.log('Datos a enviar al backend:', updatedOutflowData);
       // Envía los datos al backend usando Axios
-      const response = await axios.post('/api/entries/createOutflow', {
+      const response = await axios.post('/api/outflows/createOutflow', {
         ...updatedOutflowData,
         salidaNo: salidaNo, // Usa el número de salida obtenido
       });
       setLoading(false);
-      toast.current.show({ severity: 'success', summary: 'Entrada guardada con éxito', detail: response.data.message });
+      toast.current.show({ severity: 'success', summary: 'Salida guardada con éxito', detail: response.data.message });
       router.push('/salidas');
       // Reinicia el estado del formulario
       setOutflowData({
@@ -269,7 +244,7 @@ const OutflowSummary = () => {
         comment: outflowData.comment
       });
       setProducts([]);
-      setTotalCost(0);
+      setTotalPrice(0);
       setTotalQuantity(0);
 
       generatePDF({
@@ -279,7 +254,7 @@ const OutflowSummary = () => {
         tipo: updatedOutflowData.tipo,
         asigned_to: updatedOutflowData.asigned_to,
         cliente: updatedOutflowData.cliente,
-        totalCost: updatedOutflowData.totalCost,
+        TotalPrice: updatedOutflowData.TotalPrice,
         products: updatedOutflowData.products,
         comment: updatedOutflowData.comment
       });
@@ -305,15 +280,15 @@ const OutflowSummary = () => {
     pdfDoc.setFontSize(10);
     pdfDoc.setTextColor(0, 0, 0); // Color de texto negro
 
-    // Sección de Información de la Entrada
+    // Sección de Información de la Salida
     const outflowInfoLines = [
-      `Entrada No: ${outflowData.salidaNo}`,
+      `Salida No: ${outflowData.salidaNo}`,
       `Fecha: ${outflowData.fechaSalida}`,
       `Proveedor: ${outflowData.proveedor.value}`,
       `Tipo: ${outflowData.tipo}`,
       `Asignado a: ${outflowData.asigned_to ? outflowData.asigned_to.label : 'N/A'}`,
       `Cliente: ${outflowData.cliente.value || 'N/A'}`,
-      `Total: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(outflowData.totalCost)}`
+      `Total: ${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(outflowData.TotalPrice)}`
     ];
 
     const lineHeight = 10; // Espaciado entre líneas
@@ -336,9 +311,9 @@ const OutflowSummary = () => {
         formattedSerials, // Usa la variable, no la función
         product.ubicacion,
         formattedLote,
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price),
+        new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(product.price),
         product.quantity,
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(subtotal),
+        new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(subtotal),
       ];
     });
 
@@ -387,7 +362,7 @@ const OutflowSummary = () => {
       const totalPorProducto = price * cantidad; // Nueva línea para calcular el total por producto
       return accumulator + totalPorProducto; // Actualizado para acumular el total por producto
     }, 0);
-    setTotalCost(total);
+    setTotalPrice(total);
   }, [products]);
 
 
@@ -444,7 +419,7 @@ const OutflowSummary = () => {
               {new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
-              }).format(totalCost)}
+              }).format(TotalPrice)}
             </strong>
           </span>
         } />
@@ -490,16 +465,15 @@ const OutflowSummary = () => {
                   </span>
                 )}
               />
-              <Column field="ubicacion" header="Ubicación" />
               <Column field="lote" header="Lote" />
               <Column
                 field="price"
                 header="Precio"
                 body={(rowData) => (
                   <span>
-                    {new Intl.NumberFormat('en-US', {
+                    {new Intl.NumberFormat('es-ES', {
                       style: 'currency',
-                      currency: 'USD',
+                      currency: 'COP',
                     }).format(rowData.price)}
                   </span>
                 )}

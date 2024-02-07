@@ -16,10 +16,6 @@ try {
       type: Date,
       required: true,
     },
-    destino: {
-      type: mongoose.Schema.Types.Mixed,
-      required: true,
-    },
     cliente: {
       type: mongoose.Schema.Types.Mixed,
       required: true,
@@ -74,7 +70,7 @@ try {
         },
       },
     ],
-    totalCost: {
+    totalPrice: {
       type: Number,
       default: 0,
     },
