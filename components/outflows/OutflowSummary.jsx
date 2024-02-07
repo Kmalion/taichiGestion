@@ -110,6 +110,7 @@ const OutflowSummary = () => {
           ? error.response.data  // Muestra el mensaje personalizado del backend
           : `Error: ${error.message}`,  // Muestra el mensaje genérico si no hay mensaje personalizado
       });
+      return; 
     }
   };
   
@@ -150,6 +151,7 @@ const OutflowSummary = () => {
       }
     } catch (error) {
       console.error(`Error al actualizar el producto (Reference: ${reference}):`, error);
+      return; 
     }
   };
 
