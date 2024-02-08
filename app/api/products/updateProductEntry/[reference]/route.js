@@ -57,11 +57,11 @@ export const PATCH = async (request, { params }) => {
 
         // Mantener los datos existentes en serials y lote
         existingProduct.serials = existingProduct.serials.concat(updatedProductData.serials || []);
-        existingProduct.lote = existingProduct.lote.concat(updatedProductData.lote || []);
+        existingProduct.lotes = existingProduct.lotes.concat(updatedProductData.lotes || []);
 
         // Eliminar duplicados en serials y lote
         existingProduct.serials = [...new Set(existingProduct.serials)];
-        existingProduct.lote = [...new Set(existingProduct.lote)];
+        existingProduct.lotes = [...new Set(existingProduct.lotes)];
 
         await existingProduct.save();
 

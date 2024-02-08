@@ -44,7 +44,7 @@ export default function ProductTable() {
         ubicacion: '',
         cost: 0,
         exp_date: '',
-        lote: [],
+        lotes: [],
     };
 
 
@@ -740,7 +740,7 @@ export default function ProductTable() {
                     <Column field="ubicacion" header="Ubicacion" sortable style={{ minWidth: '12rem' }} body={ubicacionBodyTemplate}></Column>
                     <Column field="inventoryStatus" header="Estado" body={statusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
                     <Column field="price" header="Precio" body={priceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
-                    <Column field="lote" header="Lote" sortable style={{ minWidth: '12rem' }} body={loteBodyTemplate}></Column>
+                    <Column field="lotes" header="Lotes" sortable style={{ minWidth: '12rem' }} body={loteBodyTemplate}></Column>
                     <Column field="exp_date" header="Vencimiento" sortable style={{ minWidth: '12rem' }} body={expDateBodyTemplate}></Column>
                     <Column field="owner" header="Creado por" sortable style={{ minWidth: '12rem' }}></Column>
                     <Column body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
@@ -812,15 +812,22 @@ export default function ProductTable() {
                 <Dialog
                     visible={loteDialog}
                     style={{ width: '30rem' }}
-                    header={`Lotes de ${product.reference}`}
+                    header={`Seriales de ${product.reference}`}
                     modal
                     onHide={hideLoteDialog}
                     footer={loteDialogFooter}
                 >
-                    {product.lote && Array.isArray(product.lote) && product.lote.length > 0 ? (
+                    {product.lotes && Array.isArray(product.lotes) && product.lotes.length > 0 ? (
                         <ul>
-                            {product.lote.map((loteItem, index) => (
-                                <li key={index}>{loteItem}</li>
+                            {product.lotes.map((lotesItem, index) => (
+                                <li key={index}>
+                                    <div>
+                                        <strong></strong> {lotesItem.lote} <span className={`p-tag ${lotesItem.status === 'disponible' ? 'p-tag-success' : 'p-tag-danger'}`}>
+                                            {lotesItem.status}
+                                        </span>
+                                    </div>
+
+                                </li>
                             ))}
                         </ul>
                     ) : (

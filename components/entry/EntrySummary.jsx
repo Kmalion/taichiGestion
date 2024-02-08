@@ -142,7 +142,8 @@ const EntrySummary = () => {
       cliente: entryData.cliente, // Mantén el valor de cliente
       document: entryData.document, // Mantén el valor de document  
       comment: entryData.comment,
-      serials: entryData.serials
+      serials: entryData.serials,
+      lotes: entryData.lotes
     };
     // Verificar duplicados en serials antes de enviar la entrada
     for (const product of products) {
@@ -204,7 +205,7 @@ const EntrySummary = () => {
           ubicacion: product.ubicacion,
           exp_date: product.exp_date,
           serials: product.serials,
-          lote: product.lote,
+          lotes: product.lotes,
         });
       }
     
@@ -308,10 +309,10 @@ const EntrySummary = () => {
 
 
     // Añadir la tabla de productos al PDF
-    const productHeaders = ['Referencia', 'Serial', 'Ubicación', 'Lote', 'Costo', 'Cantidad', 'Subtotal'];
+    const productHeaders = ['Referencia', 'Serial', 'Ubicación', 'Lotes', 'Costo', 'Cantidad', 'Subtotal'];
     const productData = entryData.products.map(product => {
       const formattedSerials = formatSerials(product.serials);
-      const formattedLote = Array.isArray(product.lote) ? product.lote.join(', ') : product.lote;
+      const formattedLote = Array.isArray(product.lotes) ? product.lotes.join(', ') : product.lotes;
       const subtotal = calculateSubtotal(product);
 
       return [
@@ -475,7 +476,18 @@ const EntrySummary = () => {
         )}
       />
       <Column field="ubicacion" header="Ubicación" />
-      <Column field="lote" header="Lote" />
+      <Column
+        header="Lote"
+        body={(rowData) => (
+          <span>
+            {rowData.lotes.map((lote) => (
+              <div key={lote.lote}>
+                {`Lote: ${lote.lote}, Status: ${lote.status}`}
+              </div>
+            ))}
+          </span>
+        )}
+      />
       <Column
         field="cost"
         header="Costo"

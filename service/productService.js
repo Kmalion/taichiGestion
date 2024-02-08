@@ -60,7 +60,7 @@ export const deleteSerialFromProduct = async (reference, serialToDelete, loteToD
     const response = await axios.delete(`/api/products/deleteSerialFromProduct/${reference}`, {
       data: {
         serials: serialToDelete,
-        lote: loteToDelete,
+        lotes: loteToDelete,
         ubicacion: ubicacionToDelete,
       },
     });

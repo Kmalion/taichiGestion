@@ -118,7 +118,7 @@ const EntryTable = () => {
       } else {
         // Itera sobre los productos de la entrada
         for (const product of entry.products) {
-       
+
 
           // Verifica si hay seriales en el producto
           if (!product || !product.serials || product.serials.length === 0) {
@@ -129,24 +129,24 @@ const EntryTable = () => {
               // Obtiene la cantidad anterior del producto
               const oldProduct = await getProductByReference(product.reference);
               const oldQuantity = oldProduct.quantity;
-              
+
 
               // Calcula la nueva cantidad restando la cantidad de la entrada
               const newQuantity = oldQuantity - product.quantity;
-              
+
 
               for (const serial of product.serials) {
-                
+
 
                 try {
                   // Llama a la función para eliminar el serial, lote y ubicación
                   await deleteSerialFromProduct(product.reference, serial.serial, product.lote, product.ubicacion);
-                  
+
 
                   // Actualiza la cantidad de producto existente utilizando la nueva cantidad calculada
                   await updateProductQuantity(product.reference, newQuantity);
                 } catch (error) {
-                
+
                   // Puedes manejar el error según tus necesidades
                 }
               }
@@ -182,7 +182,7 @@ const EntryTable = () => {
         summary: 'Error al eliminar la entrada',
         detail: 'Hubo un problema al eliminar la entrada. Por favor, inténtalo de nuevo.',
       });
-    }finally {
+    } finally {
       setLoading(false); // Oculta la barra de progreso al finalizar la acción, ya sea con éxito o error
     }
   };
@@ -225,7 +225,18 @@ const EntryTable = () => {
           <DataTable value={data.products}>
             <Column field="reference" header="Referencia" sortable />
             <Column field="quantity" header="Cantidad" sortable />
-            <Column field="cost" header="Costo" sortable />
+            <Column
+              field="cost"
+              header="Costo"
+              sortable
+              body={(rowData) =>
+                rowData.cost ? (
+                  <span>{rowData.cost.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>
+                ) : (
+                  <span>No hay costo asignado</span>
+                )
+              }
+            />
             <Column
               field="serials"
               header="Serials"
@@ -239,7 +250,19 @@ const EntryTable = () => {
                 </ul>
               )}
             />
-            <Column field="lote" header="Lote" sortable />
+            <Column
+              field="lotes"
+              header="Lotes"
+              body={(rowData) => (
+                <ul>
+                  {rowData.lotes.map((loteData, index) => (
+                    <li key={index}>
+                      <strong>Lote:</strong> {loteData.lote}, <strong>Status:</strong> {loteData.status}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            />
             <Column field="ubicacion" header="Ubicación" sortable />
             <Column
               field="exp_date"
@@ -270,17 +293,17 @@ const EntryTable = () => {
 
 
   const header = (
-  <div className="flex flex-wrap justify-content-between">
-    <Button 
-      className="p-button-success" 
-      icon="pi pi-plus" 
-      label="Registrar Entrada" 
-      onClick={() => router.push('/entradas/registro')} 
-      disabled={!isAdminPremium}  // Deshabilita el botón si no es admin o premium
-    />
-    <Button icon="pi pi-minus" label="Colapsar Todo" onClick={collapseAll} text />
-  </div>
-);
+    <div className="flex flex-wrap justify-content-between">
+      <Button
+        className="p-button-success"
+        icon="pi pi-plus"
+        label="Registrar Entrada"
+        onClick={() => router.push('/entradas/registro')}
+        disabled={!isAdminPremium}  // Deshabilita el botón si no es admin o premium
+      />
+      <Button icon="pi pi-minus" label="Colapsar Todo" onClick={collapseAll} text />
+    </div>
+  );
 
   const DocumentColumn = (data) => {
     const handleDownload = () => {
@@ -336,24 +359,24 @@ const EntryTable = () => {
       disabled={!isAdmin}
     />
   );
-  
+
   const handleDownloadPDF = (entryData) => {
     // Crea un nuevo objeto jsPDF
     const doc = new jsPDF({
       orientation: 'landscape', // Establece la orientación a horizontal
     });
-  
+
     // Primer título
     const firstTitle = `Taichi Holdings Entrada No. ${entryData.entradaNo}`;
     const firstTitleWidth = doc.getStringUnitWidth(firstTitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
     const firstTitleX = (doc.internal.pageSize.width - firstTitleWidth) / 2;
     doc.text(firstTitle, firstTitleX, 5);
-  
+
     // Ajusta la posición inicial de la segunda tabla
     const secondTableStartY = 38; // Establece la posición fija
-  
-  
-  
+
+
+
     doc.autoTable({
       head: [
         ['Entrada No.', 'Fecha', 'Proveedor', 'Cliente', 'Responsable', 'Tipo', 'Documento', 'Comentario'],
@@ -375,16 +398,16 @@ const EntryTable = () => {
         ],
       ],
     });
-  
+
     // Ajusta la posición vertical del segundo título
     const secondTitleY = secondTableStartY - 2; // Ajusta el valor de acuerdo a tu preferencia
-  
+
     // Segundo título
     const secondTitle = 'Productos en la Entrada';
     const secondTitleWidth = doc.getStringUnitWidth(secondTitle) * doc.internal.getFontSize() / doc.internal.scaleFactor;
     const secondTitleX = (doc.internal.pageSize.width - secondTitleWidth) / 2;
     doc.text(secondTitle, secondTitleX, secondTitleY);
-  
+
     doc.autoTable({
       startY: secondTableStartY, // Usa la posición ajustada
       head: [
@@ -404,12 +427,12 @@ const EntryTable = () => {
         }).format(new Date(product.exp_date)) : '',
       ]),
     });
-  
+
     // Guarda el PDF o abre una nueva ventana para descargarlo
     doc.save(`Entrada_${entryData.entradaNo}.pdf`);
   };
-  
-  
+
+
   const downloadButtonColumn = (rowData) => (
     <Button
       icon="pi pi-download"

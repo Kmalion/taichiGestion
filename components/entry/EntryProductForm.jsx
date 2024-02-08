@@ -20,7 +20,7 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
     quantity: '',
     cost: '',
     serials: '',
-    lote: '',
+    lotes: '',
     ubicacion: '',
     exp_date: '', // Agrega el campo de fecha
   });
@@ -168,7 +168,7 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
             <InputText
               id="lote"
               name="lote"
-              value={form.lote.length > 0 ? form.lote[0].lotes : ''}
+              value={form.lotes.length > 0 ? form.lotes[0].lote : ''}
               onChange={handleLotesChange}
             />
           </div>

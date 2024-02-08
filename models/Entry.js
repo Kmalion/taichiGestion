@@ -63,9 +63,19 @@ try {
             },
           },
         ],
-        lote: {
-          type: String,
-        },
+        lotes: [
+          {
+            lote: {
+              type: String,
+            },
+            status: {
+              type: String,
+              enum: ['disponible', 'noDisponible'],
+              default: 'disponible',
+              required: true,
+            },
+          },
+        ],
         ubicacion: {
           type: String,
         },
