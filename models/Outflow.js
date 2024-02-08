@@ -20,6 +20,10 @@ try {
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
+    proveedor: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
+    },
     tipo: {
       type: String,
       required: true,

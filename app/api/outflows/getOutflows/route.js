@@ -14,10 +14,10 @@ export const GET = async (request) => {
         const formattedOutflows = outflows.map(outflow => ({
             salidaNo: outflow.salidaNo,
             fechaSalida: `${new Date(outflow.fechaSalida).getDate()}/${new Date(outflow.fechaSalida).getMonth() + 1}/${new Date(outflow.fechaSalida).getFullYear()}`,
-            destino: outflow.destino,
+            proveedor: outflow.proveedor,
             tipo: outflow.tipo,
             asigned_to: outflow.asigned_to,
-            totalCost: outflow.totalCost,
+            totalPrice: outflow.totalPrice,
             totalQuantity: outflow.totalQuantity,
             created_by: outflow.created_by,
             cliente: outflow.cliente,

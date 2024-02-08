@@ -45,6 +45,7 @@ const OutflowTable = () => {
     try {
       OutflowService.getOutflows().then((data) => {
         setOutflows(data);
+        console.log("Data entrada:", data)
       });
     } catch (error) {
       console.error("Error al obtener las salidas:", error);
@@ -233,7 +234,7 @@ const OutflowTable = () => {
                   {new Intl.NumberFormat("es-CO", {
                     style: "currency",
                     currency: "COP",
-                  }).format(data.totalPrice)}
+                  }).format(rowData.price)}
                 </span>
               )}
             />
@@ -465,12 +466,7 @@ const OutflowTable = () => {
         <Column expander style={{ width: "3rem", fontSize: "5px" }} />
         <Column field="salidaNo" header="Salida No." sortable />
         <Column field="fechaSalida" header="Fecha" sortable />
-        <Column
-          field="proveedor"
-          header="Proveedor"
-          sortable
-          body={(rowData) => renderProveedor(rowData.proveedor)}
-        />
+        <Column field="proveedor" header="Proveedor" sortable body={(rowData) => renderProveedor(rowData.proveedor)} />
         <Column field="tipo" header="Tipo" sortable />
         <Column
           field="totalPrice"

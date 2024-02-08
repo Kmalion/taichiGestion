@@ -18,7 +18,6 @@ import { useRouter } from 'next/navigation';
 import 'moment/locale/es';
 import '../../app/styles/styles.css'
 import * as productService from '../../service/productService';
-import { getProductByReference } from '@/service/productService'; // Reemplaza 'ruta/del/servicio' con la ruta real a tu servicio
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { ProgressBar } from 'primereact/progressbar';
@@ -50,7 +49,7 @@ const OutflowSummary = () => {
   });
 
   const [products, setProducts] = useState([]);
-  const [TotalPrice, setTotalPrice] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const { data: session } = useSession();
   const [userList, setUserList] = useState([]);
@@ -175,7 +174,7 @@ const OutflowSummary = () => {
       salidaNo: salidaNo, // Usa el número de salida calculado
       products: products.map(({ subtotal, ...product }) => product),
       subtotal: subtotal,
-      TotalPrice: TotalPrice,
+      totalPrice: totalPrice,
       totalQuantity: totalQuantity,
       created_by: created_by,
       cliente: outflowData.cliente, // Mantén el valor de cliente
@@ -248,7 +247,7 @@ const OutflowSummary = () => {
         tipo: updatedOutflowData.tipo,
         asigned_to: updatedOutflowData.asigned_to,
         cliente: updatedOutflowData.cliente,
-        TotalPrice: updatedOutflowData.TotalPrice,
+        totalPrice: updatedOutflowData.totalPrice,
         products: updatedOutflowData.products,
         comment: updatedOutflowData.comment
       });
@@ -279,11 +278,11 @@ const OutflowSummary = () => {
     const outflowInfoLines = [
       `Salida No: ${outflowData.salidaNo}`,
       `Fecha: ${outflowData.fechaSalida}`,
-      `Proveedor: ${outflowData.proveedor.value}`,
+      `Proveedor: ${outflowData.proveedor.value || 'N/A'}`,
       `Tipo: ${outflowData.tipo}`,
       `Asignado a: ${outflowData.asigned_to ? outflowData.asigned_to.label : 'N/A'}`,
       `Cliente: ${outflowData.cliente.value || 'N/A'}`,
-      `Total: ${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(outflowData.TotalPrice)}`
+      `Total: ${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(outflowData.totalPrice)}`
     ];
 
     const lineHeight = 10; // Espaciado entre líneas
@@ -413,7 +412,7 @@ const OutflowSummary = () => {
               {new Intl.NumberFormat('es-ES', {
                 style: 'currency',
                 currency: 'COP',
-              }).format(TotalPrice)}
+              }).format(totalPrice)}
             </strong>
           </span>
         } />

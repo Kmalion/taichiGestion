@@ -8,7 +8,7 @@ export const POST = async (request) => {
     await connectDB();
     
     // Extrae los datos de la solicitud
-    const { salidaNo, fechaSalida,  tipo, asigned_to, products, totalPrice, totalQuantity, created_by, cliente, document, comment } = await request.json();
+    const { salidaNo, fechaSalida, proveedor,  tipo, asigned_to, products, totalPrice, totalQuantity, created_by, cliente, document, comment } = await request.json();
 
     const modifiedProducts = products.map((product) => ({
       ...product,
@@ -22,6 +22,7 @@ export const POST = async (request) => {
       salidaNo,
       fechaSalida,
       tipo,
+      proveedor,
       asigned_to,
       totalPrice,
       totalQuantity,
