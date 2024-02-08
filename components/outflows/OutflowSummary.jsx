@@ -128,7 +128,7 @@ const OutflowSummary = () => {
         // Ejemplo: Si `updatedInfo.status` es "noDisponible", puedes realizar la actualización en el modelo Outflow
         if (updatedInfo.status === 'noDisponible') {
           // Encuentra la salida (Outflow) asociada al producto por su referencia
-          const outflow = await Outflow.findOne({ 'products.reference': reference });
+          const outflow = await outflow.findOne({ 'products.reference': reference });
   
           // Verifica si se encontró la salida y actualiza el campo `status` en la sección `serials`
           if (outflow) {

@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import { AutoComplete } from 'primereact/autocomplete';
 import { Card } from 'primereact/card';
-
+import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 
 import { getAllSerials, searchProducts, getAllLotes } from '@/service/outflowService';
@@ -14,6 +14,9 @@ import { InputNumber } from 'primereact/inputnumber';
 
 
 const OutflowProductForm = ({ onHide, onAddProduct }) => {
+
+  const [filteredReferenceSerials, setFilteredReferenceSerials] = useState([]);
+
   const [form, setForm] = useState({
     reference: '',
     quantity: '',
@@ -29,18 +32,11 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
   const [filteredLotes, setFilteredLotes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prevForm) => ({
-      ...prevForm,
-      [name]: value.label || value,
-    }));
-  };
 
   const handleSerialsChange = (e) => {
     const value = e.target.value;
 
-    // Añade lógica para establecer el estado en "disponible" automáticamente para serials
+    // Añade lógica para establecer el estado en "noDisponible" automáticamente para serials
     setForm((prevForm) => ({
       ...prevForm,
       serials: [
@@ -51,42 +47,40 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       ],
     }));
   };
-
-
   const searchReferences = async (event) => {
     try {
       setLoading(true);
-      const query = event.query || ''; // Obtener la consulta del evento
+      const query = event.query || '';
       const products = await searchProducts(query);
-      console.log("Products FRONT: ", products);
-
+      console.log("Productos:", products);
+  
       // Filtrar las referencias basadas en la consulta
-      const references = products.map((product) => ({ label: product.reference }));
+      const references = products.map((product) => ({ label: product.reference, value: product.reference }));
       setFilteredReferences(references);
+      console.log("Referencias:", references);
+  
+      let allSerials = [];
+  
+      // Recorrer cada producto y extraer los serials
+      products.forEach((product) => {
+        if (product.serials) {
+          allSerials = allSerials.concat(product.serials);
+        }
+      });
+  
+      console.log("Seriales relacionados: ", allSerials);
+  
+      // Actualizar el estado con los seriales relacionados
+      setFilteredReferenceSerials(allSerials);
+  
     } catch (error) {
       console.error('Error al buscar referencias:', error);
     } finally {
       setLoading(false);
     }
   };
+  
 
-  const searchSerials = async (event) => {
-    try {
-      setLoading(true);
-      const query = event.query || ''; // Obtener la consulta del evento
-      const serials = await getAllSerials();
-
-      // Filtrar los serials basados en la consulta
-      const filteredSerials = serials.filter((serial) =>
-        serial.toLowerCase().includes(query.toLowerCase())
-      );
-      setFilteredSerials(filteredSerials);
-    } catch (error) {
-      console.error('Error al buscar serials:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
   const searchLotes = async (event) => {
     try {
       setLoading(true);
@@ -112,6 +106,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       [name]: value,
     }));
   };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onAddProduct(form);
@@ -146,7 +141,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
               suggestions={filteredReferences}
               completeMethod={searchReferences}
               field="label"
-              onChange={handleInputChange}
+              onChange={(e) => setForm((prevForm) => ({ ...prevForm, reference: e.value }))}
               placeholder="Buscar referencia"
               minLength={1}
               loading={loading}
@@ -157,18 +152,18 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
           </div>
 
           <div className="p-field p-col-12 p-md-6 mt-2">
-  <label htmlFor="quantity">Cantidad:</label>
-  <InputNumber
-    id="quantity"
-    name="quantity"
-    value={form.quantity}
-    onValueChange={(e) => setForm({ ...form, quantity: e.value })}
-    mode="decimal"
-    placeholder="Ingrese la cantidad"
-    showButtons={false} 
-    required
-  />
-</div>
+            <label htmlFor="quantity">Cantidad:</label>
+            <InputNumber
+              id="quantity"
+              name="quantity"
+              value={form.quantity}
+              onValueChange={(e) => setForm({ ...form, quantity: e.value })}
+              mode="decimal"
+              placeholder="Ingrese la cantidad"
+              showButtons={false}
+              required
+            />
+          </div>
 
           <div className="p-field p-col-12 p-md-6 mt-2">
             <label htmlFor="price">Precio de venta:</label>
@@ -178,7 +173,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
               value={form.price}
               onValueChange={(e) => setForm({ ...form, price: e.value })}
               format={true}
-              showButtons={false} 
+              showButtons={false}
               placeholder="Ingrese el precio"
               mode="currency"
               currency="COP"
@@ -187,22 +182,21 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
 
           <div className="p-field p-col-12 p-md-6 mt-2">
             <label htmlFor="serials">Serial:</label>
-            <AutoComplete
+            <Dropdown
               id="serials"
               name="serials"
-              value={form.serials.length > 0 ? form.serials[0].serial : ''}
-              suggestions={filteredSerials}
-              completeMethod={searchSerials}
+              value={form.serials.length > 0 ? form.serials[0].serial : null}
+              options={filteredReferenceSerials}
               onChange={handleSerialsChange}
-              placeholder="Buscar serial"
-              minLength={1}
-              loading={loading}
-              className="p-autocomplete-item"
-              dropdownClassName="p-autocomplete-panel"
+              placeholder="Seleccione un serial"
+              filter
+              showClear
+              optionLabel="label"
+              disabled={!filteredReferenceSerials || filteredReferenceSerials.length === 0}
               required
             />
-
           </div>
+
 
           <div className="p-field p-col-12 mt-2">
             <label htmlFor="lote">Lote:</label>
