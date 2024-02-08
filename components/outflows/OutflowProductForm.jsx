@@ -53,33 +53,33 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       const query = event.query || '';
       const products = await searchProducts(query);
       console.log("Productos:", products);
-  
+
       // Filtrar las referencias basadas en la consulta
       const references = products.map((product) => ({ label: product.reference, value: product.reference }));
       setFilteredReferences(references);
       console.log("Referencias:", references);
-  
+
       let allSerials = [];
-  
+
       // Recorrer cada producto y extraer los serials
       products.forEach((product) => {
         if (product.serials) {
           allSerials = allSerials.concat(product.serials);
         }
       });
-  
+
       console.log("Seriales relacionados: ", allSerials);
-  
+
       // Actualizar el estado con los seriales relacionados
       setFilteredReferenceSerials(allSerials);
-  
+
     } catch (error) {
       console.error('Error al buscar referencias:', error);
     } finally {
       setLoading(false);
     }
   };
-  
+
 
   const searchLotes = async (event) => {
     try {
@@ -189,7 +189,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
               options={filteredReferenceSerials}
               onChange={handleSerialsChange}
               placeholder="Seleccione un serial"
-              filter
+              filter={false}
               showClear
               optionLabel="label"
               disabled={!filteredReferenceSerials || filteredReferenceSerials.length === 0}

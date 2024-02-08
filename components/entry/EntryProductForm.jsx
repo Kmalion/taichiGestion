@@ -43,19 +43,31 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
     setForm((prevForm) => ({
       ...prevForm,
       serials: [
-        {
+        { label: value,
           serial: value,
           status: 'disponible',
         },
       ],
     }));
   };
-
-
+  const handleLotesChange = (e) => {
+    const value = e.target.value;
+  
+    // Añade lógica para establecer el estado en "disponible" automáticamente para el lote
+    setForm((prevForm) => ({
+      ...prevForm,
+      lotes: [
+        { label: value,
+          lote: value,
+          status: 'disponible',
+        },
+      ],
+    }));
+  };
   const searchReferences = async (event) => {
     try {
       setLoading(true);
-      const query = event.query || ''; 
+      const query = event.query || '';
       console.log("Query: ", query)// Obtener la consulta del evento
       const products = await searchProducts(query);
       console.log("Products FRONT: ", products);
@@ -110,17 +122,17 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
           </div>
 
           <div className="p-field p-col-12 p-md-6 mt-2">
-  <label htmlFor="quantity">Cantidad:</label>
-  <InputNumber
-    id="quantity"
-    name="quantity"
-    value={form.quantity}
-    onValueChange={(e) => setForm({ ...form, quantity: e.value })}
-    placeholder="Ingrese la cantidad"
-    showButtons={false} 
-    required
-  />
-</div>
+            <label htmlFor="quantity">Cantidad:</label>
+            <InputNumber
+              id="quantity"
+              name="quantity"
+              value={form.quantity}
+              onValueChange={(e) => setForm({ ...form, quantity: e.value })}
+              placeholder="Ingrese la cantidad"
+              showButtons={false}
+              required
+            />
+          </div>
 
           <div className="p-field p-col-12 p-md-6 mt-2">
             <label htmlFor="cost">Costo:</label>
@@ -156,8 +168,8 @@ const EntryProductForm = ({ onHide, onAddProduct }) => {
             <InputText
               id="lote"
               name="lote"
-              value={form.lote}
-              onChange={handleInputChange}
+              value={form.lote.length > 0 ? form.lote[0].lotes : ''}
+              onChange={handleLotesChange}
             />
           </div>
 
