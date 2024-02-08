@@ -198,8 +198,8 @@ const EntryForm = ({ entryData, setEntryData, handleSaveEntry }) => {
       <h3 className="text-center mt-1">Datos de entrada</h3>
       <Card>
         <form onSubmit={(e) => e.preventDefault()}  >
-          <div className='grid flex flex justify-content-start flex-wrap'>
-            <div className="col-12 md:col-6 lg:col-2  flex align-items-center justify-content-center mt-2 mx-auto">
+        <div className='grid flex  justify-content-start flex-wrap'>
+        <div className="col-12 md:col-6 lg:col-2  flex align-items-center justify-content-center mt-2 mx-auto">
               <span className="p-float-label">
                 <Toast ref={toast} />
                 <InputText

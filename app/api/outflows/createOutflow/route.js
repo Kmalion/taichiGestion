@@ -8,7 +8,7 @@ export const POST = async (request) => {
     await connectDB();
     
     // Extrae los datos de la solicitud
-    const { salidaNo, fechaSalida, destino, tipo, asigned_to, products, totalCost, totalQuantity, created_by, cliente, document, comment } = await request.json();
+    const { salidaNo, fechaSalida,  tipo, asigned_to, products, totalPrice, totalQuantity, created_by, cliente, document, comment } = await request.json();
 
     const modifiedProducts = products.map((product) => ({
       ...product,
@@ -21,10 +21,9 @@ export const POST = async (request) => {
     await outflowServiceManager.addOutflow({
       salidaNo,
       fechaSalida,
-      destino,
       tipo,
       asigned_to,
-      totalCost,
+      totalPrice,
       totalQuantity,
       created_by,
       cliente,

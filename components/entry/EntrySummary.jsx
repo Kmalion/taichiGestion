@@ -456,70 +456,71 @@ const EntrySummary = () => {
           handleSaveEntry={handleSaveEntry}  // Pasa la función como prop
         />
    
-        {products.length > 0 && (
-          <div className='p-1'>
-            <h4>Productos Agregados:</h4>
-            <DataTable value={products} footerColumnGroup={footerGroup}>
-              <Column field="reference" header="Referencia" />
-              <Column
-                header="Serial"
-                body={(rowData) => (
-                  <span>
-                    {rowData.serials.map((serial) => (
-                      <div key={serial.serial}>
-                        {`Serial: ${serial.serial}, Status: ${serial.status}`}
-                      </div>
-                    ))}
-                  </span>
-                )}
-              />
-              <Column field="ubicacion" header="Ubicación" />
-              <Column field="lote" header="Lote" />
-              <Column
-                field="cost"
-                header="Costo"
-                body={(rowData) => (
-                  <span>
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: 'USD',
-                    }).format(rowData.cost)}
-                  </span>
-                )}
-              />
-              <Column field="quantity" header="Cantidad" />
-              <Column
-                field="subtotal" // Nueva columna para mostrar el subtotal
-                header="Subtotal"
-                body={(rowData) => (
-                  <span>
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: 'USD',
-                    }).format(rowData.subtotal)}
-                  </span>
-                )}
-              />
-
-              <Column
-                body={(rowData, column) => (
-                  <Button
-                    icon="pi pi-trash"
-                    onClick={() => handleDeleteProduct(products.indexOf(rowData))}
-                  />
-                )}
-              />
-            </DataTable>
-            <Dialog
-              visible={loading}
-              modal
-              onHide={() => setLoading(false)}
-              header="Procesando solicitud"
-            >
-              <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
-            </Dialog>
-          </div>
+   {products.length > 0 && (
+   <div className='p-1 flex flex-column'>
+    <h4>Productos Agregados:</h4>
+    <Card>
+    <DataTable value={products} responsive footerColumnGroup={footerGroup}>
+      <Column field="reference" header="Referencia" />
+      <Column
+        header="Serial"
+        body={(rowData) => (
+          <span>
+            {rowData.serials.map((serial) => (
+              <div key={serial.serial}>
+                {`Serial: ${serial.serial}, Status: ${serial.status}`}
+              </div>
+            ))}
+          </span>
         )}
+      />
+      <Column field="ubicacion" header="Ubicación" />
+      <Column field="lote" header="Lote" />
+      <Column
+        field="cost"
+        header="Costo"
+        body={(rowData) => (
+          <span>
+            {new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(rowData.cost)}
+          </span>
+        )}
+      />
+      <Column field="quantity" header="Cantidad" />
+      <Column
+        field="subtotal" // Nueva columna para mostrar el subtotal
+        header="Subtotal"
+        body={(rowData) => (
+          <span>
+            {new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(rowData.subtotal)}
+          </span>
+        )}
+      />
+      <Column
+        body={(rowData, column) => (
+          <Button
+            icon="pi pi-trash"
+            onClick={() => handleDeleteProduct(products.indexOf(rowData))}
+          />
+        )}
+      />
+    </DataTable>
+    </Card>
+    <Dialog
+      visible={loading}
+      modal
+      onHide={() => setLoading(false)}
+      header="Procesando solicitud"
+    >
+      <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
+    </Dialog>
+  </div>
+)}
       </Card>
 
       <Dialog visible={showForm} onHide={handleCloseForm}>

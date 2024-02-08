@@ -42,9 +42,9 @@ try {
           type: Number,
           required: true,
         },
-        cost: {
+        price: {
           type: Number,
-          required: true,
+          default: 0,
         },
         serials: [
           {

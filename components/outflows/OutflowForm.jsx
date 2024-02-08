@@ -199,8 +199,8 @@ const OutflowForm = ({ outflowData, setOutflowData, handleSaveOutflow }) => {
       <h3 className="text-center mt-1">Datos de salida</h3>
       <Card>
           <form onSubmit={(e) => e.preventDefault()}  >
-            <div className='grid flex flex justify-content-start flex-wrap'>
-            <div className="col-12 md:col-6 lg:col-2  flex align-items-center justify-content-center mt-2 mx-auto">
+            <div className='grid flex  justify-content-start flex-wrap'>
+            <div className="col-12 md:col-6 lg:col-2  flex align-items-center justify-content-center mt-2 gap-1 ">
               <span className="p-float-label">
                 <Toast ref={toast} />
                 <InputText
@@ -257,7 +257,7 @@ const OutflowForm = ({ outflowData, setOutflowData, handleSaveOutflow }) => {
               {getFormErrorMessage('proveedor')}
             </div>
 
-            <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mt-2 mx-auto">
+            <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mt-2 ">
               <span className="p-float-label">
                 <AutoComplete
                   id="cliente"
@@ -280,7 +280,7 @@ const OutflowForm = ({ outflowData, setOutflowData, handleSaveOutflow }) => {
               {getFormErrorMessage('cliente')}
             </div>
 
-            <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mt-2 mx-auto">
+            <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mt-2 ">
               <span className="p-float-label">
                 <Dropdown
                   id="asigned_to"
@@ -320,7 +320,7 @@ const OutflowForm = ({ outflowData, setOutflowData, handleSaveOutflow }) => {
               </span>
               {getFormErrorMessage('tipo')}
             </div>
-            <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mx-auto">
+            <div className="col-12 md:col-6 lg:col-2 flex align-items-center justify-content-center mt-2 ">
               <span className="p-float-label">
                 <FileUpload
                   mode="basic"

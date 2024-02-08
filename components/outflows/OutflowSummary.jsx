@@ -81,7 +81,7 @@ const OutflowSummary = () => {
 
       console.log("Cantidad actualizada: " , updatedQuantity)
   
-      await productService.updateProductQuantity(reference, updatedQuantity);
+      await productService.updateProductQuantityOutflow(reference, updatedQuantity);
   
       // Actualiza la cantidad en el estado solo para el producto específico
       setProducts((prevProducts) => {
@@ -189,9 +189,7 @@ const OutflowSummary = () => {
       // Primer bloque de código
       for (const product of products) {
         await updateProductInfo(product.reference, {
-          cost: product.cost,
-          ubicacion: product.ubicacion,
-          exp_date: product.exp_date,
+          price: product.price,
           serials: product.serials,
           lote: product.lote,
         });
@@ -264,6 +262,7 @@ const OutflowSummary = () => {
         summary: 'Error al guardar la salida',
         detail: 'Por favor, inténtalo de nuevo.',
       });
+      return;
     }
   };
 
@@ -296,7 +295,7 @@ const OutflowSummary = () => {
 
 
     // Añadir la tabla de productos al PDF
-    const productHeaders = ['Referencia', 'Serial', 'Ubicación', 'Lote', 'Precio', 'Cantidad', 'Subtotal'];
+    const productHeaders = ['Referencia', 'Serial', 'Lote', 'Precio', 'Cantidad', 'Subtotal'];
     const productData = outflowData.products.map(product => {
       const formattedSerials = formatSerials(product.serials);
       const formattedLote = Array.isArray(product.lote) ? product.lote.join(', ') : product.lote;
@@ -305,7 +304,6 @@ const OutflowSummary = () => {
       return [
         product.reference,
         formattedSerials, // Usa la variable, no la función
-        product.ubicacion,
         formattedLote,
         new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(product.price),
         product.quantity,
@@ -412,9 +410,9 @@ const OutflowSummary = () => {
         <Column colSpan={3} footer={
           <span> Total :
             <strong>
-              {new Intl.NumberFormat('en-US', {
+              {new Intl.NumberFormat('es-ES', {
                 style: 'currency',
-                currency: 'USD',
+                currency: 'COP',
               }).format(TotalPrice)}
             </strong>
           </span>

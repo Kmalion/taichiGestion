@@ -24,7 +24,7 @@ export const GET = async (request, { params }) => {
     if (!existingProduct) {
       return new NextResponse('Producto no encontrado', { status: 404 });
     }
-
+console.log("Producto existente", existingProduct)
     // Responde con la cantidad actual y los seriales del producto
     return new NextResponse(
       JSON.stringify({
