@@ -78,10 +78,10 @@ const OutflowSummary = () => {
       const enteredQuantity = Number(userEnteredQuantity) || 0;
       const updatedQuantity = currentQuantity - enteredQuantity;
 
-      console.log("Cantidad actualizada: " , updatedQuantity)
-  
+      console.log("Cantidad actualizada: ", updatedQuantity)
+
       await productService.updateProductQuantityOutflow(reference, updatedQuantity);
-  
+
       // Actualiza la cantidad en el estado solo para el producto específico
       setProducts((prevProducts) => {
         return prevProducts.map((product) => {
@@ -91,7 +91,7 @@ const OutflowSummary = () => {
           return product;
         });
       });
-  
+
       // Muestra un Toast de éxito usando toast.current.show
       toast.current.show({
         severity: 'success',
@@ -100,7 +100,7 @@ const OutflowSummary = () => {
       });
     } catch (error) {
       console.error('Error al obtener o actualizar la cantidad del producto:', error);
-  
+
       // Muestra un Toast de error usando toast.current.show
       toast.current.show({
         severity: 'error',
@@ -109,37 +109,37 @@ const OutflowSummary = () => {
           ? error.response.data  // Muestra el mensaje personalizado del backend
           : `Error: ${error.message}`,  // Muestra el mensaje genérico si no hay mensaje personalizado
       });
-      return; 
+      return;
     }
   };
-  
+
 
   const updateProductInfo = async (reference, updatedInfo) => {
     try {
       // Realiza una solicitud PATCH a la API para actualizar la información del producto
       const response = await axios.patch(`/api/products/updateProductOutflow/${reference}`, updatedInfo);
-  
+
       // Verifica si la solicitud fue exitosa y maneja según sea necesario
       if (response.status === 200) {
         // Si la actualización fue exitosa, también puedes realizar cambios en el modelo Outflow
         // Aquí, asumiré que `updatedInfo` tiene una propiedad `status` que contiene el nuevo valor
         // Puedes ajustar esto según la estructura real de `updatedInfo` y cómo planeas usarlo
-  
+
         // Ejemplo: Si `updatedInfo.status` es "noDisponible", puedes realizar la actualización en el modelo Outflow
         if (updatedInfo.status === 'noDisponible') {
           // Encuentra la salida (Outflow) asociada al producto por su referencia
           const outflow = await outflow.findOne({ 'products.reference': reference });
-  
+
           // Verifica si se encontró la salida y actualiza el campo `status` en la sección `serials`
           if (outflow) {
             const productIndex = outflow.products.findIndex(product => product.reference === reference);
-            
+
             if (productIndex !== -1) {
               // Actualiza el campo `status` en la sección `serials` del producto
               outflow.products[productIndex].serials.forEach(serial => {
                 serial.status = 'noDisponible';
               });
-  
+
               // Guarda la salida actualizada en la base de datos
               await outflow.save();
             }
@@ -150,7 +150,7 @@ const OutflowSummary = () => {
       }
     } catch (error) {
       console.error(`Error al actualizar el producto (Reference: ${reference}):`, error);
-      return; 
+      return;
     }
   };
 
@@ -180,27 +180,28 @@ const OutflowSummary = () => {
       cliente: outflowData.cliente, // Mantén el valor de cliente
       document: outflowData.document, // Mantén el valor de document  
       comment: outflowData.comment,
-      serials: outflowData.serials
+      serials: outflowData.serials,
+      lotes: outflowData.lotes
     };
     // Verificar duplicados en serials antes de enviar la salida
-   
+
     try {
       // Primer bloque de código
       for (const product of products) {
         await updateProductInfo(product.reference, {
           price: product.price,
           serials: product.serials,
-          lote: product.lote,
+          lotes: product.lotes,
         });
       }
-    
+
       // Segundo bloque de código
       for (const product of products) {
         await handleUpdateProductQuantity(product.reference, product.quantity);
       }
-    
+
       // Resto del código aquí...
-    
+
     } catch (error) {
       // Maneja errores si alguna de las operaciones anteriores falla
       console.error('Error al actualizar productos:', error);
@@ -212,7 +213,7 @@ const OutflowSummary = () => {
       setLoading(false); // Asegúrate de ajustar el estado según tus necesidades
       return; // Detiene la ejecución del resto del código
     }
-    
+
     try {
       const salidaNo = await generateOutflowNo();
 
@@ -294,16 +295,16 @@ const OutflowSummary = () => {
 
 
     // Añadir la tabla de productos al PDF
-    const productHeaders = ['Referencia', 'Serial', 'Lote', 'Precio', 'Cantidad', 'Subtotal'];
+    const productHeaders = ['Referencia', 'Serial', 'Lotes', 'Precio', 'Cantidad', 'Subtotal'];
     const productData = outflowData.products.map(product => {
       const formattedSerials = formatSerials(product.serials);
-      const formattedLote = Array.isArray(product.lote) ? product.lote.join(', ') : product.lote;
+      const formattedLotes = formatLotes(product.lotes);
       const subtotal = calculateSubtotal(product);
 
       return [
         product.reference,
-        formattedSerials, // Usa la variable, no la función
-        formattedLote,
+        formattedSerials,
+        formattedLotes,
         new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(product.price),
         product.quantity,
         new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'COP' }).format(subtotal),
@@ -325,19 +326,45 @@ const OutflowSummary = () => {
   };
 
 
-  const formatSerials = (serials) => {
-    if (!serials || !Array.isArray(serials)) {
-      return ''; // O cualquier valor predeterminado que desees mostrar
+  const formatLotes = (lotes) => {
+    if (!lotes || !Array.isArray(lotes)) {
+      return '';
     }
 
-    return serials.map(serialObj => {
-      const { serial, status } = serialObj;
-      return `${serial} (${status})`;
+    return lotes.map(loteObj => {
+      if (typeof loteObj === 'object' && loteObj.hasOwnProperty('label') && loteObj.hasOwnProperty('status')) {
+        return `${loteObj.label} (${loteObj.status})`;
+      } else if (typeof loteObj === 'object' && loteObj.hasOwnProperty('value')) {
+        // Trata los objetos que tienen 'value' (como el caso de reference) para evitar el error
+        return loteObj.value;
+      } else if (typeof loteObj === 'object') {
+        // Si es un objeto pero no tiene label y status ni value, conviértelo a cadena
+        return JSON.stringify(loteObj);
+      } else {
+        return String(loteObj); // Tratar como cadena si no es un objeto
+      }
     }).join(', ');
   };
 
-
-
+  const formatSerials = (serials) => {
+    if (!serials || !Array.isArray(serials)) {
+      return '';
+    }
+console.log("Seriales en el formato", serials)
+    return serials.map(serialObj => {
+      if (typeof serialObj === 'object' && serialObj.hasOwnProperty('label') && serialObj.hasOwnProperty('status')) {
+        return `${serialObj.label} (${serialObj.status})`;
+      } else if (typeof serialObj === 'object' && serialObj.hasOwnProperty('value')) {
+        // Trata los objetos que tienen 'value' (como el caso de reference) para evitar el error
+        return serialObj.value;
+      } else if (typeof serialObj === 'object') {
+        // Si es un objeto pero no tiene label y status ni value, conviértelo a cadena
+        return JSON.stringify(serialObj);
+      } else {
+        return String(serialObj); // Tratar como cadena si no es un objeto
+      }
+    }).join(', ');
+  };
 
   const handleDeleteProduct = (index) => {
     setProducts((prevProducts) => {
@@ -389,6 +416,7 @@ const OutflowSummary = () => {
 
 
   const handleAddProduct = (product) => {
+    console.log("Productos en Summary", products)
     const price = parseFloat(product.price) || 0;
     const subtotal = calculateSubtotal(product);
     setProducts((prevProducts) => {
@@ -428,37 +456,53 @@ const OutflowSummary = () => {
   return (
     <div className='flex align-items-center justify-content-center'>
       <Card >
-      <h3 className="text-center mt-1">Agrega productos</h3>
+        <h3 className="text-center mt-1">Agrega productos</h3>
 
-      <div className='flex align-items-center justify-content-center '>
-      <i className="pi pi-arrow-right font-size: 24px"></i>
-      <Button  className='flex m-3 p-3 text-center mt-1 ' size="small" label='Agregar producto' severity="help" onClick={handleOpenForm}>
-      </Button>
-      </div>
+        <div className='flex align-items-center justify-content-center '>
+          <i className="pi pi-arrow-right font-size: 24px"></i>
+          <Button className='flex m-3 p-3 text-center mt-1 ' size="small" label='Agregar producto' severity="help" onClick={handleOpenForm}>
+          </Button>
+        </div>
         <OutflowForm
           outflowData={outflowData}
           setOutflowData={setOutflowData}
           handleSaveOutflow={handleSaveOutflow}  // Pasa la función como prop
         />
-   
+
         {products.length > 0 && (
           <div className='p-1'>
             <h4>Productos Agregados:</h4>
             <DataTable value={products} footerColumnGroup={footerGroup}>
               <Column field="reference" header="Referencia" />
               <Column
-                header="Serial"
+                field="serials"
+                header="Serials"
                 body={(rowData) => (
-                  <span>
-                    {rowData.serials.map((serial) => (
-                      <div key={serial.serial}>
-                        {`Serial: ${serial.serial}, Status: ${serial.status}`}
-                      </div>
+                  <ul>
+                    {rowData.serials.map((serialData, index) => (
+                      <li key={index}>
+                        <strong>Serial:</strong> {serialData.serial}, <strong>Status:</strong> {serialData.status}
+                      </li>
                     ))}
-                  </span>
+                  </ul>
                 )}
               />
-              <Column field="lote" header="Lote" />
+
+
+              <Column
+                field="lotes"
+                header="Lotes"
+                body={(rowData) => (
+                  <ul>
+                    {rowData.lotes.map((loteData, index) => (
+                      <li key={index}>
+                        <strong>Lote:</strong> {loteData.lote}, <strong>Status:</strong> {loteData.status}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              />
+
               <Column
                 field="price"
                 header="Precio"

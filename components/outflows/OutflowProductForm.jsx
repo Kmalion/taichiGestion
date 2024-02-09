@@ -15,21 +15,19 @@ import { InputNumber } from 'primereact/inputnumber';
 
 const OutflowProductForm = ({ onHide, onAddProduct }) => {
 
-  const [filteredReferenceSerials, setFilteredReferenceSerials] = useState([]);
 
   const [form, setForm] = useState({
     reference: '',
     quantity: '',
     price: '',
     serials: '',
-    lote: '',
+    lotes: '',
     ubicacion: '',
     exp_date: '', // Agrega el campo de fecha
   });
-
+  const [filteredReferenceSerials, setFilteredReferenceSerials] = useState([]);
+  const [filteredReferenceLotes, setFilteredReferenceLotes] = useState([]);
   const [filteredReferences, setFilteredReferences] = useState([]);
-  const [filteredSerials, setFilteredSerials] = useState([]);
-  const [filteredLotes, setFilteredLotes] = useState([]);
   const [loading, setLoading] = useState(false);
 
 
@@ -39,14 +37,20 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
     // Añade lógica para establecer el estado en "noDisponible" automáticamente para serials
     setForm((prevForm) => ({
       ...prevForm,
-      serials: [
-        {
-          serial: value,
-          status: 'noDisponible',
-        },
-      ],
+      serials: [{ label: value, value, status: 'noDisponible' }],
     }));
   };
+
+  const handleLoteChange = (e) => {
+    const value = e.target.value;
+
+
+    setForm((prevForm) => ({
+      ...prevForm,
+      lotes: [{ label: value, value, status: 'noDisponible' }],
+    }));
+  };
+
   const searchReferences = async (event) => {
     try {
       setLoading(true);
@@ -60,18 +64,23 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       console.log("Referencias:", references);
 
       let allSerials = [];
-
+      let allLotes = [];
       // Recorrer cada producto y extraer los serials
       products.forEach((product) => {
         if (product.serials) {
           allSerials = allSerials.concat(product.serials);
         }
+        if (product.lotes) {
+          allLotes = allLotes.concat(product.lotes);
+        }
       });
 
       console.log("Seriales relacionados: ", allSerials);
+      console.log("Lotes relacionados: ", allLotes);
 
       // Actualizar el estado con los seriales relacionados
       setFilteredReferenceSerials(allSerials);
+      setFilteredReferenceLotes(allLotes)
 
     } catch (error) {
       console.error('Error al buscar referencias:', error);
@@ -81,34 +90,13 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
   };
 
 
-  const searchLotes = async (event) => {
-    try {
-      setLoading(true);
-      const query = event.query || ''; // Obtener la consulta del evento
-      const lotes = await getAllLotes();
-      console.log("Lotes FRONT: ", lotes);
-
-      // Filtrar los lotes basados en la consulta
-      setFilteredLotes(lotes);
-    } catch (error) {
-      console.error('Error al buscar lotes:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
-  // Función para manejar el cambio en el input de lotes
-  const handleLoteChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prevForm) => ({
-      ...prevForm,
-      [name]: value,
-    }));
-  };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('Valores del formulario:', form);
     onAddProduct(form);
     onHide();
   };
@@ -180,44 +168,46 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
             />
           </div>
 
-          <div className="p-field p-col-12 p-md-6 mt-2">
-            <label htmlFor="serials">Serial:</label>
-            <Dropdown
-              id="serials"
-              name="serials"
-              value={form.serials.length > 0 ? form.serials[0].serial : null}
-              options={filteredReferenceSerials}
-              onChange={handleSerialsChange}
-              placeholder="Seleccione un serial"
-              filter={false}
-              showClear
-              optionLabel="label"
-              disabled={!filteredReferenceSerials || filteredReferenceSerials.length === 0}
-              required
-            />
-          </div>
+      <div className="p-field p-col-12 p-md-6 mt-2">
+      <label htmlFor="serials">Serial:</label>
+      <Dropdown
+        id="serials"
+        name="serials"
+        value={form.serials.length > 0 ? form.serials[0].label : null}
+        options={filteredReferenceSerials.map((serialObj) => ({
+          label: serialObj.serial,
+          value: serialObj.serial,
+        }))}
+        onChange={handleSerialsChange}
+        placeholder="Seleccione un serial"
+        filter
+        showClear
+        optionLabel="label"
+        disabled={!filteredReferenceSerials || filteredReferenceSerials.length === 0}
+        required
+      />
+    </div>
 
 
-          <div className="p-field p-col-12 mt-2">
-            <label htmlFor="lote">Lote:</label>
-            <AutoComplete
-              id="lote"
-              name="lote"
-              value={form.lote}
-              suggestions={filteredLotes}
-              completeMethod={searchLotes}
-              onChange={handleLoteChange}
-              placeholder="Buscar lote"
-              minLength={1}
-              loading={loading}
-              className="p-autocomplete-item"
-              dropdownClassName="p-autocomplete-panel"
-            />
-          </div>
-
-
-
-
+    <div className="p-field p-col-12 p-md-6 mt-2">
+      <label htmlFor="lotes">Lote:</label>
+      <Dropdown
+        id="lotes"
+        name="lotes"
+        value={form.lotes.length > 0 ? form.lotes[0].label : null}
+        options={filteredReferenceLotes.map((loteObj) => ({
+          label: loteObj.lote,
+          value: loteObj.lote,
+        }))}
+        onChange={handleLoteChange}
+        placeholder="Seleccione un lote"
+        filter
+        showClear
+        optionLabel="label"
+        disabled={!filteredReferenceLotes || filteredReferenceLotes.length === 0}
+        required
+      />
+    </div>
         </div>
         <div className="p-field p-col-12 mt-3">
           <Button label="Agregar" type="submit" />
