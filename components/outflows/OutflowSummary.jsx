@@ -326,45 +326,22 @@ const OutflowSummary = () => {
   };
 
 
+  const formatSerials = (serials) => {
+    if (!serials || !Array.isArray(serials)) {
+      return '';
+    }
+
+    return serials.map(serialObj => `${serialObj.label} (${serialObj.status})`).join(', ');
+  };
+
   const formatLotes = (lotes) => {
     if (!lotes || !Array.isArray(lotes)) {
       return '';
     }
 
-    return lotes.map(loteObj => {
-      if (typeof loteObj === 'object' && loteObj.hasOwnProperty('label') && loteObj.hasOwnProperty('status')) {
-        return `${loteObj.label} (${loteObj.status})`;
-      } else if (typeof loteObj === 'object' && loteObj.hasOwnProperty('value')) {
-        // Trata los objetos que tienen 'value' (como el caso de reference) para evitar el error
-        return loteObj.value;
-      } else if (typeof loteObj === 'object') {
-        // Si es un objeto pero no tiene label y status ni value, conviértelo a cadena
-        return JSON.stringify(loteObj);
-      } else {
-        return String(loteObj); // Tratar como cadena si no es un objeto
-      }
-    }).join(', ');
+    return lotes.map(loteObj => `${loteObj.label} (${loteObj.status})`).join(', ');
   };
 
-  const formatSerials = (serials) => {
-    if (!serials || !Array.isArray(serials)) {
-      return '';
-    }
-console.log("Seriales en el formato", serials)
-    return serials.map(serialObj => {
-      if (typeof serialObj === 'object' && serialObj.hasOwnProperty('label') && serialObj.hasOwnProperty('status')) {
-        return `${serialObj.label} (${serialObj.status})`;
-      } else if (typeof serialObj === 'object' && serialObj.hasOwnProperty('value')) {
-        // Trata los objetos que tienen 'value' (como el caso de reference) para evitar el error
-        return serialObj.value;
-      } else if (typeof serialObj === 'object') {
-        // Si es un objeto pero no tiene label y status ni value, conviértelo a cadena
-        return JSON.stringify(serialObj);
-      } else {
-        return String(serialObj); // Tratar como cadena si no es un objeto
-      }
-    }).join(', ');
-  };
 
   const handleDeleteProduct = (index) => {
     setProducts((prevProducts) => {
@@ -416,14 +393,17 @@ console.log("Seriales en el formato", serials)
 
 
   const handleAddProduct = (product) => {
-    console.log("Productos en Summary", products)
     const price = parseFloat(product.price) || 0;
     const subtotal = calculateSubtotal(product);
+
+    // Actualiza el estado de los productos
     setProducts((prevProducts) => {
       const newProducts = [...prevProducts, { ...product, price, subtotal }];
+
       return newProducts;
     });
   };
+
 
 
 
@@ -469,87 +449,69 @@ console.log("Seriales en el formato", serials)
           handleSaveOutflow={handleSaveOutflow}  // Pasa la función como prop
         />
 
-        {products.length > 0 && (
-          <div className='p-1'>
-            <h4>Productos Agregados:</h4>
-            <DataTable value={products} footerColumnGroup={footerGroup}>
-              <Column field="reference" header="Referencia" />
-              <Column
-                field="serials"
-                header="Serials"
-                body={(rowData) => (
-                  <ul>
-                    {rowData.serials.map((serialData, index) => (
-                      <li key={index}>
-                        <strong>Serial:</strong> {serialData.serial}, <strong>Status:</strong> {serialData.status}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              />
-
-
-              <Column
-                field="lotes"
-                header="Lotes"
-                body={(rowData) => (
-                  <ul>
-                    {rowData.lotes.map((loteData, index) => (
-                      <li key={index}>
-                        <strong>Lote:</strong> {loteData.lote}, <strong>Status:</strong> {loteData.status}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              />
-
-              <Column
-                field="price"
-                header="Precio"
-                body={(rowData) => (
-                  <span>
-                    {new Intl.NumberFormat('es-ES', {
-                      style: 'currency',
-                      currency: 'COP',
-                    }).format(rowData.price)}
-                  </span>
-                )}
-              />
-              <Column field="quantity" header="Cantidad" />
-              <Column
-                field="subtotal" // Nueva columna para mostrar el subtotal
-                header="Subtotal"
-                body={(rowData) => (
-                  <span>
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: 'USD',
-                    }).format(rowData.subtotal)}
-                  </span>
-                )}
-              />
-
-              <Column
-                body={(rowData, column) => (
-                  <Button
-                    icon="pi pi-trash"
-                    onClick={() => handleDeleteProduct(products.indexOf(rowData))}
-                  />
-                )}
-              />
-            </DataTable>
-            <Dialog
-              visible={loading}
-              modal
-              onHide={() => setLoading(false)}
-              header="Procesando solicitud"
-            >
-              <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
-            </Dialog>
-          </div>
-        )}
+        <DataTable value={products}  responsive="true" footerColumnGroup={footerGroup}>
+          <Column field="reference.label" header="Referencia" />
+          <Column
+            field="serials"
+            header="Serials"
+            body={(rowData) => (
+              <ul>
+                <li>
+                  <strong>Serials:</strong> {formatSerials(rowData.serials)}
+                </li>
+              </ul>
+            )}
+          />
+          <Column field="ubicacion" header="Ubicación" />
+          <Column
+            field="lotes"
+            header="Lotes"
+            body={(rowData) => (
+              <ul>
+                <li>
+                  <strong>Lotes:</strong> {formatLotes(rowData.lotes)}
+                </li>
+              </ul>
+            )}
+          />
+          <Column
+            field="price"
+            header="Precio"
+            body={(rowData) => (
+              <span>
+                {new Intl.NumberFormat('es-ES', {
+                  style: 'currency',
+                  currency: 'COP',
+                }).format(rowData.price)}
+              </span>
+            )}
+          />
+          <Column field="quantity" header="Cantidad" />
+          <Column
+            field="subtotal"
+            header="Subtotal"
+            body={(rowData) => (
+              <span>
+                {new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                }).format(rowData.subtotal)}
+              </span>
+            )}
+          />
+        </DataTable>
+       
       </Card>
 
+      <Column field="lastYearSale" body={footerGroup} />
+      <Dialog
+        visible={loading}
+        modal
+        onHide={() => setLoading(false)}
+        header="Procesando solicitud"
+      >
+        <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
+      </Dialog>
       <Dialog visible={showForm} onHide={handleCloseForm}>
         <OutflowProductForm
           onClose={handleCloseForm}

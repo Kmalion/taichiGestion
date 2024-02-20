@@ -36,7 +36,7 @@ export const generateOutflowNo = async () => {
     getOutflows: async () => {
       try {
         const response = await axios.get('/api/outflows/getOutflows');
-        console.log("Respuesta del servicio: ", response)
+
         return response.data;
       } catch (error) {
         console.error('Error al obtener las salidas:', error);
@@ -67,7 +67,7 @@ export const generateOutflowNo = async () => {
   // Función para buscar productos por referencia
   export const searchProducts = async (query) => {
     try {
-      console.log('query Servicio: ', query )
+     
   
       // Realiza la búsqueda en el lado del servidor (backend)
       const response = await axios.get('/api/products/getProducts');
@@ -80,7 +80,7 @@ export const generateOutflowNo = async () => {
           product.reference.toLowerCase().includes(query.toLowerCase())
         );
   
-        console.log("Productos filtrados", filteredProducts);
+
         return filteredProducts;
       } else {
         console.error('Error al obtener productos desde el backend:', response.statusText);

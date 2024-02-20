@@ -29,6 +29,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
   const [filteredReferenceLotes, setFilteredReferenceLotes] = useState([]);
   const [filteredReferences, setFilteredReferences] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(true);
 
 
   const handleSerialsChange = (e) => {
@@ -56,12 +57,11 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       setLoading(true);
       const query = event.query || '';
       const products = await searchProducts(query);
-      console.log("Productos:", products);
+
 
       // Filtrar las referencias basadas en la consulta
       const references = products.map((product) => ({ label: product.reference, value: product.reference }));
       setFilteredReferences(references);
-      console.log("Referencias:", references);
 
       let allSerials = [];
       let allLotes = [];
@@ -74,10 +74,6 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
           allLotes = allLotes.concat(product.lotes);
         }
       });
-
-      console.log("Seriales relacionados: ", allSerials);
-      console.log("Lotes relacionados: ", allLotes);
-
       // Actualizar el estado con los seriales relacionados
       setFilteredReferenceSerials(allSerials);
       setFilteredReferenceLotes(allLotes)
@@ -89,34 +85,14 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
     }
   };
 
-
-
-
-  
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Valores del formulario:', form);
     onAddProduct(form);
-    onHide();
+    onHide(false);  
   };
 
-  const getCurrentDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  const formatCurrency = (value) => {
-    return value.toLocaleString('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-    });
-  };
   return (
-    <Card style={{ width: '100%', padding: '20px' }} onHide={onHide}>
+    <Card style={{ width: '100%', padding: '20px' }} >
       <h2 className="text-center mt-0">Agregar producto</h2>
       <form onSubmit={handleSubmit}>
         <div className="p-fluid p-formgrid p-grid">
@@ -132,11 +108,12 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
               onChange={(e) => setForm((prevForm) => ({ ...prevForm, reference: e.value }))}
               placeholder="Buscar referencia"
               minLength={1}
-              loading={loading}
+              loading={loading ? 'true' : 'false'} 
               className="p-autocomplete-item"
-              dropdownClassName="p-autocomplete-panel"
+              dropdownclassname="p-autocomplete-panel"
               required
             />
+
           </div>
 
           <div className="p-field p-col-12 p-md-6 mt-2">
@@ -168,46 +145,46 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
             />
           </div>
 
-      <div className="p-field p-col-12 p-md-6 mt-2">
-      <label htmlFor="serials">Serial:</label>
-      <Dropdown
-        id="serials"
-        name="serials"
-        value={form.serials.length > 0 ? form.serials[0].label : null}
-        options={filteredReferenceSerials.map((serialObj) => ({
-          label: serialObj.serial,
-          value: serialObj.serial,
-        }))}
-        onChange={handleSerialsChange}
-        placeholder="Seleccione un serial"
-        filter
-        showClear
-        optionLabel="label"
-        disabled={!filteredReferenceSerials || filteredReferenceSerials.length === 0}
-        required
-      />
-    </div>
+          <div className="p-field p-col-12 p-md-6 mt-2">
+            <label htmlFor="serials">Serial:</label>
+            <Dropdown
+              id="serials"
+              name="serials"
+              value={form.serials.length > 0 ? form.serials[0].label : null}
+              options={filteredReferenceSerials.map((serialObj) => ({
+                label: serialObj.serial,
+                value: serialObj.serial,
+              }))}
+              onChange={handleSerialsChange}
+              placeholder="Seleccione un serial"
+              filter
+              showClear
+              optionLabel="label"
+              disabled={!filteredReferenceSerials || filteredReferenceSerials.length === 0}
+              required
+            />
+          </div>
 
 
-    <div className="p-field p-col-12 p-md-6 mt-2">
-      <label htmlFor="lotes">Lote:</label>
-      <Dropdown
-        id="lotes"
-        name="lotes"
-        value={form.lotes.length > 0 ? form.lotes[0].label : null}
-        options={filteredReferenceLotes.map((loteObj) => ({
-          label: loteObj.lote,
-          value: loteObj.lote,
-        }))}
-        onChange={handleLoteChange}
-        placeholder="Seleccione un lote"
-        filter
-        showClear
-        optionLabel="label"
-        disabled={!filteredReferenceLotes || filteredReferenceLotes.length === 0}
-        required
-      />
-    </div>
+          <div className="p-field p-col-12 p-md-6 mt-2">
+            <label htmlFor="lotes">Lote:</label>
+            <Dropdown
+              id="lotes"
+              name="lotes"
+              value={form.lotes.length > 0 ? form.lotes[0].label : null}
+              options={filteredReferenceLotes.map((loteObj) => ({
+                label: loteObj.lote,
+                value: loteObj.lote,
+              }))}
+              onChange={handleLoteChange}
+              placeholder="Seleccione un lote"
+              filter
+              showClear
+              optionLabel="label"
+              disabled={!filteredReferenceLotes || filteredReferenceLotes.length === 0}
+              required
+            />
+          </div>
         </div>
         <div className="p-field p-col-12 mt-3">
           <Button label="Agregar" type="submit" />
