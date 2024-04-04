@@ -73,19 +73,21 @@ const OutflowSummary = () => {
 
   const handleUpdateProductQuantity = async (reference, userEnteredQuantity) => {
     try {
-      const currentProduct = await productService.getProductByReference(reference);
+      console.log("ID: ", reference.id)
+      const id = reference.id
+      const currentProduct = await productService.getProductByReference(id);
       const currentQuantity = Number(currentProduct.quantity) || 0;
       const enteredQuantity = Number(userEnteredQuantity) || 0;
       const updatedQuantity = currentQuantity - enteredQuantity;
 
       console.log("Cantidad actualizada: ", updatedQuantity)
 
-      await productService.updateProductQuantityOutflow(reference, updatedQuantity);
+      await productService.updateProductQuantityOutflow(id, updatedQuantity);
 
       // Actualiza la cantidad en el estado solo para el producto específico
       setProducts((prevProducts) => {
         return prevProducts.map((product) => {
-          if (product.reference === reference) {
+          if (product.id === id) {
             return { ...product, quantity: updatedQuantity };
           }
           return product;
@@ -114,25 +116,23 @@ const OutflowSummary = () => {
   };
 
 
-  const updateProductInfo = async (reference, updatedInfo) => {
+  const updateProductInfo = async (id, updatedInfo) => {
     try {
+
+      console.log("Informacion actualizada", updatedInfo)
       // Realiza una solicitud PATCH a la API para actualizar la información del producto
-      const response = await axios.patch(`/api/products/updateProductOutflow/${reference}`, updatedInfo);
+      const response = await axios.patch(`/api/products/updateProductOutflow/${id}`, updatedInfo);
 
       // Verifica si la solicitud fue exitosa y maneja según sea necesario
       if (response.status === 200) {
-        // Si la actualización fue exitosa, también puedes realizar cambios en el modelo Outflow
-        // Aquí, asumiré que `updatedInfo` tiene una propiedad `status` que contiene el nuevo valor
-        // Puedes ajustar esto según la estructura real de `updatedInfo` y cómo planeas usarlo
 
-        // Ejemplo: Si `updatedInfo.status` es "noDisponible", puedes realizar la actualización en el modelo Outflow
         if (updatedInfo.status === 'noDisponible') {
           // Encuentra la salida (Outflow) asociada al producto por su referencia
-          const outflow = await outflow.findOne({ 'products.reference': reference });
+          const outflow = await outflow.findOne({ 'products._id': id });
 
           // Verifica si se encontró la salida y actualiza el campo `status` en la sección `serials`
           if (outflow) {
-            const productIndex = outflow.products.findIndex(product => product.reference === reference);
+            const productIndex = outflow.products.findIndex(product => product._id === id);
 
             if (productIndex !== -1) {
               // Actualiza el campo `status` en la sección `serials` del producto
@@ -146,10 +146,10 @@ const OutflowSummary = () => {
           }
         }
       } else {
-        console.error(`Error al actualizar el producto (Reference: ${reference}):`, response.data);
+        console.error(`Error al actualizar el producto (Reference: ${id}):`, response.data);
       }
     } catch (error) {
-      console.error(`Error al actualizar el producto (Reference: ${reference}):`, error);
+      console.error(`Error al actualizar el producto (Reference: ${id}):`, error);
       return;
     }
   };
@@ -158,6 +158,7 @@ const OutflowSummary = () => {
 
 
   const handleSaveOutflow = async () => {
+    console.log("Productos en salida: ", products)
     setLoading(true)
     if (products.length === 0) {
       toast.current.show({
@@ -188,7 +189,7 @@ const OutflowSummary = () => {
     try {
       // Primer bloque de código
       for (const product of products) {
-        await updateProductInfo(product.reference, {
+        await updateProductInfo(product.id, {
           price: product.price,
           serials: product.serials,
           lotes: product.lotes,
@@ -197,7 +198,7 @@ const OutflowSummary = () => {
 
       // Segundo bloque de código
       for (const product of products) {
-        await handleUpdateProductQuantity(product.reference, product.quantity);
+        await handleUpdateProductQuantity(product.id, product.quantity);
       }
 
       // Resto del código aquí...
@@ -499,8 +500,16 @@ const OutflowSummary = () => {
               </span>
             )}
           />
+             <Column
+        body={(rowData, column) => (
+          <Button
+            icon="pi pi-trash"
+            onClick={() => handleDeleteProduct(products.indexOf(rowData))}
+          />
+        )}
+      />
         </DataTable>
-       
+        
       </Card>
 
       <Column field="lastYearSale" body={footerGroup} />

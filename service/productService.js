@@ -24,11 +24,11 @@ export const getProductByReference = async (reference) => {
 };
 
 
-export const updateProductQuantityOutflow = async (reference, newQuantity) => {
+export const updateProductQuantityOutflow = async (id, newQuantity) => {
   try {
-    console.log("Referencia a actualizar servicio: ", reference)
+    console.log("Referencia a actualizar servicio: ", id)
     console.log("Nueva cantidad servicio: ", newQuantity)
-    await axios.put(`/api/products/updateProductQtyOutflow/${reference}`, { quantity: newQuantity });
+    await axios.put(`/api/products/updateProductQtyOutflow/${_id}`, { quantity: newQuantity });
   } catch (error) {
     console.error('Error al actualizar la cantidad del producto:', error);
     throw error;

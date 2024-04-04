@@ -29,7 +29,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
   const [filteredReferenceLotes, setFilteredReferenceLotes] = useState([]);
   const [filteredReferences, setFilteredReferences] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [filteredId, setFilteredId] = useState([]);
 
 
   const handleSerialsChange = (e) => {
@@ -58,11 +58,14 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       const query = event.query || '';
       const products = await searchProducts(query);
 
-
+      
       // Filtrar las referencias basadas en la consulta
       const references = products.map((product) => ({ label: product.reference, value: product.reference }));
-      setFilteredReferences(references);
+      const id = products.map(product => product.idp);
 
+      console.log("ID:",id)
+      setFilteredReferences(references);
+      console.log("Referencias", references)
       let allSerials = [];
       let allLotes = [];
       // Recorrer cada producto y extraer los serials
@@ -77,7 +80,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       // Actualizar el estado con los seriales relacionados
       setFilteredReferenceSerials(allSerials);
       setFilteredReferenceLotes(allLotes)
-
+      setFilteredId(id)
     } catch (error) {
       console.error('Error al buscar referencias:', error);
     } finally {
