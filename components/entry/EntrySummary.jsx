@@ -126,9 +126,6 @@ const EntrySummary = () => {
       });
       return;
     }
-
-
-
     const subtotalArray = products.map((product) => calculateSubtotal(product));
     const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
     const updatedEntryData = {
@@ -214,7 +211,7 @@ const EntrySummary = () => {
         await handleUpdateProductQuantity(product.reference, product.quantity);
       }
     
-      // Resto del código aquí...
+    
     
     } catch (error) {
       // Maneja errores si alguna de las operaciones anteriores falla

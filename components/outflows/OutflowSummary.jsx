@@ -73,21 +73,20 @@ const OutflowSummary = () => {
 
   const handleUpdateProductQuantity = async (reference, userEnteredQuantity) => {
     try {
-      console.log("ID: ", reference.id)
-      const id = reference.id
-      const currentProduct = await productService.getProductByReference(id);
+      console.log("Referencia: ", reference.value)
+      const currentProduct = await productService.getProductByReference(reference.value);
       const currentQuantity = Number(currentProduct.quantity) || 0;
       const enteredQuantity = Number(userEnteredQuantity) || 0;
       const updatedQuantity = currentQuantity - enteredQuantity;
 
       console.log("Cantidad actualizada: ", updatedQuantity)
 
-      await productService.updateProductQuantityOutflow(id, updatedQuantity);
+      await productService.updateProductQuantityOutflow(reference.value, updatedQuantity);
 
       // Actualiza la cantidad en el estado solo para el producto específico
       setProducts((prevProducts) => {
         return prevProducts.map((product) => {
-          if (product.id === id) {
+          if (product.reference.value === reference) {
             return { ...product, quantity: updatedQuantity };
           }
           return product;
@@ -116,23 +115,22 @@ const OutflowSummary = () => {
   };
 
 
-  const updateProductInfo = async (id, updatedInfo) => {
+  const updateProductInfo = async (reference, updatedInfo) => {
     try {
-
-      console.log("Informacion actualizada", updatedInfo)
-      // Realiza una solicitud PATCH a la API para actualizar la información del producto
-      const response = await axios.patch(`/api/products/updateProductOutflow/${id}`, updatedInfo);
+      
+      reference=reference.value
+      const response = await axios.patch(`/api/products/updateProductOutflow/${reference}`, updatedInfo);
 
       // Verifica si la solicitud fue exitosa y maneja según sea necesario
       if (response.status === 200) {
 
         if (updatedInfo.status === 'noDisponible') {
           // Encuentra la salida (Outflow) asociada al producto por su referencia
-          const outflow = await outflow.findOne({ 'products._id': id });
+          const outflow = await outflow.findOne({ 'products.reference': reference });
 
           // Verifica si se encontró la salida y actualiza el campo `status` en la sección `serials`
           if (outflow) {
-            const productIndex = outflow.products.findIndex(product => product._id === id);
+            const productIndex = outflow.products.findIndex(product => product.reference === reference);
 
             if (productIndex !== -1) {
               // Actualiza el campo `status` en la sección `serials` del producto
@@ -146,10 +144,10 @@ const OutflowSummary = () => {
           }
         }
       } else {
-        console.error(`Error al actualizar el producto (Reference: ${id}):`, response.data);
+        console.error(`Error al actualizar el producto (Reference: ${reference}):`, response.data);
       }
     } catch (error) {
-      console.error(`Error al actualizar el producto (Reference: ${id}):`, error);
+      console.error(`Error al actualizar el producto (Reference: ${reference}):`, error);
       return;
     }
   };
@@ -170,10 +168,17 @@ const OutflowSummary = () => {
     }
     const subtotalArray = products.map((product) => calculateSubtotal(product));
     const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
+
+    const productsToSend = products.map(({ subtotal, ...product }) => {
+      return {
+        ...product,
+        reference: product.reference.value, // Asignar solo el valor de reference
+      };
+    });
     const updatedOutflowData = {
       ...outflowData,
       salidaNo: salidaNo, // Usa el número de salida calculado
-      products: products.map(({ subtotal, ...product }) => product),
+      products: productsToSend,
       subtotal: subtotal,
       totalPrice: totalPrice,
       totalQuantity: totalQuantity,
@@ -181,15 +186,14 @@ const OutflowSummary = () => {
       cliente: outflowData.cliente, // Mantén el valor de cliente
       document: outflowData.document, // Mantén el valor de document  
       comment: outflowData.comment,
-      serials: outflowData.serials,
-      lotes: outflowData.lotes
+      lotes: outflowData.lotes,
     };
     // Verificar duplicados en serials antes de enviar la salida
 
     try {
       // Primer bloque de código
       for (const product of products) {
-        await updateProductInfo(product.id, {
+        await updateProductInfo(product.reference, {
           price: product.price,
           serials: product.serials,
           lotes: product.lotes,
@@ -198,10 +202,10 @@ const OutflowSummary = () => {
 
       // Segundo bloque de código
       for (const product of products) {
-        await handleUpdateProductQuantity(product.id, product.quantity);
+        await handleUpdateProductQuantity(product.reference, product.quantity);
       }
 
-      // Resto del código aquí...
+    
 
     } catch (error) {
       // Maneja errores si alguna de las operaciones anteriores falla
@@ -458,7 +462,7 @@ const OutflowSummary = () => {
             body={(rowData) => (
               <ul>
                 <li>
-                  <strong>Serials:</strong> {formatSerials(rowData.serials)}
+                  <strong>Serials:</strong> {formatSerials(rowData.serial)}
                 </li>
               </ul>
             )}

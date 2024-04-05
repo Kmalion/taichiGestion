@@ -55,6 +55,14 @@ try {
             serial: {
               type: String,
             },
+            label: {
+              type: String,
+              required: true,
+            },
+            value: {
+              type: String,
+              required: true,
+            },
             status: {
               type: String,
               enum: ['disponible', 'noDisponible'],

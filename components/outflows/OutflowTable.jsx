@@ -8,10 +8,7 @@ import { Toast } from "primereact/toast";
 import { Paginator } from "primereact/paginator";
 import { useRouter } from "next/navigation";
 import { Dialog } from "primereact/dialog";
-import {
-  deleteSerialFromProduct,
-  getProductByReference,
-} from "@/service/productService";
+import { deleteSerialFromProduct, getProductByReference,} from "@/service/productService";
 import { updateProductQuantity } from "@/service/productService";
 import { useSession } from "next-auth/react";
 import jsPDF from "jspdf";
@@ -44,8 +41,9 @@ const OutflowTable = () => {
   useEffect(() => {
     try {
       OutflowService.getOutflows().then((data) => {
+        console.log(data)
         setOutflows(data);
-        console.log("Data entrada:", data)
+        
       });
     } catch (error) {
       console.error("Error al obtener las salidas:", error);
@@ -245,7 +243,7 @@ const OutflowTable = () => {
                 <ul>
                   {rowData.serials.map((serialData, index) => (
                     <li key={index}>
-                      <strong>Serial:</strong> {serialData.serial},{" "}
+                      <strong>Serial:</strong> {serialData.value},{" "}
                       <strong>Status:</strong> {serialData.status}
                     </li>
                   ))}

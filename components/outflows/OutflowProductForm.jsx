@@ -61,9 +61,6 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       
       // Filtrar las referencias basadas en la consulta
       const references = products.map((product) => ({ label: product.reference, value: product.reference }));
-      const id = products.map(product => product.idp);
-
-      console.log("ID:",id)
       setFilteredReferences(references);
       console.log("Referencias", references)
       let allSerials = [];
@@ -80,7 +77,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
       // Actualizar el estado con los seriales relacionados
       setFilteredReferenceSerials(allSerials);
       setFilteredReferenceLotes(allLotes)
-      setFilteredId(id)
+
     } catch (error) {
       console.error('Error al buscar referencias:', error);
     } finally {
@@ -90,6 +87,7 @@ const OutflowProductForm = ({ onHide, onAddProduct }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Formulario", form)
     onAddProduct(form);
     onHide(false);  
   };

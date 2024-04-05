@@ -12,7 +12,7 @@ export const POST = async (request) => {
 
     const modifiedProducts = products.map((product) => ({
       ...product,
-      serials: Array.isArray(product.serials) ? product.serials : [{ serial: product.serials, status: 'disponible' }],
+      serials: Array.isArray(product.serials) ? product.serials : [{ serial: product.serials, status: 'noDisponible' }],
     }));
     
     const outflowServiceManager = new OutflowServiceManager();
