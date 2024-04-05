@@ -117,7 +117,7 @@ const OutflowSummary = () => {
 
   const updateProductInfo = async (reference, updatedInfo) => {
     try {
-      
+      console.log("Informacion actualizada: ", updatedInfo)
       reference=reference.value
       const response = await axios.patch(`/api/products/updateProductOutflow/${reference}`, updatedInfo);
 
@@ -169,16 +169,17 @@ const OutflowSummary = () => {
     const subtotalArray = products.map((product) => calculateSubtotal(product));
     const subtotal = subtotalArray.reduce((acc, current) => acc + current, 0);
 
-    const productsToSend = products.map(({ subtotal, ...product }) => {
+    const updatedProducts = products.map(({ subtotal, ...product }) => {
       return {
-        ...product,
-        reference: product.reference.value, // Asignar solo el valor de reference
+          ...product,
+          reference: product.reference.value, // Asignar solo el valor de reference
       };
-    });
+  });
+
     const updatedOutflowData = {
       ...outflowData,
       salidaNo: salidaNo, // Usa el número de salida calculado
-      products: productsToSend,
+      products: updatedProducts,
       subtotal: subtotal,
       totalPrice: totalPrice,
       totalQuantity: totalQuantity,
@@ -186,24 +187,37 @@ const OutflowSummary = () => {
       cliente: outflowData.cliente, // Mantén el valor de cliente
       document: outflowData.document, // Mantén el valor de document  
       comment: outflowData.comment,
-      lotes: outflowData.lotes,
     };
     // Verificar duplicados en serials antes de enviar la salida
 
     try {
       // Primer bloque de código
-      for (const product of products) {
-        await updateProductInfo(product.reference, {
-          price: product.price,
-          serials: product.serials,
-          lotes: product.lotes,
-        });
-      }
+      for (const product of updatedProducts) {
+        if (outflowData.tipo === 'demostracion') {
+            // Si el tipo es demostración, marca el serial como noDisponible
+            product.serials.forEach((serial) => {
+                serial.status = 'noDisponible';
+            });
+        } else if (outflowData.tipo === 'facturado' || outflowData.tipo === 'ajuste') {
+            // Si el tipo es facturado o ajuste, elimina el serial específico del producto
+            const updatedSerials = product.serials.filter((serial) => {
+                // Filtra el serial que se debe eliminar, basándote en alguna condición
+                // Por ejemplo, si hay una propiedad 'selected' que indica si el serial fue seleccionado
+                return !serial.selected;
+            });
+            product.serials = updatedSerials;
+        }
 
-      // Segundo bloque de código
-      for (const product of products) {
+        // Actualiza la información del producto en la base de datos
+        await updateProductInfo(product.reference, {
+            price: product.price,
+            serials: product.serials,
+            lotes: product.lotes,
+        });
+
+        // Actualiza la cantidad del producto en la base de datos
         await handleUpdateProductQuantity(product.reference, product.quantity);
-      }
+    }
 
     
 
@@ -332,7 +346,9 @@ const OutflowSummary = () => {
 
 
   const formatSerials = (serials) => {
+    console.log("Seriales a visualizar: ", serials)
     if (!serials || !Array.isArray(serials)) {
+
       return '';
     }
 
@@ -340,7 +356,9 @@ const OutflowSummary = () => {
   };
 
   const formatLotes = (lotes) => {
+    console.log("Lotes a visualizar: ", lotes)
     if (!lotes || !Array.isArray(lotes)) {
+
       return '';
     }
 
@@ -398,13 +416,14 @@ const OutflowSummary = () => {
 
 
   const handleAddProduct = (product) => {
+    console.log("Productos agregados: ", product)
     const price = parseFloat(product.price) || 0;
     const subtotal = calculateSubtotal(product);
 
     // Actualiza el estado de los productos
     setProducts((prevProducts) => {
       const newProducts = [...prevProducts, { ...product, price, subtotal }];
-
+      console.log("Productos muevos agregados: ", newProducts)
       return newProducts;
     });
   };
@@ -462,7 +481,7 @@ const OutflowSummary = () => {
             body={(rowData) => (
               <ul>
                 <li>
-                  <strong>Serials:</strong> {formatSerials(rowData.serial)}
+                  <strong>Serials:</strong> {formatSerials(rowData.serials)}
                 </li>
               </ul>
             )}

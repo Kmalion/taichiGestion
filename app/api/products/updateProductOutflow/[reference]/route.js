@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 export const PATCH = async (request, { params }) => {
     const { body } = request;
     const reference = params.reference;
+    console.log("Referencia en backend a actualizar: ", reference)
 
     if (!reference) {
         return new NextResponse('Reference no proporcionado', { status: 400 });
@@ -15,6 +16,8 @@ export const PATCH = async (request, { params }) => {
     try {
         client = await connectDB();
         const existingProduct = await Product.findOne({ reference });
+
+        console.log("Producto existente en backend: ", existingProduct)
 
         if (!existingProduct) {
             return new NextResponse('Producto no encontrado', { status: 404 });
@@ -29,26 +32,17 @@ export const PATCH = async (request, { params }) => {
         let updatedProductData;
         try {
             updatedProductData = JSON.parse(bodyText);
+            console.log("Informacion para actualizar", updatedProductData)
         } catch (parseError) {
             console.error('Error al parsear JSON:', parseError);
             return new NextResponse('Cuerpo de solicitud no es un JSON válido', { status: 400 });
         }
 
-      
-
-        if (updatedProductData.price) {
-            existingProduct.price = updatedProductData.cost;
-        }
-
-        if (updatedProductData.ubicacion) {
-            existingProduct.ubicacion = updatedProductData.ubicacion;
-        }
-
-        existingProduct.serials = existingProduct.serials.concat(updatedProductData.serials || []);
-        existingProduct.lote = existingProduct.lote.concat(updatedProductData.lote || []);
-
-        existingProduct.serials = [...new Set(existingProduct.serials)];
-        existingProduct.lote = [...new Set(existingProduct.lote)];
+        // Actualizar los campos relevantes del producto existente
+        existingProduct.price = updatedProductData.price || existingProduct.price;
+        existingProduct.ubicacion = updatedProductData.ubicacion || existingProduct.ubicacion;
+        existingProduct.serials = updatedProductData.serials || existingProduct.serials;
+        existingProduct.lote = updatedProductData.lote || existingProduct.lote;
 
         await existingProduct.save();
 
