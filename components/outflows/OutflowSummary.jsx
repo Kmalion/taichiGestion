@@ -73,15 +73,15 @@ const OutflowSummary = () => {
 
   const handleUpdateProductQuantity = async (reference, userEnteredQuantity) => {
     try {
-      console.log("Referencia: ", reference.value)
-      const currentProduct = await productService.getProductByReference(reference.value);
+      console.log("Referencia: ", reference)
+      const currentProduct = await productService.getProductByReference(reference);
       const currentQuantity = Number(currentProduct.quantity) || 0;
       const enteredQuantity = Number(userEnteredQuantity) || 0;
       const updatedQuantity = currentQuantity - enteredQuantity;
 
       console.log("Cantidad actualizada: ", updatedQuantity)
 
-      await productService.updateProductQuantityOutflow(reference.value, updatedQuantity);
+      await productService.updateProductQuantityOutflow(reference, updatedQuantity);
 
       // Actualiza la cantidad en el estado solo para el producto específico
       setProducts((prevProducts) => {
@@ -118,7 +118,7 @@ const OutflowSummary = () => {
   const updateProductInfo = async (reference, updatedInfo) => {
     try {
       console.log("Informacion actualizada: ", updatedInfo)
-      reference=reference.value
+      console.log("Referencia en actualizar producto", reference)
       const response = await axios.patch(`/api/products/updateProductOutflow/${reference}`, updatedInfo);
 
       // Verifica si la solicitud fue exitosa y maneja según sea necesario
